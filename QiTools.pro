@@ -14,6 +14,8 @@ win32 {
     }
 }
 
+CONFIG += c++11
+
 DEFINES += QT_DEPRECATED_WARNINGS
 
 include(src/src.pri)

@@ -18,9 +18,8 @@ private:
     Ui::PropertyGenerator *ui;
 
 private slots:
-    void on_pushBtnCodeGen_clicked();
-
-    void on_pushBtnPropertyGen_clicked();
+    void on_pushBtnGenCode_clicked();
+    void on_pushBtnGenProperty_clicked();
 
 };
 

@@ -1,12 +1,14 @@
 SOURCES += \
     $$PWD/main.cpp \
     $$PWD/qitoolswindow.cpp \
-    $$PWD/propertygenerator.cpp
+    $$PWD/propertygenerator.cpp \
+    $$PWD/propertymanager.cpp
 
 
 HEADERS += \
     $$PWD/qitoolswindow.h \
-    $$PWD/propertygenerator.h
+    $$PWD/propertygenerator.h \
+    $$PWD/propertymanager.h
 
 
 FORMS += \
