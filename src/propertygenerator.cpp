@@ -1,23 +1,27 @@
 ﻿#include "propertygenerator.h"
 #include "ui_propertygenerator.h"
+#include "propertymanager.h"
 #include <QMessageBox>
 #include <QDebug>
 
 PropertyGenerator::PropertyGenerator(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PropertyGenerator)
+    ui(new Ui::PropertyGenerator),
+    m_manager(new PropertyManager)
 {
     ui->setupUi(this);
     ui->lineEditPrefix->setText("m_");
     ui->lineEditType->setText("int");
     ui->lineEditVariation->setText("number");
 
+    m_manager->setArgumentType(1);
     on_pushBtnGenProperty_clicked();
 }
 
 PropertyGenerator::~PropertyGenerator()
 {
     delete ui;
+    delete m_manager;
 }
 
 void PropertyGenerator::on_pushBtnGenCode_clicked()
@@ -29,7 +33,9 @@ void PropertyGenerator::on_pushBtnGenCode_clicked()
         return;
     }
 
-
+    ui->textBrowserGenCode->clear();
+    m_manager->setPrefix(ui->lineEditPrefix->text());
+    ui->textBrowserGenCode->setText(m_manager->generateCode(qPropertyContent, false));
 }
 
 void PropertyGenerator::on_pushBtnGenProperty_clicked()

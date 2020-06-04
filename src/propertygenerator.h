@@ -7,6 +7,8 @@ namespace Ui {
 class PropertyGenerator;
 }
 
+class PropertyManager;
+
 class PropertyGenerator : public QWidget
 {
     Q_OBJECT
@@ -16,6 +18,8 @@ public:
 
 private:
     Ui::PropertyGenerator *ui;
+
+    PropertyManager       *m_manager;
 
 private slots:
     void on_pushBtnGenCode_clicked();

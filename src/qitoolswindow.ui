@@ -23,6 +23,11 @@
         <height>16777215</height>
        </size>
       </property>
+      <column>
+       <property name="text">
+        <string>Q_PROPERTY代码生成</string>
+       </property>
+      </column>
      </widget>
     </item>
     <item>
