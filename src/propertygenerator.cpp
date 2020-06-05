@@ -14,7 +14,8 @@ PropertyGenerator::PropertyGenerator(QWidget *parent) :
     ui->lineEditType->setText("int");
     ui->lineEditVariation->setText("number");
 
-    m_manager->setArgumentType(1);
+    ui->comboBoxArg->addItems({"T", "const T &"});
+
     on_pushBtnGenProperty_clicked();
 }
 
@@ -26,8 +27,8 @@ PropertyGenerator::~PropertyGenerator()
 
 void PropertyGenerator::on_pushBtnGenCode_clicked()
 {
-    QString qPropertyContent = ui->textEditGenProperty->toPlainText();
-    if (!qPropertyContent.contains("READ"))
+    QString property = ui->textEditGenProperty->toPlainText();
+    if (!property.contains("READ"))
     {
         QMessageBox::critical(this, "error", QStringLiteral("必须含有 READ 属性！"));
         return;
@@ -35,7 +36,8 @@ void PropertyGenerator::on_pushBtnGenCode_clicked()
 
     ui->textBrowserGenCode->clear();
     m_manager->setPrefix(ui->lineEditPrefix->text());
-    ui->textBrowserGenCode->setText(m_manager->generateCode(qPropertyContent, false));
+    m_manager->setArgumentType(ui->comboBoxArg->currentIndex());
+    ui->textBrowserGenCode->setText(m_manager->generateCode(property, ui->checkBoxInline->isChecked()));
 }
 
 void PropertyGenerator::on_pushBtnGenProperty_clicked()

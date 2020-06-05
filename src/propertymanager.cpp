@@ -57,10 +57,10 @@ PropertyManager::PropertyManager()
         return "none";
     };
 
-    m_propertyType["RESET"] = [=](const QString &type, const QString &name, const QString &value, const QString &notifyValue)->QString
+    m_propertyType["RESET"] = [=](const QString &, const QString &name, const QString &value, const QString &notifyValue)->QString
     {
         return QString("void %1() { if (%2%3 != %4()) { %2%3 = %4(); Q_EMIT %5(%3); } }\n").
-        arg(value).arg(m_prefix).arg(name).arg(type).arg(notifyValue);
+        arg(value).arg(m_prefix).arg(name).arg(name).arg(notifyValue);
     };
 }
 
@@ -69,14 +69,8 @@ QString PropertyManager::generateCode(const QString &source, bool isInline)
     if (!source.startsWith("Q_PROPERTY(" ) || !source.endsWith(")"))
         return "error format";
 
-    bool flag = false;
     QString code;
     QString line = source;
-
-    while (line.startsWith(" "))
-    {
-        line.remove(0, 1);
-    }
 
     line.remove(0, 11);
     line.remove(line.size() - 1, 1);
@@ -85,7 +79,6 @@ QString PropertyManager::generateCode(const QString &source, bool isInline)
 
     if (1 == elements.size() % 2)
         return "property's count donnot equal to content's count";
-
 
     QString type;
     QString name;
@@ -120,22 +113,12 @@ QString PropertyManager::generateCode(const QString &source, bool isInline)
     if (type.isEmpty() || name.isEmpty())
         return "error: empty";
 
-    if (flag)
-    {
-        code += "\n";
-    }
-    else
-    {
-        flag = true;
-    }
-
     code += "public:\n";
-
     for (const auto &data : datas)
     {
         if (data.first == "NOTIFY")
         {
-            signal += "\nQ_SIGNALS:\n\t";
+            signal += "\nQ_SIGNALS:\n";
             signal += m_propertyType[data.first](type, name, data.second, notifyValue);
             continue;
         }
@@ -145,8 +128,8 @@ QString PropertyManager::generateCode(const QString &source, bool isInline)
         }
         code += m_propertyType[data.first](type, name, data.second, notifyValue);
     }
+    code += QString("\nprivate:\n%1 %2%3;\n").arg(type).arg(m_prefix).arg(name);
 
-    code += QString("\nprivate:\n\t%1 %2%3;\n").arg(type).arg(m_prefix).arg(name);
     if (!signal.isEmpty())
     {
         code += signal;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>629</width>
-    <height>461</height>
+    <width>768</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,11 +17,43 @@
    <item>
     <widget class="QFrame" name="frameVariationSet">
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>1</number>
+      </property>
+      <property name="rightMargin">
+       <number>1</number>
+      </property>
+      <property name="bottomMargin">
+       <number>1</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="pushBtnGenProperty">
+        <property name="maximumSize">
+         <size>
+          <width>180</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>生成 Q_PROPERTY</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QLabel" name="label_4">
         <property name="font">
          <font>
-          <pointsize>11</pointsize>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
          </font>
         </property>
         <property name="text">
@@ -33,6 +65,7 @@
        <widget class="QLineEdit" name="lineEditType">
         <property name="font">
          <font>
+          <family>Consolas</family>
           <pointsize>13</pointsize>
          </font>
         </property>
@@ -42,7 +75,8 @@
        <widget class="QLabel" name="label">
         <property name="font">
          <font>
-          <pointsize>11</pointsize>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
          </font>
         </property>
         <property name="text">
@@ -54,51 +88,26 @@
        <widget class="QLineEdit" name="lineEditVariation">
         <property name="font">
          <font>
+          <family>Consolas</family>
           <pointsize>13</pointsize>
          </font>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_2">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-         </font>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="text">
-         <string>前缀</string>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="lineEditPrefix">
-        <property name="font">
-         <font>
-          <pointsize>13</pointsize>
-         </font>
-        </property>
-       </widget>
+       </spacer>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="pushBtnGenProperty">
-     <property name="maximumSize">
-      <size>
-       <width>180</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>生成 Q_PROPERTY</string>
-     </property>
     </widget>
    </item>
    <item>
@@ -112,27 +121,138 @@
      <property name="font">
       <font>
        <family>Consolas</family>
-       <pointsize>12</pointsize>
+       <pointsize>14</pointsize>
       </font>
+     </property>
+     <property name="placeholderText">
+      <string notr="true">Q_PROPERTY(int number READ number WRITE setNumber NOTIFY NumberChanged)</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="pushBtnGenCode">
-     <property name="maximumSize">
-      <size>
-       <width>180</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>生成代码</string>
-     </property>
+    <widget class="QFrame" name="frameGenCode">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>1</number>
+      </property>
+      <property name="rightMargin">
+       <number>1</number>
+      </property>
+      <property name="bottomMargin">
+       <number>1</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="pushBtnGenCode">
+        <property name="minimumSize">
+         <size>
+          <width>180</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>250</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>生成 C++ 代码</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>变量名前缀</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEditPrefix">
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Consolas</family>
+          <pointsize>13</pointsize>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_5">
+        <property name="minimumSize">
+         <size>
+          <width>70</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>形参类型</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBoxArg">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxInline">
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>inline 关键字</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
@@ -140,8 +260,11 @@
      <property name="font">
       <font>
        <family>Consolas</family>
-       <pointsize>11</pointsize>
+       <pointsize>14</pointsize>
       </font>
+     </property>
+     <property name="cursor" stdset="0">
+      <cursorShape>IBeamCursor</cursorShape>
      </property>
     </widget>
    </item>

@@ -14,7 +14,7 @@
    <string>QiToolsWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,4">
     <item>
      <widget class="QTreeWidget" name="treeWidget">
       <property name="maximumSize">
