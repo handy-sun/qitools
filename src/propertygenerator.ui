@@ -95,6 +95,19 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkBoxNotify">
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>含有 NOTIFY</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -256,7 +269,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTextBrowser" name="textBrowserGenCode">
+    <widget class="QTextEdit" name="textEditGenCode">
      <property name="font">
       <font>
        <family>Consolas</family>
