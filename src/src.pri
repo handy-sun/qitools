@@ -20,4 +20,8 @@ FORMS += \
     $$PWD/qitoolswindow.ui \
     $$PWD/propertygenerator.ui
 
+RESOURCES += \
+    $$PWD/resource/qitools.qrc
+
+RC_ICONS = $$PWD/resource/toolsimage.ico
 

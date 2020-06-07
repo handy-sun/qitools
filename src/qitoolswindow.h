@@ -1,4 +1,4 @@
-#ifndef QITOOLSWINDOW_H
+﻿#ifndef QITOOLSWINDOW_H
 #define QITOOLSWINDOW_H
 
 #include <QMainWindow>
@@ -17,6 +17,9 @@ public:
 
 private:
     Ui::QiToolsWindow *ui;
+
+    QString readStyleSheetFile(const QString &rcFile) const;
+
 };
 
 #endif // QITOOLSWINDOW_H
