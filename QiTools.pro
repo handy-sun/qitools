@@ -25,4 +25,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include(src/src.pri)
 
+RESOURCES += \
+    $$PWD/resource/qitools.qrc
+
+RC_ICONS = $$PWD/resource/toolsimage.ico
 
