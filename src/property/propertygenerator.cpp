@@ -16,7 +16,7 @@ PropertyGenerator::PropertyGenerator(QWidget *parent) :
     ui->comboBoxArg->addItem("T", 0);
     ui->comboBoxArg->addItem("const T &", 1);
 
-    on_pushBtnGenProperty_clicked();
+    //on_pushBtnGenProperty_clicked();
 }
 
 PropertyGenerator::~PropertyGenerator()
@@ -27,7 +27,7 @@ PropertyGenerator::~PropertyGenerator()
 
 void PropertyGenerator::on_pushBtnGenCode_clicked()
 {
-    QString property(std::move(ui->textEditGenProperty->toPlainText()));
+    QString property = ui->textEditGenProperty->toPlainText();
     if (!property.contains("READ"))
     {
         QMessageBox::critical(this, "error", QStringLiteral("必须含有 READ 属性！"));

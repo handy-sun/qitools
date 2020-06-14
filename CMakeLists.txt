@@ -4,17 +4,19 @@
 #set(CMAKE_CXX_COMPILER "D:\\Qt\\Qt5.9.2\\Tools\\mingw530_32\\bin\\g++.exe")
 # Point CMake to the custom modules
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+#set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # 本次使用C++标准版本
-set(CMAKE_CXX_STANDARD 11)
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
 
 # Set appropriate compiler flags, etc. (MSVC is already set to W3 and Clang
 # issues enough warnings as it is)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
-
 # It would be nice if CMake offered a constant for Linux
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(LINUX 1)
@@ -24,42 +26,57 @@ set(PROJECT_NAME "QiTools")
 set(PROJECT_AUTHOR "SunQi")
 project(${PROJECT_NAME} CXX)
 
-set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 0)
-set(PROJECT_VERSION_PATCH 1)
-set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+#set(AUTO_RECURSE_FILE)
 
 # At the very minimum, Qt 5.9+ is required
-#find_package(Qt5Gui 5.9)
-#find_package(Qt5Core 5.9)
-#find_package(Qt5Widgets 5.9)
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 #打开全局rcc，非必须，
 # set(CMAKE_AUTORCC ON)
 
-file(GLOB_RECURSE SOURCES "*.cpp")
-file(GLOB_RECURSE HEADERS "*.h")
-file(GLOB_RECURSE FORMS "*.ui")
-file(GLOB_RECURSE RESOURCES "*.qrc")
+# 自动搜索各种文件，易出现重复定义问题
+if(AUTO_RECURSE_FILE)
+    file(GLOB_RECURSE SOURCES "*.cpp")
+    file(GLOB_RECURSE HEADERS "*.h")
+    file(GLOB_RECURSE FORMS "*.ui")
+#    file(GLOB_RECURSE RESOURCES "*.qrc")
+    file(GLOB_RECURSE all_files *.h *.cpp *.c *.cc *.hpp) #create_filters(all_files) unknown cmake command?
 
-file(GLOB_RECURSE all_files *.h *.cpp *.c *.cc *.hpp)
-#create_filters(all_files)
+    #通过Ui文件生成对应的头文件，一定要添加 ???
+    #qt5_wrap_ui(WRAP_FILES ${FORMS})
 
-#通过Ui文件生成对应的头文件，一定要添加
-qt5_wrap_ui(WRAP_FILES ${FORMS})
+    #将ui文件和生成文件整理在一个文件夹中，非必须
+    #source_group("Ui" FILES ${UI_FILES} ${WRAP_FILES} )
 
-#添加资源文件，非必须，一旦采用，注意修改相应的qrc文件名
-#set(RCC_FILES Qto.qrc)
+    #list(REMOVE_ITEM SOURCES "CMakeCXXCompilerId.cpp")
+    #list(REMOVE_ITEM SOURCES "CMakeCXX*.cpp")
+    #list(REMOVE_ITEM HEADERS "moc*.h")
+else()
+    set(SOURCES
+        src/main.cpp
+        src/qitoolswindow.cpp
+        src/qitoolswindow.h
+        src/stable.h
+        src/qitoolswindow.ui
 
-#将ui文件和生成文件整理在一个文件夹中，非必须
-#source_group("Ui" FILES ${UI_FILES} ${WRAP_FILES} )
+        src/property/propertygenerator.cpp
+        src/property/propertymanager.cpp
+        src/property/propertygenerator.ui
+        src/property/propertygenerator.h
+        src/property/propertymanager.h
+        )
+endif()
+
 
 if(CMAKE_CL_64)
-    set(EXECUTABLE_OUTPUT_PATH ../out_X64)
+    set(EXECUTABLE_OUTPUT_PATH ../binX64)
+    set(ADDRESS_MODEL 64)
+    set(NODE_TARGET x64)
 else(CMAKE_CL_64)
-    set(EXECUTABLE_OUTPUT_PATH ../out_X86)
+    set(EXECUTABLE_OUTPUT_PATH ../binX86)
+    set(ADDRESS_MODEL 32)
+    set(NODE_TARGET x86)
 endif(CMAKE_CL_64)
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
@@ -68,14 +85,25 @@ else()
     set(EXE_NAME ${PROJECT_NAME})
 endif()
 
-list(REMOVE_ITEM SOURCES "CMakeCXXCompilerId.cpp")
-#list(REMOVE_ITEM SOURCES "CMakeCXX*.cpp")
-#list(REMOVE_ITEM HEADERS "moc*.h")
-message(${SOURCES})
+include_directories(src src/property)
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${FORMS}
+qt5_add_resources(QRC_FILES resource/qitools.qrc)
+message(">>>${QRC_FILES}")
+
+if(WIN32)
+    set(WIN_RC ${CMAKE_CURRENT_SOURCE_DIR}/resource/icon.rc)
+endif()
+
+if(AUTO_RECURSE_FILE)
+    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${FORMS}
     ${RESOURCES} ${WRAP_FILES})
+else()
+    add_executable(${PROJECT_NAME} ${SOURCES} ${QRC_FILES}
+#        ${WIN_RC}
+        )
+endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${EXE_NAME})
+set_target_properties(${PROJECT_NAME} PROPERTIES
+                      OUTPUT_NAME ${EXE_NAME})
 
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core Qt5::Gui)

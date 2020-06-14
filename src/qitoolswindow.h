@@ -15,11 +15,14 @@ public:
     explicit QiToolsWindow(QWidget *parent = 0);
     ~QiToolsWindow();
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     Ui::QiToolsWindow *ui;
 
-    QString readStyleSheetFile(const QString &rcFile) const;
-
 };
+
+QString readStyleSheetFile(const QString &rcFile);
 
 #endif // QITOOLSWINDOW_H

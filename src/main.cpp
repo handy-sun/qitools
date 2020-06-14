@@ -3,8 +3,6 @@
 
 int main(int argc, char *argv[])
 {
-    Q_INIT_RESOURCE(qitools);
-
     QApplication a(argc, argv);
     QiToolsWindow w;
     w.resize(960, 600);

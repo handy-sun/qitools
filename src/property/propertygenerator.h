@@ -17,9 +17,8 @@ public:
     ~PropertyGenerator();
 
 private:
-    Ui::PropertyGenerator *ui;
-
-    PropertyManager       *m_manager;
+    Ui::PropertyGenerator   *ui;
+    PropertyManager         *m_manager;
 
 private slots:
     void on_pushBtnGenCode_clicked();

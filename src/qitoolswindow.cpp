@@ -1,16 +1,14 @@
 ﻿#include "qitoolswindow.h"
 #include "ui_qitoolswindow.h"
 #include <QFile>
+#include <QKeyEvent>
 
 QiToolsWindow::QiToolsWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::QiToolsWindow)
 {
     ui->setupUi(this);
-//    ui->treeWidget->setAutoExpandDelay(2);
-//    ui->treeWidget->setIndentation(20);
-//    ui->treeWidget->setHeaderHidden(true);
-//    ui->treeWidget->setColumnCount(1);
+
     setStyleSheet(readStyleSheetFile(":/QiTools.css"));
 }
 
@@ -19,7 +17,15 @@ QiToolsWindow::~QiToolsWindow()
     delete ui;
 }
 
-QString QiToolsWindow::readStyleSheetFile(const QString &rcFile) const
+void QiToolsWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+    {
+        close();
+    }
+}
+
+QString readStyleSheetFile(const QString &rcFile)
 {
     QFile file(/*qApp->applicationDirPath() + */rcFile);
     if (!file.exists())
