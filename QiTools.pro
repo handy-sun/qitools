@@ -21,7 +21,8 @@ CONFIG(debug, debug|release){
 
 CONFIG += c++11
 
-DEFINES += QT_DEPRECATED_WARNINGS
+DEFINES += QT_DEPRECATED_WARNINGS \
+        qtout=qDebug()
 
 include(src/src.pri)
 

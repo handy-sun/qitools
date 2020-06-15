@@ -2,14 +2,23 @@
 #include "ui_qitoolswindow.h"
 #include <QFile>
 #include <QKeyEvent>
+#include <QDebug>
+#include <QListWidget>
 
-QiToolsWindow::QiToolsWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::QiToolsWindow)
+QiToolsWindow::QiToolsWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::QiToolsWindow)
 {
     ui->setupUi(this);
 
     setStyleSheet(readStyleSheetFile(":/QiTools.css"));
+
+    if (ui->listWidget->count() == ui->stackedWidget->count())
+    {
+        connect(ui->listWidget, &QListWidget::currentRowChanged,
+                ui->stackedWidget, &QStackedWidget::setCurrentIndex);
+    }
+    ui->listWidget->setCurrentRow(0);
 }
 
 QiToolsWindow::~QiToolsWindow()
@@ -27,7 +36,7 @@ void QiToolsWindow::keyPressEvent(QKeyEvent *event)
 
 QString readStyleSheetFile(const QString &rcFile)
 {
-    QFile file(/*qApp->applicationDirPath() + */rcFile);
+    QFile file(/*qApp->applicationDirPath() + */ rcFile);
     if (!file.exists())
     {
         qDebug("File Is Not Exists.");

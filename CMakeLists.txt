@@ -11,9 +11,6 @@ if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
-# Set appropriate compiler flags, etc. (MSVC is already set to W3 and Clang
-# issues enough warnings as it is)
-
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()

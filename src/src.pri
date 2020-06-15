@@ -14,3 +14,4 @@ FORMS += \
     $$PWD/qitoolswindow.ui \
 
 include($$PWD/property/property.pri)
+include($$PWD/color/color.pri)

@@ -45,6 +45,11 @@
         <string>Q_PROPERTY代码生成</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>颜色转换</string>
+       </property>
+      </item>
      </widget>
     </item>
     <item>
@@ -56,6 +61,7 @@
        </size>
       </property>
       <widget class="PropertyGenerator" name="page"/>
+      <widget class="ColorConvert" name="page_2"/>
      </widget>
     </item>
    </layout>
@@ -67,6 +73,12 @@
    <class>PropertyGenerator</class>
    <extends>QWidget</extends>
    <header>propertygenerator.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ColorConvert</class>
+   <extends>QWidget</extends>
+   <header>colorconvert.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
