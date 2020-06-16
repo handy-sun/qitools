@@ -16,7 +16,7 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QFrame" name="frameVariationSet">
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -29,7 +29,7 @@
       <property name="bottomMargin">
        <number>1</number>
       </property>
-      <item>
+      <item row="0" column="0">
        <widget class="QPushButton" name="pushBtnGenProperty">
         <property name="maximumSize">
          <size>
@@ -48,7 +48,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="0" column="1">
        <widget class="QLabel" name="label_4">
         <property name="font">
          <font>
@@ -61,7 +61,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="0" column="2">
        <widget class="QLineEdit" name="lineEditType">
         <property name="font">
          <font>
@@ -71,7 +71,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="0" column="3">
        <widget class="QLabel" name="label">
         <property name="font">
          <font>
@@ -84,7 +84,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="0" column="4">
        <widget class="QLineEdit" name="lineEditVariation">
         <property name="font">
          <font>
@@ -94,7 +94,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="0" column="5">
        <widget class="QCheckBox" name="checkBoxNotify">
         <property name="font">
          <font>
@@ -107,7 +107,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="0" column="6">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -144,7 +144,7 @@
    </item>
    <item>
     <widget class="QFrame" name="frameGenCode">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -157,48 +157,7 @@
       <property name="bottomMargin">
        <number>1</number>
       </property>
-      <item>
-       <widget class="QPushButton" name="pushBtnGenCode">
-        <property name="minimumSize">
-         <size>
-          <width>180</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>250</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>生成 C++ 代码</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_3">
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>变量名前缀</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
+      <item row="0" column="4">
        <widget class="QLineEdit" name="lineEditPrefix">
         <property name="maximumSize">
          <size>
@@ -214,7 +173,80 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="0" column="6">
+       <widget class="QComboBox" name="comboBoxArg">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5" colspan="2">
+       <widget class="QRadioButton" name="radioBtnAlignVar">
+        <property name="maximumSize">
+         <size>
+          <width>200</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>指针符号 对齐变量</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3" colspan="2">
+       <widget class="QRadioButton" name="radioBtnAlignType">
+        <property name="maximumSize">
+         <size>
+          <width>200</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>指针符号 对齐类型</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="label_3">
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>变量名前缀</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
        <widget class="QLabel" name="label_5">
         <property name="minimumSize">
          <size>
@@ -236,12 +268,12 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QComboBox" name="comboBoxArg">
-        <property name="minimumSize">
+      <item row="0" column="7">
+       <widget class="QCheckBox" name="checkBoxInline">
+        <property name="maximumSize">
          <size>
-          <width>120</width>
-          <height>0</height>
+          <width>200</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="font">
@@ -250,10 +282,25 @@
           <pointsize>12</pointsize>
          </font>
         </property>
+        <property name="text">
+         <string>inline 关键字</string>
+        </property>
        </widget>
       </item>
-      <item>
-       <widget class="QCheckBox" name="checkBoxInline">
+      <item row="0" column="0">
+       <widget class="QPushButton" name="pushBtnGenCode">
+        <property name="minimumSize">
+         <size>
+          <width>180</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>250</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <family>微软雅黑</family>
@@ -261,7 +308,7 @@
          </font>
         </property>
         <property name="text">
-         <string>inline 关键字</string>
+         <string>生成 C++ 代码</string>
         </property>
        </widget>
       </item>

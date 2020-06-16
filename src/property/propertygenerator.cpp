@@ -16,6 +16,8 @@ PropertyGenerator::PropertyGenerator(QWidget *parent) :
     ui->comboBoxArg->addItem("T", 0);
     ui->comboBoxArg->addItem("const T &", 1);
 
+    ui->radioBtnAlignType->hide();
+    ui->radioBtnAlignVar->hide();
     //on_pushBtnGenProperty_clicked();
 }
 
@@ -36,6 +38,7 @@ void PropertyGenerator::on_pushBtnGenCode_clicked()
 
     m_manager->setPrefix(ui->lineEditPrefix->text());
     m_manager->setArgumentType(ui->comboBoxArg->currentData().toInt());
+    m_manager->setPointerAlignment((int)ui->radioBtnAlignVar->isChecked());
 
     ui->textEditGenCode->setText(m_manager->generateCode(property, ui->checkBoxInline->isChecked()));
 }
@@ -46,6 +49,7 @@ void PropertyGenerator::on_pushBtnGenProperty_clicked()
     QString varName = ui->lineEditVariation->text().trimmed();
     QString upperVarName(varName);
 
+    type.replace(" ", "");
     upperVarName.replace(0, 1, upperVarName.constData()->toUpper());
 
     QString qProperty = QString("Q_PROPERTY(%1 %2 READ %2 WRITE set%3")

@@ -5,6 +5,7 @@
 PropertyManager::PropertyManager()
     : m_argumentType(0)
     , m_prefix("")
+    , m_pointerAlignment(0)
 {
     m_propertyType["READ"] = [=](const QString &type, const QString &name, const QString &value, const QString &)->QString
     {
@@ -135,5 +136,9 @@ QString PropertyManager::generateCode(const QString &source, bool isInline)
         code += signal;
     }
 
+    if (m_pointerAlignment > 0)
+    {
+        code.replace("* ", " *");
+    }
     return code;
 }
