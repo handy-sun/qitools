@@ -18,7 +18,7 @@ QiToolsWindow::QiToolsWindow(QWidget *parent)
         connect(ui->listWidget, &QListWidget::currentRowChanged,
                 ui->stackedWidget, &QStackedWidget::setCurrentIndex);
     }
-    ui->listWidget->setCurrentRow(0);
+    ui->listWidget->setCurrentRow(1);
 }
 
 QiToolsWindow::~QiToolsWindow()

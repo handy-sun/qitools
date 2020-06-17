@@ -77,6 +77,12 @@ void ColorConvert::on_toolButtonRgbValue_clicked()
                 {
                     m_color = QColor(colVal[0], colVal[1], colVal[2], colVal[3]);
                     ui->lineEditRgbHex->setText(m_color.name(cnt == 2 ? QColor::HexRgb : QColor::HexArgb));
+                    ui->lineEditRgbDec->setText(QString::number(m_color.rgba(), 10));
+                    ui->lineEditRgbGL->setText(QString("glColor4f(%1f, %2f, %3f, %4f)").
+                                               arg(m_color.redF(), 0, 'f', 2, 0).
+                                               arg(m_color.greenF(), 0, 'f', 2, 0).
+                                               arg(m_color.blueF(), 0, 'f', 2, 0).
+                                               arg(m_color.alphaF(), 0, 'f', 2, 0));
                 }
             }
             break;
