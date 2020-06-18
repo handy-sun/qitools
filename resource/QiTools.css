@@ -21,3 +21,16 @@ QListWidget::item::selected{
     color: rgb(0, 0, 255);
     background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 235, 235, 206), stop:0.35 rgba(255, 188, 188, 80), stop:0.4 rgba(255, 162, 162, 80), stop:0.425 rgba(255, 132, 132, 156), stop:0.44 rgba(252, 128, 128, 80), stop:1 rgba(255, 255, 255, 0));
 }
+/*QTableWidget{
+    font: normal 20px "Consolas";
+}*/
+QHeaderView#hHeader::section{
+    color: rgb(0, 0, 255);
+    font: 16px "Microsoft YaHei";
+    padding-top: 3px;
+    padding-bottom: 3px;
+    height: 30px;
+    border: 1px solid #B2B6B9;
+    border-width: 0px 1px 1px 0px;
+    background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #F2F3F4,stop:1 #E7E9EB);
+}

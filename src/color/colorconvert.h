@@ -7,6 +7,8 @@ namespace Ui {
 class ColorConvert;
 }
 
+class QTableWidget;
+
 class ColorConvert : public QWidget
 {
     Q_OBJECT
@@ -20,8 +22,10 @@ private slots:
 
 private:
     Ui::ColorConvert *ui;
+    QTableWidget     *m_table;
     QColor            m_color;
 
+    void initTableWidget();
 };
 
 #endif // COLORCONVERT_H
