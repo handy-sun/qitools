@@ -1,9 +1,7 @@
 ﻿#include "colorconvert.h"
 #include "ui_colorconvert.h"
-
-//#if _MSC_VER < 1805
-//#define Q_COMPILER_INITIALIZER_LISTS
-//#endif
+#include <QLabel>
+#include <QDebug>
 
 static bool toColorValue(const QStringList &strlist, uchar arr[])
 {
@@ -53,11 +51,14 @@ static bool toColorValue(const QStringList &strlist, uchar arr[])
 ColorConvert::ColorConvert(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ColorConvert)
+    , m_pmDecoration(QPixmap(36, 36))
 {
     ui->setupUi(this);
     m_table = ui->tableWidget;
+    m_pmDecoration.fill(Qt::transparent);
     initTableWidget();
     //ui->tableWidget->item(0, 0)->setText("rgb");
+    connect(m_table, &QTableWidget::itemPressed, [=](QTableWidgetItem *item){qtout << item->text();});
 }
 
 ColorConvert::~ColorConvert()
@@ -83,6 +84,8 @@ void ColorConvert::on_toolButtonRgbValue_clicked()
                 if (toColorValue(rgb.split(","), colVal))
                 {
                     m_color = QColor(colVal[0], colVal[1], colVal[2], colVal[3]);
+                    m_pmDecoration.fill(m_color);
+                    m_table->item(1, 1)->setData(Qt::DecorationRole, m_pmDecoration);
                     m_table->item(2, 1)->setText(m_color.name(cnt == 2 ? QColor::HexRgb : QColor::HexArgb));
                     m_table->item(3, 1)->setText(QString::number(m_color.rgba(), 10));
                     m_table->item(4, 1)->setText(QString("glColor4f(%1f, %2f, %3f, %4f)").
@@ -90,6 +93,15 @@ void ColorConvert::on_toolButtonRgbValue_clicked()
                                                arg(m_color.greenF(), 0, 'f', 2, 0).
                                                arg(m_color.blueF(), 0, 'f', 2, 0).
                                                arg(m_color.alphaF(), 0, 'f', 2, 0));
+                    m_table->item(5, 1)->setText(QString("(%1, %2, %3, %4)").
+                                               arg(m_color.cyan()).
+                                               arg(m_color.magenta()).
+                                               arg(m_color.yellow()).
+                                               arg(m_color.black()));
+                    m_table->item(6, 1)->setText(QString("(%1, %2, %3)").
+                                               arg(m_color.hue()).
+                                               arg(m_color.saturation()).
+                                               arg(m_color.value()));
                 }
             }
             break;
@@ -100,16 +112,21 @@ void ColorConvert::on_toolButtonRgbValue_clicked()
 void ColorConvert::initTableWidget()
 {
     QTableWidgetItem *item;
+    QFont fontCol0("Microsoft Yahei", 14);
+    QFont fontCol1("Consolas", 16);   
     QStringList horizontalLabels, verticalContents;
     horizontalLabels << QStringLiteral("表达方式") << QStringLiteral("值");
+
     verticalContents << QStringLiteral("RGB") << QStringLiteral("色块")
                      << QStringLiteral("十六进制") << QStringLiteral("十进制")
-                     << QStringLiteral("OpenGL") << QStringLiteral("CMYK");
-    QFont fontCol0("Microsoft Yahei", 14);
-    QFont fontCol1("Consolas", 16);
+                     << QStringLiteral("OpenGL") << QStringLiteral("CMYK")
+                     << QStringLiteral("HSV");
+    QLabel *colorBlock = new QLabel(this);
+    colorBlock->setFixedSize(45, 45);
+
 
     m_table->setColumnCount(2);
-    m_table->setRowCount(6);
+    m_table->setRowCount(7);
 
     m_table->setColumnWidth(0, 150);
     m_table->horizontalHeader()->setStretchLastSection(true);
@@ -136,6 +153,12 @@ void ColorConvert::initTableWidget()
 //            {
 //                item->setFont(fontCol1);
 //            }
+            if (1 == row && 1 == col) // 色块的展示采用 Qt::DecorationRole 设置一张 pixmap
+            {
+                item->setData(Qt::DecorationRole, m_pmDecoration);
+                item->setFlags(item->flags() & (~Qt::ItemIsEditable) & (~Qt::ItemIsSelectable));
+            }
+
             m_table->setItem(row, col, item);
         }
     }

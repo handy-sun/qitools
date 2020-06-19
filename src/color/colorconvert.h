@@ -24,6 +24,7 @@ private:
     Ui::ColorConvert *ui;
     QTableWidget     *m_table;
     QColor            m_color;
+    QPixmap           m_pmDecoration;
 
     void initTableWidget();
 };
