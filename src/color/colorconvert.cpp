@@ -1,9 +1,12 @@
 ﻿#include "colorconvert.h"
 #include "ui_colorconvert.h"
+#include "screencolorpicker.h"
 #include <QLabel>
 #include <QDebug>
+#include <QTimer>
+#include <typeinfo>
 
-static bool toColorValue(const QStringList &strlist, uchar arr[])
+static bool toColor(const QStringList &strlist, uchar arr[])
 {
     bool isInt, isFloat;
     int val;
@@ -48,9 +51,32 @@ static bool toColorValue(const QStringList &strlist, uchar arr[])
     return true;
 }
 
+static bool toColorF(const QStringList &strlist, uchar arr[])
+{
+    bool isFloat;
+    float f;
+    QString temp;
+
+    for (int i = 0; i < strlist.size(); ++i)
+    {
+        temp = strlist.at(i);
+        f = temp.toFloat(&isFloat);
+        if (isFloat && f >= 0.0f && f <= 1.0f)
+        {
+            arr[i] = f * 255;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 ColorConvert::ColorConvert(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ColorConvert)
+    , m_scrPicker(new ScreenColorPicker(this))
     , m_pmDecoration(QPixmap(36, 36))
 {
     ui->setupUi(this);
@@ -58,7 +84,62 @@ ColorConvert::ColorConvert(QWidget *parent)
     m_pmDecoration.fill(Qt::transparent);
     initTableWidget();
     //ui->tableWidget->item(0, 0)->setText("rgb");
-    connect(m_table, &QTableWidget::itemPressed, [=](QTableWidgetItem *item){qtout << item->text();});
+
+    connect(m_scrPicker, &ScreenColorPicker::pickFinished, [=](bool isUseful, const QColor &color)
+    {        
+        if (topLevelWidget()->isMinimized())
+        {
+            topLevelWidget()->showNormal();
+        }
+        ui->toolButtonPick->setEnabled(true);
+        if (!isUseful)
+            return;
+        m_color = color;
+        m_pmDecoration.fill(m_color);
+        m_table->item(1, 1)->setData(Qt::DecorationRole, m_pmDecoration);
+    });
+
+    connect(ui->toolButtonPick, &QToolButton::clicked, [=]()
+    {
+        int integral;
+        if (ui->checkBoxIsHideWindow->isChecked())
+        {
+            topLevelWidget()->showMinimized();
+            topLevelWidget()->activateWindow();
+            integral = 300;
+        }
+        else
+        {
+            ui->toolButtonPick->setEnabled(false);
+            integral = 50;
+        }
+        QTimer::singleShot(integral, [=](){ m_scrPicker->grabColor(); m_scrPicker->show(); });
+    });
+
+    connect(m_table, &QTableWidget::cellChanged, [=](int row, int)
+    {
+        m_table->blockSignals(true);
+        switch (row)
+        {
+        case 0:
+            convertFromRgb();
+            break;
+        case 1:
+            setColorValue({ 0, 2, 3, 4, 5, 6 });
+            break;
+        case 2:
+            convertFromHex();
+            break;
+        case 4:
+            convertFromGL();
+            break;
+        default:
+            break;
+        }
+        m_table->blockSignals(false);
+    });
+
+    m_table->item(0, 1)->setText("rgba(102, 204, 253, 0.76)");
 }
 
 ColorConvert::~ColorConvert()
@@ -66,67 +147,21 @@ ColorConvert::~ColorConvert()
     delete ui;
 }
 
-void ColorConvert::on_toolButtonRgbValue_clicked()
-{    
-    QString rgb = m_table->item(0, 1)->text();
-    uchar colVal[4] = { 0, 0, 0, 255 };
-    int cnt;
-    for (const QString &_head : { "rgb(", "rgba(", "(" })
-    {
-        if (rgb.startsWith(_head, Qt::CaseInsensitive) && rgb.endsWith(")"))
-        {
-            rgb.remove(0, _head.length());
-            rgb.resize(rgb.size() - 1);
-            cnt = rgb.count(",");
-
-            if (cnt == 2 || cnt == 3)
-            {
-                if (toColorValue(rgb.split(","), colVal))
-                {
-                    m_color = QColor(colVal[0], colVal[1], colVal[2], colVal[3]);
-                    m_pmDecoration.fill(m_color);
-                    m_table->item(1, 1)->setData(Qt::DecorationRole, m_pmDecoration);
-                    m_table->item(2, 1)->setText(m_color.name(cnt == 2 ? QColor::HexRgb : QColor::HexArgb));
-                    m_table->item(3, 1)->setText(QString::number(m_color.rgba(), 10));
-                    m_table->item(4, 1)->setText(QString("glColor4f(%1f, %2f, %3f, %4f)").
-                                               arg(m_color.redF(), 0, 'f', 2, 0).
-                                               arg(m_color.greenF(), 0, 'f', 2, 0).
-                                               arg(m_color.blueF(), 0, 'f', 2, 0).
-                                               arg(m_color.alphaF(), 0, 'f', 2, 0));
-                    m_table->item(5, 1)->setText(QString("(%1, %2, %3, %4)").
-                                               arg(m_color.cyan()).
-                                               arg(m_color.magenta()).
-                                               arg(m_color.yellow()).
-                                               arg(m_color.black()));
-                    m_table->item(6, 1)->setText(QString("(%1, %2, %3)").
-                                               arg(m_color.hue()).
-                                               arg(m_color.saturation()).
-                                               arg(m_color.value()));
-                }
-            }
-            break;
-        }
-    }
-}
-
 void ColorConvert::initTableWidget()
 {
     QTableWidgetItem *item;
     QFont fontCol0("Microsoft Yahei", 14);
-    QFont fontCol1("Consolas", 16);   
+    QFont fontCol1("Consolas", 16);
     QStringList horizontalLabels, verticalContents;
-    horizontalLabels << QStringLiteral("表达方式") << QStringLiteral("值");
+    horizontalLabels << QStringLiteral("颜色属性") << QStringLiteral("值");
 
     verticalContents << QStringLiteral("RGB") << QStringLiteral("色块")
                      << QStringLiteral("十六进制") << QStringLiteral("十进制")
                      << QStringLiteral("OpenGL") << QStringLiteral("CMYK")
                      << QStringLiteral("HSV");
-    QLabel *colorBlock = new QLabel(this);
-    colorBlock->setFixedSize(45, 45);
 
-
-    m_table->setColumnCount(2);
-    m_table->setRowCount(7);
+    m_table->setColumnCount(horizontalLabels.size());
+    m_table->setRowCount(verticalContents.size());
 
     m_table->setColumnWidth(0, 150);
     m_table->horizontalHeader()->setStretchLastSection(true);
@@ -162,6 +197,138 @@ void ColorConvert::initTableWidget()
             m_table->setItem(row, col, item);
         }
     }
-
-    m_table->item(0, 1)->setText("rgba(102, 204, 253, 0.76)");
 }
+
+void ColorConvert::convertFromRgb()
+{    
+    QString rgb = m_table->item(0, 1)->text().trimmed();
+    uchar clrVal[4] = { 0, 0, 0, 255 };
+    int _count;
+    if (!rgb.endsWith(")"))
+        return;
+
+    for (const QString &_head : { "rgb(", "rgba(", "(" })
+    {
+        if (rgb.startsWith(_head, Qt::CaseInsensitive))
+        {
+            rgb.remove(0, _head.length());
+            rgb.resize(rgb.size() - 1);
+            _count = rgb.count(",");
+
+            if ((_head == "(" && (_count == 2 || _count == 3))
+                    || (_head == "rgb(" && _count == 2)
+                    || (_head == "rgba(" && _count == 3))
+            {
+                if (toColor(rgb.split(","), clrVal))
+                {
+                    m_color = QColor(clrVal[0], clrVal[1], clrVal[2], clrVal[3]);
+                    setColorValue({ 1, 2, 3, 4, 5, 6 });
+                }
+            }
+            break;
+        }
+    }
+}
+
+void ColorConvert::convertFromHex()
+{
+    QString hex = m_table->item(2, 1)->text().trimmed();
+    m_color = QColor(hex);
+    setColorValue({ 0, 1, 3, 4, 5, 6 });
+}
+
+void ColorConvert::convertFromGL()
+{
+    QString glClr = m_table->item(4, 1)->text().trimmed();
+    if (!glClr.endsWith(")"))
+        return;
+
+    int _count;
+    uchar clrF[4] = { 0, 0, 0, 255 };
+
+    for (const QString &_head : { "glColor4f(", "glColor3f(", "(" })
+    {
+        if (glClr.startsWith(_head, Qt::CaseInsensitive))
+        {
+            glClr.remove(0, _head.length());
+            glClr.resize(glClr.size() - 1);
+            _count = glClr.count(",");
+
+            if ((_head == "(" && (_count == 2 || _count == 3))
+                    || (_head == "glColor3f(" && _count == 2)
+                    || (_head == "glColor4f(" && _count == 3))
+            {
+                if (toColorF(glClr.remove("f").split(","), clrF))
+                {
+                    m_color = QColor(clrF[0], clrF[1], clrF[2], clrF[3]);
+                    setColorValue({ 0, 1, 2, 3, 5, 6 });
+                }
+            }
+            break;
+        }
+    }
+}
+
+void ColorConvert::setColorValue(const QVector<int> &usedRows)
+{
+    if (!m_color.isValid())
+        return;
+
+    for (int row : usedRows)
+    {
+        switch (row)
+        {
+        case 0:
+            if (m_color.alphaF() < 1.0f)
+            {
+                m_table->item(row, 1)->setText(QString("rgba(%1, %2, %3, %4)").
+                                             arg(m_color.red()).
+                                             arg(m_color.green()).
+                                             arg(m_color.blue()).
+                                             arg(m_color.alpha()));
+            }
+            else
+            {
+                m_table->item(row, 1)->setText(QString("rgb(%1, %2, %3)").
+                                             arg(m_color.red()).
+                                             arg(m_color.green()).
+                                             arg(m_color.blue()));
+            }
+            break;
+        case 1:
+            m_pmDecoration.fill(m_color);
+            m_table->item(row, 1)->setData(Qt::DecorationRole, m_pmDecoration);
+            break;
+        case 2:
+            m_table->item(row, 1)->setText(m_color.name(m_color.alphaF() < 1.0f ? QColor::HexArgb : QColor::HexRgb));
+            break;
+        case 3:
+            m_table->item(row, 1)->setText(QString::number(m_color.rgba(), 10));
+            break;
+        case 4:
+            m_table->item(row, 1)->setText(QString("glColor4f(%1f, %2f, %3f, %4f)").
+                                         arg(m_color.redF(), 0, 'f', 2, 0).
+                                         arg(m_color.greenF(), 0, 'f', 2, 0).
+                                         arg(m_color.blueF(), 0, 'f', 2, 0).
+                                         arg(m_color.alphaF(), 0, 'f', 2, 0));
+            break;
+        case 5:
+            m_table->item(row, 1)->setText(QString("(%1, %2, %3, %4)").
+                                         arg(m_color.cyan()).
+                                         arg(m_color.magenta()).
+                                         arg(m_color.yellow()).
+                                         arg(m_color.black()));
+            break;
+        case 6:
+            m_table->item(row, 1)->setText(QString("(%1, %2, %3)").
+                                         arg(m_color.hue()).
+                                         arg(m_color.saturation()).
+                                         arg(m_color.value()));
+            break;
+        default:
+            Q_ASSERT(false);
+            break;
+        }
+    }
+}
+

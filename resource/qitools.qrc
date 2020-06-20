@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>QiTools.css</file>
+        <file>colorpicker.png</file>
     </qresource>
 </RCC>

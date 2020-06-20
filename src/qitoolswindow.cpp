@@ -15,9 +15,9 @@ QiToolsWindow::QiToolsWindow(QWidget *parent)
 
     if (ui->listWidget->count() == ui->stackedWidget->count())
     {
-        connect(ui->listWidget, &QListWidget::currentRowChanged,
-                ui->stackedWidget, &QStackedWidget::setCurrentIndex);
+        connect(ui->listWidget, &QListWidget::currentRowChanged, ui->stackedWidget, &QStackedWidget::setCurrentIndex);
     }
+//    ui->stackedWidget->setFocusPolicy(Qt::StrongFocus);
     ui->listWidget->setCurrentRow(1);
 }
 
@@ -28,9 +28,14 @@ QiToolsWindow::~QiToolsWindow()
 
 void QiToolsWindow::keyPressEvent(QKeyEvent *event)
 {
+    //qtout << event->key();
     if (event->key() == Qt::Key_Escape)
     {
         close();
+    }
+    else if (event->key() == Qt::Key_Minus)
+    {
+        showMinimized();
     }
 }
 

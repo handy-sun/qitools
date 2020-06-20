@@ -8,6 +8,7 @@ class ColorConvert;
 }
 
 class QTableWidget;
+class ScreenColorPicker;
 
 class ColorConvert : public QWidget
 {
@@ -17,16 +18,19 @@ public:
     explicit ColorConvert(QWidget *parent = nullptr);
     ~ColorConvert();
 
-private slots:
-    void on_toolButtonRgbValue_clicked();
-
 private:
-    Ui::ColorConvert *ui;
-    QTableWidget     *m_table;
-    QColor            m_color;
-    QPixmap           m_pmDecoration;
+    Ui::ColorConvert    *ui;
+    QTableWidget        *m_table;
+    ScreenColorPicker   *m_scrPicker;
+    QColor              m_color;
+    QPixmap             m_pmDecoration;
+    //decltype(connect(0, 0, 0, 0)) m_connection;
 
     void initTableWidget();
+    void convertFromRgb();
+    void convertFromHex();
+    void convertFromGL();
+    void setColorValue(const QVector<int> &usedRows);
 };
 
 #endif // COLORCONVERT_H

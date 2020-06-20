@@ -25,7 +25,7 @@ QListWidget::item::selected{
     font: normal 20px "Consolas";
 }*/
 QHeaderView#hHeader::section{
-    color: rgb(102, 204, 253);
+    color: rgb(15, 128, 0);
     font: 16px "Microsoft YaHei";
     padding-top: 3px;
     padding-bottom: 3px;

@@ -24,6 +24,11 @@ CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS \
         qtout=qDebug()
 
+msvc: !contains(DEFINES, Q_COMPILER_INITIALIZER_LISTS) {
+        DEFINES += Q_COMPILER_INITIALIZER_LISTS
+}
+
+
 include(src/src.pri)
 
 RESOURCES += \
