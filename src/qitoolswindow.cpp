@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QListWidget>
 
+
 QiToolsWindow::QiToolsWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::QiToolsWindow)
@@ -18,7 +19,7 @@ QiToolsWindow::QiToolsWindow(QWidget *parent)
         connect(ui->listWidget, &QListWidget::currentRowChanged, ui->stackedWidget, &QStackedWidget::setCurrentIndex);
     }
 //    ui->stackedWidget->setFocusPolicy(Qt::StrongFocus);
-    ui->listWidget->setCurrentRow(1);
+    ui->listWidget->setCurrentRow(0);
 }
 
 QiToolsWindow::~QiToolsWindow()
@@ -33,10 +34,10 @@ void QiToolsWindow::keyPressEvent(QKeyEvent *event)
     {
         close();
     }
-    else if (event->key() == Qt::Key_Minus)
-    {
-        showMinimized();
-    }
+//    else if (event->key() == Qt::Key_Minus)
+//    {
+//        showMinimized();
+//    }
 }
 
 QString readStyleSheetFile(const QString &rcFile)

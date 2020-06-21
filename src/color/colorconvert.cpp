@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <typeinfo>
+//#include <cstdio>
 
 static bool toColor(const QStringList &strlist, uchar arr[])
 {
@@ -83,7 +84,7 @@ ColorConvert::ColorConvert(QWidget *parent)
     m_table = ui->tableWidget;
     m_pmDecoration.fill(Qt::transparent);
     initTableWidget();
-    //ui->tableWidget->item(0, 0)->setText("rgb");
+//    uint he = 3244739836;printf("%x\n", he);fflush(stdout);
 
     connect(m_scrPicker, &ScreenColorPicker::pickFinished, [=](bool isUseful, const QColor &color)
     {        
@@ -130,6 +131,9 @@ ColorConvert::ColorConvert(QWidget *parent)
         case 2:
             convertFromHex();
             break;
+        case 3:
+            convertFromDec();
+            break;
         case 4:
             convertFromGL();
             break;
@@ -151,12 +155,11 @@ void ColorConvert::initTableWidget()
 {
     QTableWidgetItem *item;
     QFont fontCol0("Microsoft Yahei", 14);
-    QFont fontCol1("Consolas", 16);
     QStringList horizontalLabels, verticalContents;
     horizontalLabels << QStringLiteral("颜色属性") << QStringLiteral("值");
 
     verticalContents << QStringLiteral("RGB") << QStringLiteral("色块")
-                     << QStringLiteral("十六进制") << QStringLiteral("十进制")
+                     << QStringLiteral("十六进制") << QStringLiteral("十进制(uint)")
                      << QStringLiteral("OpenGL") << QStringLiteral("CMYK")
                      << QStringLiteral("HSV");
 
@@ -170,7 +173,7 @@ void ColorConvert::initTableWidget()
     m_table->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     m_table->verticalHeader()->setHidden(true);
     m_table->setAlternatingRowColors(true); // 奇偶行交替颜色
-    m_table->setFont(fontCol1);
+    m_table->setFont(QFont("Verdana", 14));
 //    m_table->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
     for (int row = 0; row < m_table->rowCount(); ++row)
@@ -180,17 +183,17 @@ void ColorConvert::initTableWidget()
             item = new QTableWidgetItem;
             if (0 == col)
             {
-                item->setFlags(item->flags() & (~Qt::ItemIsEditable)); // 第一列不可编辑
+                item->setFlags(item->flags() & (~Qt::ItemIsEditable) & (~Qt::ItemIsSelectable)); // 第一列不可编辑
                 item->setText(verticalContents.at(row));
                 item->setFont(fontCol0);
             }
-//            else // 表格整体设置字体后，第一列字体默认为表格字体
-//            {
-//                item->setFont(fontCol1);
-//            }
-            if (1 == row && 1 == col) // 色块的展示采用 Qt::DecorationRole 设置一张 pixmap
+            else if (1 == row && 1 == col) // 色块的展示采用 Qt::DecorationRole 设置一张 pixmap
             {
                 item->setData(Qt::DecorationRole, m_pmDecoration);
+                item->setFlags(item->flags() & (~Qt::ItemIsEditable) & (~Qt::ItemIsSelectable));
+            }
+            else if (row > 4 && 1 == col)
+            {
                 item->setFlags(item->flags() & (~Qt::ItemIsEditable) & (~Qt::ItemIsSelectable));
             }
 
@@ -235,6 +238,18 @@ void ColorConvert::convertFromHex()
     QString hex = m_table->item(2, 1)->text().trimmed();
     m_color = QColor(hex);
     setColorValue({ 0, 1, 3, 4, 5, 6 });
+}
+
+void ColorConvert::convertFromDec()
+{
+    bool ok;
+    QString dec = m_table->item(3, 1)->text().trimmed();
+    uint _hex = dec.toUInt(&ok, 10);
+    if (ok)
+    {
+        m_color = QColor(_hex);
+        setColorValue({ 0, 1, 2, 4, 5, 6 });
+    }
 }
 
 void ColorConvert::convertFromGL()

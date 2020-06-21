@@ -29,6 +29,7 @@ private:
     void initTableWidget();
     void convertFromRgb();
     void convertFromHex();
+    void convertFromDec();
     void convertFromGL();
     void setColorValue(const QVector<int> &usedRows);
 };

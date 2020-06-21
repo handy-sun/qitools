@@ -25,12 +25,11 @@ project(${PROJECT_NAME} CXX)
 
 #set(AUTO_RECURSE_FILE)
 
-# At the very minimum, Qt 5.9+ is required
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 #打开全局rcc，非必须，
-# set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTORCC ON)
 
 # 自动搜索各种文件，易出现重复定义问题
 if(AUTO_RECURSE_FILE)
@@ -62,6 +61,12 @@ else()
         src/property/propertygenerator.ui
         src/property/propertygenerator.h
         src/property/propertymanager.h
+
+        src/color/colorconvert.h
+        src/color/colorconvert.cpp
+        src/color/colorconvert.ui
+        src/color/screencolorpicker.h
+        src/color/screencolorpicker.cpp
         )
 endif()
 
@@ -82,20 +87,25 @@ else()
     set(EXE_NAME ${PROJECT_NAME})
 endif()
 
-include_directories(src src/property)
+include_directories(src src/property src/color)
 
 qt5_add_resources(QRC_FILES resource/qitools.qrc)
-message(">>>${QRC_FILES}")
+
 
 if(WIN32)
-    set(WIN_RC ${CMAKE_CURRENT_SOURCE_DIR}/resource/icon.rc)
+    set(WIN_RC "${CMAKE_CURRENT_SOURCE_DIR}/resource/icon.rc")
 endif()
+#string(REPLACE " " "\ " WIN_RC2 ${WIN_RC})
+message(">>>${WIN_RC}")
+
 
 if(AUTO_RECURSE_FILE)
-    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${FORMS}
-    ${RESOURCES} ${WRAP_FILES})
+    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${FORMS} ${QRC_FILES}
+#    ${WRAP_FILES}
+        ${WIN_RC}
+    )
 else()
-    add_executable(${PROJECT_NAME} ${SOURCES} ${QRC_FILES}
+    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${QRC_FILES}
 #        ${WIN_RC}
         )
 endif()
