@@ -109,6 +109,7 @@ else()
 #        ${WIN_RC}
         )
 endif()
+# PS: 如果路径内有空格，则添加.rc文件编译无法通过
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
                       OUTPUT_NAME ${EXE_NAME})

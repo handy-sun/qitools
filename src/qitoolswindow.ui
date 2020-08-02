@@ -50,6 +50,11 @@
         <string>颜色转换</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>GLSL 工具</string>
+       </property>
+      </item>
      </widget>
     </item>
     <item>
@@ -62,6 +67,7 @@
       </property>
       <widget class="PropertyGenerator" name="page"/>
       <widget class="ColorConvert" name="page_2"/>
+      <widget class="GlslCodeConvert" name="page_3"/>
      </widget>
     </item>
    </layout>
@@ -79,6 +85,12 @@
    <class>ColorConvert</class>
    <extends>QWidget</extends>
    <header>colorconvert.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GlslCodeConvert</class>
+   <extends>QWidget</extends>
+   <header>glslcodeconvert.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

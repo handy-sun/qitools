@@ -15,3 +15,4 @@ FORMS += \
 
 include($$PWD/property/property.pri)
 include($$PWD/color/color.pri)
+include($$PWD/glsltool/glsltool.pri)
