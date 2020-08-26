@@ -19,7 +19,7 @@ QiToolsWindow::QiToolsWindow(QWidget *parent)
         connect(ui->listWidget, &QListWidget::currentRowChanged, ui->stackedWidget, &QStackedWidget::setCurrentIndex);
     }
 //    ui->stackedWidget->setFocusPolicy(Qt::StrongFocus);
-    ui->listWidget->setCurrentRow(2);
+    ui->listWidget->setCurrentRow(0);
 }
 
 QiToolsWindow::~QiToolsWindow()
