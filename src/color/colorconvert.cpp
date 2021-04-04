@@ -81,67 +81,11 @@ ColorConvert::ColorConvert(QWidget *parent)
     , m_pmDecoration(QPixmap(36, 36))
 {
     ui->setupUi(this);
-    m_table = ui->tableWidget;
+    m_table = ui->tableWidgetColor;
     m_pmDecoration.fill(Qt::transparent);
     initTableWidget();
-//    uint he = 3244739836;printf("%x\n", he);fflush(stdout);
-
-    connect(m_scrPicker, &ScreenColorPicker::pickFinished, [=](bool isUseful, const QColor &color)
-    {        
-        if (topLevelWidget()->isMinimized())
-        {
-            topLevelWidget()->showNormal();
-        }
-        ui->toolButtonPick->setEnabled(true);
-        if (!isUseful)
-            return;
-        m_color = color;
-        m_pmDecoration.fill(m_color);
-        m_table->item(1, 1)->setData(Qt::DecorationRole, m_pmDecoration);
-    });
-
-    connect(ui->toolButtonPick, &QToolButton::clicked, [=]()
-    {
-        int integral;
-        if (ui->checkBoxIsHideWindow->isChecked())
-        {
-            topLevelWidget()->showMinimized();
-            topLevelWidget()->activateWindow();
-            integral = 300;
-        }
-        else
-        {
-            ui->toolButtonPick->setEnabled(false);
-            integral = 50;
-        }
-        QTimer::singleShot(integral, [=](){ m_scrPicker->grabColor(); m_scrPicker->show(); });
-    });
-
-    connect(m_table, &QTableWidget::cellChanged, [=](int row, int)
-    {
-        m_table->blockSignals(true);
-        switch (row)
-        {
-        case 0:
-            convertFromRgb();
-            break;
-        case 1:
-            setColorValue({ 0, 2, 3, 4, 5, 6 });
-            break;
-        case 2:
-            convertFromHex();
-            break;
-        case 3:
-            convertFromDec();
-            break;
-        case 4:
-            convertFromGL();
-            break;
-        default:
-            break;
-        }
-        m_table->blockSignals(false);
-    });
+    connect(m_scrPicker, &ScreenColorPicker::pickFinished, this, &ColorConvert::slot_PickFinished);
+    connect(m_table, &QTableWidget::cellChanged, this, &ColorConvert::onTableCellChanged);
 
     m_table->item(0, 1)->setText("rgba(102, 204, 253, 0.76)");
 }
@@ -347,3 +291,64 @@ void ColorConvert::setColorValue(const QVector<int> &usedRows)
     }
 }
 
+void ColorConvert::slot_PickFinished(bool isUseful, const QColor &color)
+{
+    if (topLevelWidget()->isMinimized())
+    {
+        topLevelWidget()->showNormal();
+    }
+    ui->toolButtonPick->setEnabled(true);
+
+    if (!isUseful)
+        return;
+
+    m_color = color;
+    m_pmDecoration.fill(m_color);
+    m_table->item(1, 1)->setData(Qt::DecorationRole, m_pmDecoration);
+}
+
+void ColorConvert::on_toolButtonPick_clicked()
+{
+    int delayTime;
+    if (ui->checkBoxIsHideWindow->isChecked())
+    {
+        topLevelWidget()->showMinimized();
+        topLevelWidget()->activateWindow();
+        delayTime = 300;
+    }
+    else
+    {
+        ui->toolButtonPick->setEnabled(false);
+        delayTime = 50;
+    }
+    QTimer::singleShot(delayTime, [=](){
+        m_scrPicker->grabColor();
+        m_scrPicker->show();
+    });
+}
+
+void ColorConvert::onTableCellChanged(int row, int)
+{
+    m_table->blockSignals(true);
+    switch (row)
+    {
+    case 0:
+        convertFromRgb();
+        break;
+    case 1:
+        setColorValue({ 0, 2, 3, 4, 5, 6 });
+        break;
+    case 2:
+        convertFromHex();
+        break;
+    case 3:
+        convertFromDec();
+        break;
+    case 4:
+        convertFromGL();
+        break;
+    default:
+        break;
+    }
+    m_table->blockSignals(false);
+}

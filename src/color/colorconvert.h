@@ -32,6 +32,14 @@ private:
     void convertFromDec();
     void convertFromGL();
     void setColorValue(const QVector<int> &usedRows);
+
+public Q_SLOTS:
+    void slot_PickFinished(bool isUseful, const QColor &color);
+
+private Q_SLOTS:
+    void on_toolButtonPick_clicked();
+    void onTableCellChanged(int row, int);
+
 };
 
 #endif // COLORCONVERT_H
