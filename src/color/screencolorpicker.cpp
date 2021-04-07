@@ -82,7 +82,7 @@ void ScreenColorPicker::paintEvent(QPaintEvent *)
     drawPickedRect(&painter, magnifier, color);
 
     painter.setPen(QColor(128, 0, 0));
-    painter.drawRect(rect().adjusted(1, 0, -1, -1)); // 外边红框
+    painter.drawRect(rect().adjusted(0, 0, -1, -1)); // 外边红框
 }
 
 void ScreenColorPicker::mousePressEvent(QMouseEvent *event)

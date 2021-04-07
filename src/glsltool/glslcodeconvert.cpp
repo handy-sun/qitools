@@ -17,6 +17,12 @@ GlslCodeConvert::~GlslCodeConvert()
 
 void GlslCodeConvert::onTextCodeChanged()
 {
+    if (ui->textEditFile->toPlainText().isEmpty())
+    {
+        ui->textEditCode->clear();
+        return;
+    }
+
     QString fileContent = ui->textEditFile->toPlainText();
     fileContent.replace("\n", "\\n\"\n\"");
     fileContent.prepend("\"");

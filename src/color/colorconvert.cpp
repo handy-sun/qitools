@@ -110,9 +110,11 @@ void ColorConvert::initTableWidget()
     m_table->setColumnCount(horizontalLabels.size());
     m_table->setRowCount(verticalContents.size());
 
-    m_table->setColumnWidth(0, 150);
+    m_table->setColumnWidth(0, 150);    
     m_table->horizontalHeader()->setStretchLastSection(true);
     m_table->horizontalHeader()->setObjectName("hHeader");
+    // 设置所有列不可拖动
+    m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     m_table->setHorizontalHeaderLabels(horizontalLabels);
     m_table->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     m_table->verticalHeader()->setHidden(true);

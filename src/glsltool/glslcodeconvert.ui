@@ -14,21 +14,6 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="font">
-      <font>
-       <pointsize>13</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>glsl字符数组</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="1">
     <widget class="QLabel" name="label_2">
      <property name="font">
@@ -37,20 +22,10 @@
       </font>
      </property>
      <property name="text">
-      <string>glsl文件</string>
+      <string>原始内容</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QTextEdit" name="textEditCode">
-     <property name="font">
-      <font>
-       <family>Consolas</family>
-       <pointsize>16</pointsize>
-      </font>
      </property>
     </widget>
    </item>
@@ -61,6 +36,34 @@
        <family>Consolas</family>
        <pointsize>16</pointsize>
       </font>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QTextEdit" name="textEditCode">
+     <property name="font">
+      <font>
+       <family>Consolas</family>
+       <pointsize>16</pointsize>
+      </font>
+     </property>
+     <property name="placeholderText">
+      <string>此区域内容不可编辑</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <pointsize>13</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>字符数组</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
