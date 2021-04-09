@@ -67,6 +67,10 @@ else()
         src/color/colorconvert.ui
         src/color/screencolorpicker.h
         src/color/screencolorpicker.cpp
+
+        src/glsltool/glslcodeconvert.ui
+        src/glsltool/glslcodeconvert.h
+        src/glsltool/glslcodeconvert.cpp
         )
 endif()
 
@@ -87,17 +91,16 @@ else()
     set(EXE_NAME ${PROJECT_NAME})
 endif()
 
-include_directories(src src/property src/color)
+include_directories(src src/property src/color src/glsltool)
 
 qt5_add_resources(QRC_FILES resource/qitools.qrc)
 
 
 if(WIN32)
     set(WIN_RC "${CMAKE_CURRENT_SOURCE_DIR}/resource/icon.rc")
+    message(">>>${WIN_RC}")
 endif()
 #string(REPLACE " " "\ " WIN_RC2 ${WIN_RC})
-message(">>>${WIN_RC}")
-
 
 if(AUTO_RECURSE_FILE)
     add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${FORMS} ${QRC_FILES}

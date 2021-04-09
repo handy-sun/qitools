@@ -12,8 +12,8 @@ static const int blockSize = greyHeight - 2 * blockOffset;
 ScreenColorPicker::ScreenColorPicker(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowFlag(Qt::FramelessWindowHint);
-//    setFixedSize(QApplication::primaryScreen()->size());
+    setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+
     setCursor(QCursor(QPixmap(":/colorpicker.png"), 0, 19));
     setMouseTracking(true);
 
@@ -24,10 +24,14 @@ void ScreenColorPicker::grabColor()
 {
     setMultiScreen();
     m_mousePos = QCursor::pos() - m_multiScreenRect.topLeft();
-//    qtout << QApplication::desktop()->winId();
+#ifdef Q_OS_WIN
     m_pmScreen = QApplication::primaryScreen()->grabWindow(QApplication::desktop()->winId(),
                                                            m_multiScreenRect.x(), m_multiScreenRect.y(),
                                                            m_multiScreenRect.width(), m_multiScreenRect.height());
+#elif Q_OS_UNIX
+    m_pmScreen = QApplication::primaryScreen()->grabWindow(0, m_multiScreenRect.x(), m_multiScreenRect.y(),
+                                                           m_multiScreenRect.width(), m_multiScreenRect.height());
+#endif
     update();
 }
 
@@ -64,6 +68,9 @@ void ScreenColorPicker::drawPickedRect(QPainter *painter, const QRect &magnifier
 
 void ScreenColorPicker::paintEvent(QPaintEvent *)
 {
+    if (m_pmScreen.isNull())
+        return;
+
     QPainter painter(this);
     QRect magnifier(m_mousePos.x(), m_mousePos.y(), 100, 100);
     QColor color = m_pmScreen.toImage().pixel(m_mousePos);
