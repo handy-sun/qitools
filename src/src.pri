@@ -1,6 +1,6 @@
 INCLUDEPATH += $$PWD
 
-PRECOMPILED_HEADER = $$PWD/stable.h
+#PRECOMPILED_HEADER = $$PWD/stable.h
 
 SOURCES += \
     $$PWD/main.cpp \

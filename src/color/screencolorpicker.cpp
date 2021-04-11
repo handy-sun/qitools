@@ -4,6 +4,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QScreen>
+#include <QDebug>
 
 static const int greyHeight = 30;
 static const int blockOffset = 5;
@@ -28,10 +29,13 @@ void ScreenColorPicker::grabColor()
     m_pmScreen = QApplication::primaryScreen()->grabWindow(QApplication::desktop()->winId(),
                                                            m_multiScreenRect.x(), m_multiScreenRect.y(),
                                                            m_multiScreenRect.width(), m_multiScreenRect.height());
-#elif Q_OS_UNIX
-    m_pmScreen = QApplication::primaryScreen()->grabWindow(0, m_multiScreenRect.x(), m_multiScreenRect.y(),
-                                                           m_multiScreenRect.width(), m_multiScreenRect.height());
-#endif
+#else
+#ifdef Q_OS_LINUX
+//    m_pmScreen = QApplication::primaryScreen()->grabWindow(QApplication::desktop()->winId(), m_multiScreenRect.x(), m_multiScreenRect.y(), m_multiScreenRect.width(), m_multiScreenRect.height());
+    qDebug() << system("gnome-screenshot -f gnome_screenshot.jpg");
+    m_pmScreen = QPixmap("gnome_screenshot.jpg");
+#endif // Q_OS_LINUX
+#endif // Q_OS_WIN
     update();
 }
 
@@ -85,9 +89,7 @@ void ScreenColorPicker::paintEvent(QPaintEvent *)
     }
 
     painter.fillRect(rect(), m_pmScreen);
-
     drawPickedRect(&painter, magnifier, color);
-
     painter.setPen(QColor(128, 0, 0));
     painter.drawRect(rect().adjusted(0, 0, -1, -1)); // 外边红框
 }
