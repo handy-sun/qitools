@@ -20,7 +20,7 @@ private:
     Ui::PropertyGenerator   *ui;
     PropertyManager         *m_manager;
 
-private slots:
+private Q_SLOTS:
     void on_pushBtnGenCode_clicked();
     void on_pushBtnGenProperty_clicked();
 

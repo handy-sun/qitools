@@ -96,7 +96,7 @@ void ScreenColorPicker::paintEvent(QPaintEvent *)
 
 void ScreenColorPicker::mousePressEvent(QMouseEvent *event)
 {
-    emit pickFinished(event->button() == Qt::LeftButton, m_pmScreen.toImage().pixel(m_mousePos));
+    Q_EMIT pickFinished(event->button() == Qt::LeftButton, m_pmScreen.toImage().pixel(m_mousePos));
     close();
 }
 

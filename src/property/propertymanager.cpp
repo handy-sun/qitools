@@ -4,8 +4,8 @@
 
 PropertyManager::PropertyManager()
     : m_argumentType(0)
-    , m_prefix("")
     , m_pointerAlignment(0)
+    , m_prefix("")
 {
     m_propertyType["READ"] = [=](const QString &type, const QString &name, const QString &value, const QString &)->QString
     {

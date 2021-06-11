@@ -15,7 +15,7 @@ public:
     explicit GlslCodeConvert(QWidget *parent = 0);
     ~GlslCodeConvert();
 
-private slots:
+private Q_SLOTS:
     void onTextCodeChanged();
 
 private:

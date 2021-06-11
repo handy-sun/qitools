@@ -55,6 +55,11 @@
         <string>GLSL 工具</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>VSCode扩展快捷下载</string>
+       </property>
+      </item>
      </widget>
     </item>
     <item>
@@ -68,6 +73,7 @@
       <widget class="PropertyGenerator" name="page"/>
       <widget class="ColorConvert" name="page_2"/>
       <widget class="GlslCodeConvert" name="page_3"/>
+      <widget class="DownVscVsixWidget" name="page_4"/>
      </widget>
     </item>
    </layout>
@@ -91,6 +97,12 @@
    <class>GlslCodeConvert</class>
    <extends>QWidget</extends>
    <header>glslcodeconvert.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DownVscVsixWidget</class>
+   <extends>QWidget</extends>
+   <header>downvscvsixwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

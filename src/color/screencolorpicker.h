@@ -23,7 +23,7 @@ private:
     void setMultiScreen(); // 多屏时 获得包含各屏幕位置的最小矩形并刷新 geometry
     void drawPickedRect(QPainter *painter, const QRect &magnifier, const QColor &pickColor) const;
 
-signals:
+Q_SIGNALS:
     void pickFinished(bool isUseful, const QColor &color);
     //void windowShowState(int state);
 };

@@ -29,7 +29,6 @@ QiToolsWindow::~QiToolsWindow()
 
 void QiToolsWindow::keyPressEvent(QKeyEvent *event)
 {
-    //qtout << event->key();
     if (event->key() == Qt::Key_Escape)
     {
         close();
