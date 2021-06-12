@@ -23,7 +23,7 @@ contains(TARGET_ARCH, x86_64) {
 }
 
 CONFIG(debug, debug | release) {
-    TARGET_NAME = $${TARGET_NAME}_D
+    TARGET_NAME = $${TARGET_NAME}_dbg
 }
 
 TARGET = $$TARGET_NAME
