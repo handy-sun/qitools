@@ -1,30 +1,30 @@
-﻿QMainWindow{
+﻿QMainWindow {
     background-color: qconicalgradient(cx:0.5, cy:0.5, angle:0, stop:0 rgba(30,144,255 255), stop:0.19 rgba(135,206,250, 255), stop:0.38 rgba(135,206,235, 255), stop:0.57 rgba(0,191,255, 255),stop:0.71 rgba(173,216,230, 255),stop:0.82 rgba(100,149,237, 255) stop:1 rgba(30,144,255,255));
 }
-QStackedWidget{
+QStackedWidget {
     border: 2px groove gray;
     border-radius: 10px;
     background-color: qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(65,105,225,100),stop:1 rgba(100,149,237,110));
 }
-QListWidget{
+QListWidget {
     outline: 0px;
     border: 2px groove gray;
     border-radius: 10px;
     background: transparent;
 }
-QListWidget::item{
+QListWidget::item {
     color: rgb(15, 10, 20);
     height: 30px;
     background: transparent;
 }
-QListWidget::item::selected{
+QListWidget::item::selected {
     color: rgb(0, 0, 255);
     background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(255, 235, 235, 206), stop:0.35 rgba(255, 188, 188, 80), stop:0.4 rgba(255, 162, 162, 80), stop:0.425 rgba(255, 132, 132, 156), stop:0.44 rgba(252, 128, 128, 80), stop:1 rgba(255, 255, 255, 0));
 }
-/*QTableWidget{
+/*QTableWidget {
     font: normal 20px "Consolas";
 }*/
-QHeaderView#hHeader::section{
+QHeaderView#hHeader::section {
     color: rgb(15, 128, 0);
     font: 16px "Microsoft YaHei";
     padding-top: 3px;
@@ -33,4 +33,10 @@ QHeaderView#hHeader::section{
     border: 1px solid #B2B6B9;
     border-width: 0px 1px 1px 0px;
     background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #F2F3F4,stop:1 #E7E9EB);
+}
+#widgetTool {
+    border: 1px solid white;
+}
+QToolBox {
+    background: transparent;
 }

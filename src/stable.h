@@ -4,10 +4,11 @@
 #include <QHash>
 #include <QDebug>
 #include <QMessageBox>
-#include <QStringList>
-#include <QWidget>
-#include <QMainWindow>
-#include <QApplication>
+#include <QtMath>
+#include <QtGui>
+#include <QtCore>
+#include <QtWidgets>
+#include <QtNetwork>
 #include <functional>
 #include <initializer_list>
 

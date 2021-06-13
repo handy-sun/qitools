@@ -24,16 +24,18 @@ contains(TARGET_ARCH, x86_64) {
 
 CONFIG(debug, debug | release) {
     TARGET_NAME = $${TARGET_NAME}_dbg
+} else {
+    DEFINES += QT_MESSAGELOGCONTEXT
 }
 
 TARGET = $$TARGET_NAME
 
 CONFIG += c++11 \
     no_keywords \
-#    console
 
-DEFINES += QT_DEPRECATED_WARNINGS \
-#        qtout=qDebug()
+
+DEFINES += QT_DEPRECATED_WARNINGS
+
 
 msvc: lessThan(QMAKE_MSC_VER, 1900): DEFINES += Q_COMPILER_INITIALIZER_LISTS
 
