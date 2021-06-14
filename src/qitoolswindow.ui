@@ -57,7 +57,12 @@
       </item>
       <item>
        <property name="text">
-        <string>VSCode扩展快捷下载</string>
+        <string>快捷下载</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>图片转换</string>
        </property>
       </item>
      </widget>
@@ -74,6 +79,7 @@
       <widget class="ColorConvert" name="page_2"/>
       <widget class="GlslCodeConvert" name="page_3"/>
       <widget class="DownVscVsixWidget" name="page_4"/>
+      <widget class="ImageToolWidget" name="page_5"/>
      </widget>
     </item>
    </layout>
@@ -103,6 +109,12 @@
    <class>DownVscVsixWidget</class>
    <extends>QWidget</extends>
    <header>downvscvsixwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ImageToolWidget</class>
+   <extends>QWidget</extends>
+   <header>imagetoolwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

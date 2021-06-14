@@ -60,4 +60,4 @@ include($$PWD/property/property.pri)
 include($$PWD/color/color.pri)
 include($$PWD/glsltool/glsltool.pri)
 include($$PWD/vsc_vsix/vsc_vsix.pri)
-
+include($$PWD/imageconvert/imageconvert.pri)

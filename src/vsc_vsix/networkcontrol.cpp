@@ -1,14 +1,19 @@
 ﻿#include "networkcontrol.h"
 #include <QNetworkReply>
 #include <QFileInfo>
+#include <QEventLoop>
+//#include <QSslSocket>
+#include <QTimer>
 #include <QDir>
 
 NetworkControl::NetworkControl(QObject *parent)
     : QObject(parent)
-    , httpRequestAborted(false)
-    , reply(Q_NULLPTR)
+    , m_isHttpRequestAborted(false)
+    , m_netAcManager(new QNetworkAccessManager(this))
+    , m_netReply(Q_NULLPTR)
     , m_writtenFile(Q_NULLPTR)
 {
+//    qDebug() << QSslSocket::sslLibraryBuildVersionString();
 }
 
 NetworkControl::~NetworkControl()
@@ -28,28 +33,73 @@ bool NetworkControl::canWriteInFile(const QString &fileName)
     return true;
 }
 
+void NetworkControl::slot_getFileInfo(const QUrl &inputUrl, const QByteArray &headerNameBa)
+{
+    if (!inputUrl.isValid())
+        return;
+
+    const uint tryTimes = 3;
+    uint i;
+
+    for (i = 0; i < tryTimes; ++i)
+    {
+        QNetworkAccessManager manager;
+        QNetworkReply *headReply = manager.head(QNetworkRequest(inputUrl));
+        if (!headReply)
+            continue;
+
+        QEventLoop loop;
+        QTimer timer;
+
+        connect(headReply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+
+        timer.start(2000);
+        loop.exec();
+
+        if (headReply->error() != QNetworkReply::NoError)
+        {
+            qDebug() << headReply->errorString();
+            continue;
+        }
+        if (!timer.isActive())
+        {
+            qDebug("Request Timeout"); // 请求超时,未获取到文件信息;
+            continue;
+        }
+        timer.stop();
+
+        if (headReply->hasRawHeader(headerNameBa))
+            Q_EMIT sig_requesetFileInfo(headReply->rawHeader(headerNameBa));
+
+        headReply->deleteLater();
+        headReply = Q_NULLPTR;
+        return;
+    }
+}
+
 void NetworkControl::slot_startRequese(const QString &filePath, const QUrl &requestedUrl)
 {
     if (!canWriteInFile(filePath))
          return;
 
     url = requestedUrl;
-    httpRequestAborted = false;
-    reply = qnam.get(QNetworkRequest(url));
+    m_isHttpRequestAborted = false;
+    m_netReply = m_netAcManager->get(QNetworkRequest(url));
 
-    connect(reply, &QNetworkReply::finished, this, &NetworkControl::httpFinished);
-    connect(reply, &QIODevice::readyRead, this, &NetworkControl::httpReadyRead);
-    connect(reply, &QNetworkReply::downloadProgress, this, [=](qint64 recv, qint64 total)
+    connect(m_netReply, &QNetworkReply::finished, this, &NetworkControl::httpFinished);
+    connect(m_netReply, &QIODevice::readyRead, this, &NetworkControl::httpReadyRead);
+    connect(m_netReply, &QNetworkReply::downloadProgress, this, [=](qint64 recv, qint64 total)
     { Q_EMIT sig_downloadProgress(recv, total); });
 
-    Q_EMIT sig_eventMessge("Begin download:" + m_writtenFile->fileName());
+    Q_EMIT sig_eventMessge(QStringLiteral("Begin download: \"%1\"").arg(m_writtenFile->fileName()));
 }
 
 void NetworkControl::slot_cancelDownload()
 {
-    if (reply)
-        reply->abort();
-    httpRequestAborted = true;
+    if (m_netReply)
+        m_netReply->abort();
+    m_isHttpRequestAborted = true;
 }
 
 void NetworkControl::httpFinished()
@@ -57,7 +107,7 @@ void NetworkControl::httpFinished()
     QFileInfo fi;
     if (m_writtenFile)
     {
-        if (!reply->error())
+        if (!m_netReply->error())
             Q_EMIT sig_eventMessge("Download finished.\n", true);
         fi.setFile(m_writtenFile->fileName());
         m_writtenFile->close();
@@ -65,27 +115,27 @@ void NetworkControl::httpFinished()
         m_writtenFile = Q_NULLPTR;
     }
 
-    if (httpRequestAborted)
+    if (m_isHttpRequestAborted)
     {
         Q_EMIT sig_eventMessge("Aborted!", true);
-        reply->deleteLater();
-        reply = Q_NULLPTR;
+        m_netReply->deleteLater();
+        m_netReply = Q_NULLPTR;
         return;
     }
 
-    if (reply->error())
+    if (m_netReply->error())
     {
         QFile::remove(fi.absoluteFilePath());
-        Q_EMIT sig_eventMessge("Download failed: " + reply->errorString(), true);
-        reply->deleteLater();
-        reply = Q_NULLPTR;
+        Q_EMIT sig_eventMessge("Download failed: " + m_netReply->errorString() + "\n", true);
+        m_netReply->deleteLater();
+        m_netReply = Q_NULLPTR;
         return;
     }
 
-    const QVariant redirectionTarget = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+    const QVariant redirectionTarget = m_netReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
 
-    reply->deleteLater();
-    reply = Q_NULLPTR;
+    m_netReply->deleteLater();
+    m_netReply = Q_NULLPTR;
 
     if (!redirectionTarget.isNull())
     {
@@ -99,5 +149,5 @@ void NetworkControl::httpFinished()
 void NetworkControl::httpReadyRead()
 {
     if (m_writtenFile)
-        m_writtenFile->write(reply->readAll());
+        m_writtenFile->write(m_netReply->readAll());
 }

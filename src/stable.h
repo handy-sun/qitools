@@ -5,10 +5,12 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QtMath>
+
 #include <QtGui>
 #include <QtCore>
 #include <QtWidgets>
 #include <QtNetwork>
+
 #include <functional>
 #include <initializer_list>
 

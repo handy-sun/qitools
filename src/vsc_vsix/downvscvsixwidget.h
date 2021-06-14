@@ -24,17 +24,20 @@ private:
     QDir                   m_dowoloadDir;
     QString                m_defaultFileName;
     quint64                m_fileSize;
+    int                    m_measureLevel;
+    static QStringList     s_measures;
 
-    QString getSuitableDecimalMeasure(quint64 bytes, double *outSize);
+    static int getSuitableDecimalMeasure(quint64 bytes, double *outSize);
 
 Q_SIGNALS:
-//    void sig_startRequeset(const QUrl &requestedUrl);
+    void sig_getFileInfo(const QUrl &inputUrl, const QByteArray &headerNameBa);
     void sig_startRequeset(const QString &filePath, const QUrl &requestedUrl);
     void sig_cancelDownload();
 
 public Q_SLOTS:
     void slot_downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     void slot_eventMessge(const QString &msg, bool isEnable = false);
+    void slot_requesetFileInfo(const QByteArray &ba);
 
 private Q_SLOTS:
     void fillInFileName();
