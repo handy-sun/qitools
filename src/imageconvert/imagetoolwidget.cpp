@@ -5,11 +5,11 @@
 ImageToolWidget::ImageToolWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ImageToolWidget)
-    , m_fileInfo(QFileInfo())
     , m_image(QImage())
+    , m_fileInfo(QFileInfo())
 {
     ui->setupUi(this);
-//    qDebug() << QImageReader::supportedImageFormats().join();
+//    qDebug() << QImageReader::supportedImageFormats().join(" *.");
     for (const auto &baFmt : QImageWriter::supportedImageFormats())
         ui->comboBox->addItem(baFmt);
 }
