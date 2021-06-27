@@ -12,7 +12,7 @@ class QiToolsWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit QiToolsWindow(QWidget *parent = 0);
+    explicit QiToolsWindow(QWidget *parent = Q_NULLPTR);
     ~QiToolsWindow();
 
 protected:

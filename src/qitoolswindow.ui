@@ -57,12 +57,17 @@
       </item>
       <item>
        <property name="text">
-        <string>快捷下载</string>
+        <string>图片转换</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>图片转换</string>
+        <string>批量编码格式转换</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>快捷下载</string>
        </property>
       </item>
      </widget>
@@ -75,11 +80,12 @@
         <height>506</height>
        </size>
       </property>
-      <widget class="PropertyGenerator" name="page"/>
-      <widget class="ColorConvert" name="page_2"/>
-      <widget class="GlslCodeConvert" name="page_3"/>
-      <widget class="DownVscVsixWidget" name="page_4"/>
-      <widget class="ImageToolWidget" name="page_5"/>
+      <widget class="PropertyGenerator" name="pageProperty"/>
+      <widget class="ColorConvert" name="pageColor"/>
+      <widget class="GlslCodeConvert" name="pageGlsl"/>
+      <widget class="ImageToolWidget" name="pageImg"/>
+      <widget class="CodecConvertWidget" name="pageCodec"/>
+      <widget class="DownVscVsixWidget" name="pageVsc"/>
      </widget>
     </item>
    </layout>
@@ -115,6 +121,12 @@
    <class>ImageToolWidget</class>
    <extends>QWidget</extends>
    <header>imagetoolwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CodecConvertWidget</class>
+   <extends>QWidget</extends>
+   <header>codecconvertwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

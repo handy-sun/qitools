@@ -28,7 +28,8 @@ void ImageToolWidget::on_pushButtonOpenImg_clicked()
     {
         if (m_image.load(srcFileName))
         {
-            ui->labelPm->setPixmap(QPixmap::fromImage(m_image));
+            QPixmap _pm = QPixmap::fromImage(m_image);
+            ui->labelPm->setPixmap(_pm.scaled(ui->labelPm->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
             ui->spinBoxWidth->setValue(m_image.width());
             ui->spinBoxHeight->setValue(m_image.height());
         }

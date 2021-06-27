@@ -16,8 +16,8 @@
   <widget class="QLabel" name="labelSourcePath">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>30</y>
+     <x>180</x>
+     <y>10</y>
      <width>531</width>
      <height>31</height>
     </rect>
@@ -31,8 +31,8 @@
   <widget class="QComboBox" name="comboBox">
    <property name="geometry">
     <rect>
-     <x>600</x>
-     <y>80</y>
+     <x>40</x>
+     <y>454</y>
      <width>121</width>
      <height>31</height>
     </rect>
@@ -46,8 +46,8 @@
   <widget class="QPushButton" name="pushButtonOpenImg">
    <property name="geometry">
     <rect>
-     <x>600</x>
-     <y>30</y>
+     <x>39</x>
+     <y>10</y>
      <width>121</width>
      <height>31</height>
     </rect>
@@ -64,8 +64,8 @@
   <widget class="QPushButton" name="pushButtonSaveDestDir">
    <property name="geometry">
     <rect>
-     <x>600</x>
-     <y>330</y>
+     <x>210</x>
+     <y>500</y>
      <width>121</width>
      <height>31</height>
     </rect>
@@ -83,17 +83,20 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>80</y>
-     <width>541</width>
+     <y>60</y>
+     <width>551</width>
      <height>381</height>
     </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
    </property>
   </widget>
   <widget class="QSpinBox" name="spinBoxWidth">
    <property name="geometry">
     <rect>
-     <x>637</x>
-     <y>240</y>
+     <x>77</x>
+     <y>504</y>
      <width>82</width>
      <height>26</height>
     </rect>
@@ -113,8 +116,8 @@
   <widget class="QSpinBox" name="spinBoxHeight">
    <property name="geometry">
     <rect>
-     <x>637</x>
-     <y>280</y>
+     <x>77</x>
+     <y>544</y>
      <width>82</width>
      <height>26</height>
     </rect>
@@ -134,8 +137,8 @@
   <widget class="QLabel" name="label2">
    <property name="geometry">
     <rect>
-     <x>600</x>
-     <y>237</y>
+     <x>40</x>
+     <y>501</y>
      <width>21</width>
      <height>31</height>
     </rect>
@@ -152,8 +155,8 @@
   <widget class="QLabel" name="label2_2">
    <property name="geometry">
     <rect>
-     <x>600</x>
-     <y>276</y>
+     <x>40</x>
+     <y>540</y>
      <width>21</width>
      <height>31</height>
     </rect>
