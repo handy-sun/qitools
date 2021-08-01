@@ -24,8 +24,6 @@ contains(TARGET_ARCH, x86_64) {
 
 CONFIG(debug, debug | release) {
     TARGET_NAME = $${TARGET_NAME}_dbg
-} else {
-    DEFINES += QT_MESSAGELOGCONTEXT
 }
 
 TARGET = $$TARGET_NAME
@@ -34,6 +32,7 @@ CONFIG += c++11 \
     no_keywords \
 
 
+DEFINES += QT_MESSAGELOGCONTEXT
 DEFINES += QT_DEPRECATED_WARNINGS
 
 

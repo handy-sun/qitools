@@ -188,12 +188,11 @@
        <widget class="QTextBrowser" name="textBrowserMessage">
         <property name="font">
          <font>
-          <family>楷体</family>
-          <pointsize>13</pointsize>
+          <pointsize>11</pointsize>
          </font>
         </property>
         <property name="placeholderText">
-         <string>显示历次下载的信息</string>
+         <string>显示历次下载的信息textbrowser</string>
         </property>
        </widget>
       </item>
@@ -290,8 +289,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>732</width>
-           <height>119</height>
+           <width>718</width>
+           <height>116</height>
           </rect>
          </property>
          <attribute name="label">
@@ -359,8 +358,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>732</width>
+           <height>115</height>
           </rect>
          </property>
          <attribute name="label">

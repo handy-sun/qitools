@@ -14,4 +14,8 @@
 #include <functional>
 #include <initializer_list>
 
+#ifndef qtout
+#   define qtout qDebug()
+#endif
+
 #endif // STABLE_H

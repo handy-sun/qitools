@@ -162,7 +162,9 @@ void DownVscVsixWidget::on_pushButtonDownload_clicked()
         return;
     }
 
-    fillInFileName();
+    if (m_defaultFileName.isEmpty())
+        fillInFileName();
+
     QString filePath = ui->lineEditFilePath->text();
     if (QFile::exists(filePath))
     {

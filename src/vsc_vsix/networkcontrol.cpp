@@ -13,7 +13,7 @@ NetworkControl::NetworkControl(QObject *parent)
     , m_netReply(Q_NULLPTR)
     , m_writtenFile(Q_NULLPTR)
 {
-//    qDebug() << QSslSocket::sslLibraryBuildVersionString();
+    qDebug() << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString();
 }
 
 NetworkControl::~NetworkControl()
@@ -38,8 +38,8 @@ void NetworkControl::slot_getFileInfo(const QUrl &inputUrl, const QByteArray &he
     if (!inputUrl.isValid())
         return;
 
-    const uint tryTimes = 3;
-    uint i;
+    const int tryTimes = 1;
+    int i;
 
     for (i = 0; i < tryTimes; ++i)
     {
@@ -59,12 +59,12 @@ void NetworkControl::slot_getFileInfo(const QUrl &inputUrl, const QByteArray &he
 
         if (headReply->error() != QNetworkReply::NoError)
         {
-            qDebug() << headReply->errorString();
+            Q_EMIT sig_eventMessge(headReply->errorString(), true);
             continue;
         }
         if (!timer.isActive())
         {
-            qDebug("Request Timeout"); // 请求超时,未获取到文件信息;
+            Q_EMIT sig_eventMessge("Request Timeout", true); // 请求超时,未获取到文件信息;
             continue;
         }
         timer.stop();

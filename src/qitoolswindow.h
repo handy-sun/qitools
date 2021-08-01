@@ -13,10 +13,11 @@ class QiToolsWindow : public QMainWindow
 
 public:
     explicit QiToolsWindow(QWidget *parent = Q_NULLPTR);
-    ~QiToolsWindow();
+    ~QiToolsWindow() Q_DECL_OVERRIDE;
 
 protected:
-    void keyPressEvent(QKeyEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
+    void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
 
 private:
     Ui::QiToolsWindow *ui;

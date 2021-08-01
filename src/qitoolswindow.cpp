@@ -1,9 +1,9 @@
-﻿#include "qitoolswindow.h"
-#include "ui_qitoolswindow.h"
-#include <QFile>
+﻿#include <QFile>
 #include <QKeyEvent>
 #include <QDebug>
 #include <QListWidget>
+#include "qitoolswindow.h"
+#include "ui_qitoolswindow.h"
 
 
 QiToolsWindow::QiToolsWindow(QWidget *parent)
@@ -11,15 +11,18 @@ QiToolsWindow::QiToolsWindow(QWidget *parent)
     , ui(new Ui::QiToolsWindow)
 {
     ui->setupUi(this);
-
-    setStyleSheet(readStyleSheetFile(":/QiTools.css"));
-
+//    setStyleSheet(readStyleSheetFile(":/QiTools.css"));
     if (ui->listWidget->count() == ui->stackedWidget->count())
     {
         connect(ui->listWidget, &QListWidget::currentRowChanged, ui->stackedWidget, &QStackedWidget::setCurrentIndex);
     }
 //    ui->stackedWidget->setFocusPolicy(Qt::StrongFocus);
-    ui->listWidget->setCurrentRow(0);
+    QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
+    int index = ini.value("Preference/index").toInt();
+    if (index >= 0 && index < ui->stackedWidget->count())
+        ui->listWidget->setCurrentRow(index);
+    else
+        ui->listWidget->setCurrentRow(0);
 }
 
 QiToolsWindow::~QiToolsWindow()
@@ -37,6 +40,13 @@ void QiToolsWindow::keyPressEvent(QKeyEvent *event)
 //    {
 //        showMinimized();
 //    }
+}
+
+void QiToolsWindow::closeEvent(QCloseEvent *event)
+{
+    event->accept();
+    QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
+    ini.setValue("Preference/index", QVariant(ui->stackedWidget->currentIndex()));
 }
 
 QString readStyleSheetFile(const QString &rcFile)
