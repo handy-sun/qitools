@@ -1,29 +1,45 @@
 ﻿#include <QAudioOutput>
+#include <QCoreApplication>
 #include "audiodataplay.h"
 
 AudioDataPlay::AudioDataPlay(AudioDataPlay::PlayMode mode, QObject *parent)
     : QObject(parent)
     , m_playMode(mode)
+      , m_state(QAudio::StoppedState)
     , m_format(QAudioFormat())
-    , m_audioOutputDevice(QAudioDeviceInfo::defaultOutputDevice())
+    , m_outputDeviceInfo(QAudioDeviceInfo::defaultOutputDevice())
     , m_audioOutput(nullptr)
     , m_filledIODevice(nullptr)
     , m_playPosition(0)
     , m_linearVolume(1.0)
 {
-    m_format.setSampleRate(44100);
-    m_format.setSampleSize(16);
-    m_format.setChannelCount(1);
-    m_format.setCodec("audio/pcm");
-    m_format.setByteOrder(QAudioFormat::LittleEndian);
-    m_format.setSampleType(QAudioFormat::SignedInt);
-
+    QAudioFormat _format;
+    _format.setSampleRate(44100);
+    _format.setSampleSize(16);
+    _format.setChannelCount(1);
+    _format.setCodec("audio/pcm");
+    _format.setByteOrder(QAudioFormat::LittleEndian);
+    _format.setSampleType(QAudioFormat::SignedInt);
+    setAudioFormat(_format);
     connect(&m_timerPull, &QTimer::timeout, this, &AudioDataPlay::onTimerPull);
+}
+
+void AudioDataPlay::setAudioFormat(const QAudioFormat &format)
+{
+    if (m_outputDeviceInfo.isFormatSupported(format))
+    {
+        m_format = format;
+    }
+    else
+    {
+        qWarning() << "Default format not supported - trying to use nearest";
+        m_format = m_outputDeviceInfo.nearestFormat(format);
+    }
 }
 
 void AudioDataPlay::appendAudioData(const QByteArray &ba)
 {
-    if (m_playMode == PullMode && m_filledIODevice)
+    if (m_playMode == PlayMode::PullMode)
         m_baBuf.append(ba);
 }
 
@@ -47,9 +63,10 @@ void AudioDataPlay::startPlay()
     }
     else
     {
-        m_audioOutput = new QAudioOutput(m_audioOutputDevice, m_format, this);
-        //QObject::connect(m_audioOutput, &QAudioOutput::stateChanged, this, &AudioDataPlay::onStateChanged);
-        m_audioOutput->setNotifyInterval(100);
+        m_audioOutput = new QAudioOutput(m_outputDeviceInfo, m_format, this);
+        connect(m_audioOutput, &QAudioOutput::stateChanged, this, &AudioDataPlay::onStateChanged);
+//        connect(m_audioOutput, &QAudioOutput::notify, this, [=](){ qDebug() << m_bufferDevice.pos() << m_baBuf.size(); });
+        m_audioOutput->setNotifyInterval(200);
         startAudio();
     }
 }
@@ -60,13 +77,11 @@ void AudioDataPlay::stopPlay()
     {
         m_timerPull.stop();
         m_audioOutput->stop();
-        m_bufferDevice.seek(0);
         m_bufferDevice.close();
         QCoreApplication::instance()->processEvents();
         m_playPosition = 0;
-        if (m_playMode == PlayMode::PullMode)
-            m_baBuf.clear();
     }
+    resetAudio();
 }
 
 void AudioDataPlay::startAudio()
@@ -82,7 +97,18 @@ void AudioDataPlay::startAudio()
     else if (m_playMode == PlayMode::PullMode)
     {
         m_filledIODevice = m_audioOutput->start();
-        m_timerPull.start(40);
+        if (m_filledIODevice)
+        {
+            m_timerPull.start(40);
+        }
+        else
+        {
+            qDebug() << "QIODevice(m_filledIODevice) = QObject(0x0)" << m_audioOutput->state();
+            m_bufferDevice.close();
+            m_bufferDevice.open(QIODevice::ReadWrite);
+            m_audioOutput->reset();
+            m_audioOutput->start(&m_bufferDevice);
+        }
     }
     m_audioOutput->setVolume(m_linearVolume);
 }
@@ -95,13 +121,12 @@ void AudioDataPlay::resetAudio()
         delete m_audioOutput;
         m_audioOutput = nullptr;
     }
+    m_baBuf.clear();
 }
 
 void AudioDataPlay::slot_setVolume(qreal vol)
 {
-    qreal linearVolume = QAudio::convertVolume(vol,
-                                               QAudio::LogarithmicVolumeScale,
-                                               QAudio::LinearVolumeScale);
+    qreal linearVolume = QAudio::convertVolume(vol, QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
     m_linearVolume = linearVolume;
     if (m_audioOutput)
         m_audioOutput->setVolume(m_linearVolume);
@@ -129,10 +154,11 @@ void AudioDataPlay::onTimerPull()
 
 void AudioDataPlay::onStateChanged(QAudio::State state)
 {
-    if (QAudio::IdleState == state && m_bufferDevice.pos() >= m_baBuf.size() - 1)
+    if (QAudio::IdleState == state)
     {
-        stopPlay();
-        qtout << "onStateChanged: stop" << m_bufferDevice.pos() << m_baBuf.size();
+        if (!m_baBuf.isEmpty() && m_bufferDevice.pos() == m_baBuf.size())
+            stopPlay();
+//        qtout << "onStateChanged: stop" << m_bufferDevice.pos() << m_baBuf.size();
     }
     else
     {

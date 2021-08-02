@@ -78,8 +78,10 @@ bool AudioWidget::initialize()
 void AudioWidget::slot_setDuration(qint32 d)
 {
     m_duration = d;
+    m_playTime = 0;
     ui->horizontalSliderProgress->setRange(0, m_duration);
     ui->labelProgress->setText("00:00/" + QTime(0, 0).addSecs(m_duration).toString("mm:ss"));
+    ui->horizontalSliderProgress->setValue(m_playTime);
 }
 
 void AudioWidget::slot_handleData(const QByteArray &ba, int sign)
@@ -108,6 +110,11 @@ void AudioWidget::slot_handleData(const QByteArray &ba, int sign)
         m_audioPlayer->appendAudioData(ba);
         ++m_playTime;
     }
+    else if (sign == 2)
+    {
+        m_audioPlayer->stopPlay();
+        slot_setDuration(m_duration);
+    }
     ui->horizontalSliderProgress->setValue(m_playTime);
 //    QTime timeEla;
     ui->labelProgress->setText(QTime(0, 0).addSecs(m_playTime).toString("mm:ss") + "/"
@@ -116,23 +123,23 @@ void AudioWidget::slot_handleData(const QByteArray &ba, int sign)
 
 void AudioWidget::onTimerPull()
 {
-    QByteArray baBlock = m_readBuffer.read(m_bytesPerSec * m_timer->interval() / 1000);
-    m_audioPlayer->appendAudioData(baBlock);
-    if (m_readBuffer.pos() > m_baContent.size() - m_bytesPerSec / 25)
-    {
-        m_timer->stop();
-        m_audioPlayer->stopPlay();
-        m_readBuffer.seek(0);
-    }
+//    QByteArray baBlock = m_readBuffer.read(m_bytesPerSec * m_timer->interval() / 1000);
+//    m_audioPlayer->appendAudioData(baBlock);
+//    if (m_readBuffer.pos() > m_baContent.size() - m_bytesPerSec / 25)
+//    {
+//        m_timer->stop();
+//        m_audioPlayer->stopPlay();
+//        m_readBuffer.seek(0);
+//    }
 }
 
 void AudioWidget::on_btnPlay_clicked()
 {
-    if (m_audioPlayer->playMode() == AudioDataPlay::PushMode)
-    {
-        m_audioPlayer->startPlay();
-    }
-    else
+//    if (m_audioPlayer->playMode() == AudioDataPlay::PushMode)
+//    {
+//        m_audioPlayer->startPlay();
+//    }
+//    else
     {
 //        QByteArray baBlock = m_readBuffer.read(m_bytesPerSec);
 //        m_timer->start(1000);
@@ -196,9 +203,6 @@ void TestStream::load(const QString &fileName)
         m_baContent.prepend(header);
 
         m_bytesPerSec = rate * channels * 2;
-        m_readBuffer.close();
-        m_readBuffer.setBuffer(&m_baContent);
-        m_readBuffer.open(QIODevice::ReadOnly);
     }
 }
 
@@ -207,6 +211,9 @@ void TestStream::slot_startGet()
     if (m_baContent.isEmpty())
         return;
 
+    m_readBuffer.close();
+    m_readBuffer.setBuffer(&m_baContent);
+    m_readBuffer.open(QIODevice::ReadOnly);
     onTimer();
     m_timer->start(1000);
 }
@@ -217,7 +224,7 @@ void TestStream::slot_stopGet()
 }
 
 void TestStream::onTimer()
-{
+{    
     if (m_readBuffer.pos() == 0)
     {
         QByteArray baBlock = m_readBuffer.read(TotalHeadSize + m_bytesPerSec);
@@ -233,7 +240,7 @@ void TestStream::onTimer()
     }
     else
     {
-        //Q_EMIT sig_data(baBlock, 2);
+        Q_EMIT sig_data(QByteArray(), 2);
         qtout << "end position:" << m_readBuffer.pos();
         m_timer->stop();
         m_readBuffer.seek(0);
