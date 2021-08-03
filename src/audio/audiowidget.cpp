@@ -1,4 +1,5 @@
 ﻿#include <QAudioFormat>
+#include <QAudioDecoder>
 #include <QTimer>
 #include "audiowidget.h"
 #include "ui_audiowidget.h"
@@ -169,40 +170,67 @@ void AudioWidget::on_btnStop_clicked()
 /** ---------- @class TestStream ----------- */
 TestStream::TestStream()
     : m_timer(new QTimer(this))
-      , m_bytesPerSec(0)
+    , m_decoder(new QAudioDecoder(this))
+    , m_bytesPerSec(0)
 {
-    QObject::connect(m_timer, &QTimer::timeout, this, &TestStream::onTimer);
+    connect(m_timer, &QTimer::timeout, this, &TestStream::onTimer);
+    connect(m_decoder, &QAudioDecoder::bufferReady, [=]() {
+        if (m_decoder->bufferAvailable())
+        {
+            QAudioBuffer buffer = m_decoder->read();
+            qDebug() << "Decoder buffer size: " << buffer.byteCount() << m_decoder->position();
+        }
+    });
 }
 
 void TestStream::load(const QString &fileName)
 {
-    if (QFileInfo(fileName).suffix() == "mp3")
+    QFile file(fileName);
+    if (!file.exists() || !file.open(QIODevice::ReadOnly) || file.size() < 10)
+    {
+        qtout << file.errorString() << file.size();
+        return;
+    }
+
+//    m_decoder->setSourceFilename(fileName);
+//    m_decoder->start();
+//    return;
+
+    QByteArray head = file.peek(10);
+    file.close();
+    if (head.startsWith("ID3"))
     {
         quint32 rate, totalCount, channels;
         QTime t(QTime::currentTime());
         qint16 *shBuf = DecodeToBuffer(fileName, &rate, &totalCount, &channels);
         //    qint16 *shBuf = DecodeToBuffer(QStringLiteral("Ring09.mp3"), &rate, &totalCount, &channels);
-        qtout << "load:" << rate << totalCount << channels << "elapsed:" << t.elapsed();
+        qtout << "load ID3:" << rate << totalCount << channels << "elapsed:" << t.elapsed();
         m_baContent.resize(totalCount * channels * 2);
         memcpy(m_baContent.data(), shBuf, m_baContent.size());
         free(shBuf);
-
-        Q_EMIT sig_duration(int(m_baContent.size() / (rate * channels * 2)));
+        m_bytesPerSec = rate * channels * 2;
+        Q_EMIT sig_duration(m_baContent.size() / m_bytesPerSec);
 
         QByteArray header(TotalHeadSize, 0);
-        CombinedHeader ch;
-        DATAHeader dh;
-        memset(&ch, 0, sizeof(CombinedHeader));
-        memset(&dh, 0, sizeof(DATAHeader));
-        ch.wave.sampleRate = rate;
-        ch.wave.numChannels = channels;
-        ch.wave.bitsPerSample = 16;
-        memcpy(header.data(), &ch, sizeof(CombinedHeader));
-        dh.descriptor.size = m_baContent.size() + TotalHeadSize - 8;
-        memcpy(header.data() + sizeof(CombinedHeader), &dh, sizeof(DATAHeader));
+        WavFile::writeBaseHeader(header.data(), rate, sizeof(qint16) * 8, channels, m_baContent.size());
         m_baContent.prepend(header);
 
-        m_bytesPerSec = rate * channels * 2;
+    }
+    else if (head.startsWith("RIFF"))
+    {
+        WavFile wavFile;
+        if (wavFile.open(fileName))
+        {
+            QDataStream out(&wavFile);
+            wavFile.seek(0);
+            m_baContent.resize(wavFile.size());
+            out.readRawData(m_baContent.data(), wavFile.size());
+            wavFile.close();
+            m_bytesPerSec = wavFile.fileFormat().sampleRate() * wavFile.fileFormat().channelCount()
+                * wavFile.fileFormat().sampleSize() / 8;
+            Q_EMIT sig_duration((m_baContent.size() - TotalHeadSize) / m_bytesPerSec);
+            qtout << "load RIFF" << qreal(m_baContent.size() - TotalHeadSize) / m_bytesPerSec;
+        }
     }
 }
 

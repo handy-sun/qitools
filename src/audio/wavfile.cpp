@@ -74,6 +74,36 @@ int WavFile::headerLength() const
     return m_headerLength;
 }
 
+int WavFile::writeBaseHeader(char *dst, quint32 sampleRate, quint16 bitsPerSample, quint16 channels, quint32 dataSize)
+{
+    const int BaseHeaderSize = sizeof(CombinedHeader) + sizeof(DATAHeader);
+    CombinedHeader ch;
+    DATAHeader dh;
+    memset(&ch, 0, sizeof(CombinedHeader));
+    memset(&dh, 0, sizeof(DATAHeader));
+    // RIFF header
+    qstrcpy(ch.riff.descriptor.id, "RIFF");
+    ch.riff.descriptor.size = dataSize + BaseHeaderSize - 8;
+    // WAVE header
+    qstrcpy(ch.riff.type, "WAVE");
+    qstrcpy(ch.wave.descriptor.id, "fmt");
+    ch.wave.descriptor.size = 16; // 格式块长度（一般=16，若=18表示最后有2字节附加信息）
+    ch.wave.audioFormat = 1; // 值＝1表示编码方式为PCMμ律编码，非压缩格式
+    ch.wave.numChannels = channels;
+    ch.wave.sampleRate = sampleRate;
+    ch.wave.byteRate = sampleRate * channels * bitsPerSample / 8;
+    ch.wave.blockAlign = channels * bitsPerSample / 8;
+    ch.wave.bitsPerSample = bitsPerSample;
+    // data header
+    qstrcpy(dh.descriptor.id, "data");
+    dh.descriptor.size = dataSize;
+
+    memcpy(dst, &ch, sizeof(CombinedHeader));
+    memcpy(dst + sizeof(CombinedHeader), &dh, sizeof(DATAHeader));
+
+    return BaseHeaderSize;
+}
+
 bool WavFile::readHeader()
 {
     seek(0);

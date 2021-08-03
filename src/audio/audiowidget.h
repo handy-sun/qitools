@@ -5,6 +5,7 @@
 #include <QByteArray>
 
 class AudioDataPlay;
+class QAudioDecoder;
 
 namespace Ui {
 class AudioWidget;
@@ -16,6 +17,7 @@ class TestStream : public QObject
     QByteArray       m_baContent;
     QBuffer          m_readBuffer;
     QTimer          *m_timer;
+    QAudioDecoder   *m_decoder;
     int              m_bytesPerSec;
 public:
     explicit TestStream();

@@ -99,6 +99,8 @@ public:
     const QAudioFormat &fileFormat() const;
     int headerLength() const;
 
+    static int writeBaseHeader(char *dst, quint32 sampleRate, quint16 bitsPerSample, quint16 channels, quint32 dataSize);
+
 private:
     bool readHeader();
 
