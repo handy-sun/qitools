@@ -15,3 +15,4 @@ RESOURCES += \
 
 RC_ICONS = $$PWD/resource/toolsimage.ico
 
+VERSION = 0.0.1

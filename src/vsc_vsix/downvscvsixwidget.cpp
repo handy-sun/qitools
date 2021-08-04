@@ -57,15 +57,25 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
 DownVscVsixWidget::~DownVscVsixWidget()
 {
     delete ui;
-//    if (m_thread->isRunning())
-//    {
-//        m_thread->quit();
-//        qDebug() << "thread end:" <<m_thread->wait();
-//    }
-    //    delete m_netDownloadCtrl;
 }
 
-int DownVscVsixWidget::getSuitableDecimalMeasure(quint64 bytes, double *outSize)
+QString DownVscVsixWidget::getSuitableDecMeasure(quint64 bytes, double *outSize)
+{
+    long double sizeAsDouble = bytes;
+
+    int level = 0;
+    for (; sizeAsDouble >= 1024.0 && level < s_measures.size(); ++level)
+    {
+        sizeAsDouble /= 1024.0;
+    }
+    if (level >= s_measures.size())
+        --level;
+
+    *outSize = sizeAsDouble;
+    return s_measures.at(level);
+}
+
+int DownVscVsixWidget::getSuitableDecLevel(quint64 bytes, double *outSize)
 {
     long double sizeAsDouble = bytes;
 
@@ -91,8 +101,8 @@ void DownVscVsixWidget::slot_downloadProgress(qint64 bytesReceived, qint64 bytes
     int recvLevel;
     int totalLevel;
 
-    totalLevel = getSuitableDecimalMeasure(bytesTotal, &suitableTotalSize);
-    recvLevel = getSuitableDecimalMeasure(bytesReceived, &suitableRecvSize);
+    totalLevel = getSuitableDecLevel(bytesTotal, &suitableTotalSize);
+    recvLevel = getSuitableDecLevel(bytesReceived, &suitableRecvSize);
 
     ui->labelRecvTotal->setText(QString("(%1 %2 / %3 %4)")
                                 .arg(suitableRecvSize, 0, 'f', 2).arg(s_measures.at(recvLevel))
@@ -119,7 +129,7 @@ void DownVscVsixWidget::slot_requesetFileInfo(const QByteArray &ba)
 
     m_fileSize = ba.toULongLong();
     double newSize;
-    m_measureLevel = getSuitableDecimalMeasure(m_fileSize, &newSize);
+    m_measureLevel = getSuitableDecLevel(m_fileSize, &newSize);
     ui->textBrowserMessage->append(QStringLiteral("已获取文件大小: %1 %2").arg(newSize, 0, 'f', 2).arg(s_measures.at(m_measureLevel)));
 }
 

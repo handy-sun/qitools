@@ -11,13 +11,13 @@ namespace Ui {
 class AudioWidget;
 }
 
+// 模拟音频流发送端
 class TestStream : public QObject
 {
     Q_OBJECT
     QByteArray       m_baContent;
     QBuffer          m_readBuffer;
     QTimer          *m_timer;
-    QAudioDecoder   *m_decoder;
     int              m_bytesPerSec;
 public:
     explicit TestStream();

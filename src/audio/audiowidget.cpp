@@ -6,6 +6,7 @@
 #include "audiodataplay.h"
 #include "wavfile.h"
 #include "exmp3.h"
+#include "downvscvsixwidget.h"
 #include "stable.h"
 
 static
@@ -152,8 +153,9 @@ void AudioWidget::on_btnPlay_clicked()
 
 void AudioWidget::on_btnOpenFile_clicked()
 {
-    const QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("打开文件"), ""
-                                                          ,"Sound Files(*.mp3 *.wav);;");
+    const QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("打开文件"), "D:\\CloudMusic"
+                                                          ,"All(*.*);;MPEG Player ID3(*.mp3 *.wma);;"
+                                                          "compressed(*.ape *.flac);;windows pcm(*.wav)");
     if (fileName.isEmpty())
         return;
 
@@ -170,17 +172,9 @@ void AudioWidget::on_btnStop_clicked()
 /** ---------- @class TestStream ----------- */
 TestStream::TestStream()
     : m_timer(new QTimer(this))
-    , m_decoder(new QAudioDecoder(this))
     , m_bytesPerSec(0)
 {
     connect(m_timer, &QTimer::timeout, this, &TestStream::onTimer);
-    connect(m_decoder, &QAudioDecoder::bufferReady, [=]() {
-        if (m_decoder->bufferAvailable())
-        {
-            QAudioBuffer buffer = m_decoder->read();
-            qDebug() << "Decoder buffer size: " << buffer.byteCount() << m_decoder->position();
-        }
-    });
 }
 
 void TestStream::load(const QString &fileName)
@@ -191,13 +185,59 @@ void TestStream::load(const QString &fileName)
         qtout << file.errorString() << file.size();
         return;
     }
-
-//    m_decoder->setSourceFilename(fileName);
-//    m_decoder->start();
-//    return;
-
     QByteArray head = file.peek(10);
     file.close();
+    m_timer->stop();
+    m_baContent.clear();
+
+    QEventLoop loop;
+    QSharedPointer<QAudioDecoder> decoder(new QAudioDecoder);
+    connect(decoder.data(), &QAudioDecoder::bufferReady, [this, decoder]()
+    {
+        if (decoder->bufferAvailable())
+        {
+            QAudioBuffer buffer = decoder->read();
+            m_baContent.append(buffer.constData<char>(), buffer.byteCount());
+        }
+    });
+    connect(decoder.data(), &QAudioDecoder::finished, [this, decoder]()
+    {
+        QAudioFormat fmt = decoder->audioFormat();
+        QByteArray header(TotalHeadSize, 0);
+        WavFile::writeBaseHeader(header.data(), fmt.sampleRate(), fmt.sampleSize(), fmt.channelCount(), m_baContent.size());
+        m_bytesPerSec = fmt.sampleRate() * fmt.channelCount() * 2;
+        qtout << "format:" <<  fmt.sampleRate() << fmt.sampleSize() << fmt.channelCount();
+        m_baContent.prepend(header);
+    });
+    connect(decoder.data(), &QAudioDecoder::finished, &loop, &QEventLoop::quit);
+    connect(decoder.data(), QOverload<QAudioDecoder::Error>::of(&QAudioDecoder::error), [decoder](QAudioDecoder::Error error)
+    { qtout << error << decoder->errorString();});
+    connect(decoder.data(), QOverload<QAudioDecoder::Error>::of(&QAudioDecoder::error), &loop, &QEventLoop::quit);
+
+    decoder->setSourceFilename(fileName);
+    qInfo(">>> decoder start: <%s>", QFileInfo(fileName).fileName().toStdString().c_str());
+    QTimer::singleShot(5000, &loop, &QEventLoop::quit); // 超时退出事件循环
+    QTime tt(QTime::currentTime());
+    decoder->start();
+    loop.exec();
+
+    double tmp;
+    int el = tt.elapsed();
+    QTime musicLen = QTime(0, 0, 0).addMSecs(decoder->duration());
+    QString meas = DownVscVsixWidget::getSuitableDecMeasure(m_baContent.size(), &tmp);
+    qInfo(">>> decoder finished, source_size: %.3f%s, duration: %s elapsed: %dms",
+          tmp, meas.toStdString().c_str(), musicLen.toString("mm:ss.zzz").toStdString().c_str(), el);
+
+    if (decoder->error() == QAudioDecoder::NoError && m_baContent.size() > TotalHeadSize)
+    {
+        Q_EMIT sig_duration(decoder->duration() / 1000); // 解析成功
+        return;
+    }
+    else
+    {
+        qtout << "error message" << decoder->errorString() << m_baContent.size();
+    }
+
     if (head.startsWith("ID3"))
     {
         quint32 rate, totalCount, channels;

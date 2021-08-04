@@ -17,6 +17,8 @@ public:
     explicit DownVscVsixWidget(QWidget *parent = Q_NULLPTR);
     ~DownVscVsixWidget();
 
+    static QString getSuitableDecMeasure(quint64 bytes, double *outSize);
+
 private:
     Ui::DownVscVsixWidget *ui;
 
@@ -27,7 +29,7 @@ private:
     int                    m_measureLevel;
     static QStringList     s_measures;
 
-    static int getSuitableDecimalMeasure(quint64 bytes, double *outSize);
+    static int getSuitableDecLevel(quint64 bytes, double *outSize);
 
 Q_SIGNALS:
     void sig_getFileInfo(const QUrl &inputUrl, const QByteArray &headerNameBa);
