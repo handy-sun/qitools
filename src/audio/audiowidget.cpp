@@ -153,7 +153,7 @@ void AudioWidget::on_btnPlay_clicked()
 
 void AudioWidget::on_btnOpenFile_clicked()
 {
-    const QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("打开文件"), "D:\\CloudMusic"
+    const QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("打开文件"), ""
                                                           ,"All(*.*);;MPEG Player ID3(*.mp3 *.wma);;"
                                                           "compressed(*.ape *.flac);;windows pcm(*.wav)");
     if (fileName.isEmpty())
@@ -189,7 +189,7 @@ void TestStream::load(const QString &fileName)
     file.close();
     m_timer->stop();
     m_baContent.clear();
-
+#ifdef Q_AUDIO_DECODER
     QEventLoop loop;
     QSharedPointer<QAudioDecoder> decoder(new QAudioDecoder);
     connect(decoder.data(), &QAudioDecoder::bufferReady, [this, decoder]()
@@ -237,8 +237,8 @@ void TestStream::load(const QString &fileName)
     {
         qtout << "error message" << decoder->errorString() << m_baContent.size();
     }
-
-    if (head.startsWith("ID3"))
+#endif
+    if (head.startsWith("ID3") || fileName.endsWith(".mp3"))
     {
         quint32 rate, totalCount, channels;
         QTime t(QTime::currentTime());
@@ -266,8 +266,7 @@ void TestStream::load(const QString &fileName)
             m_baContent.resize(wavFile.size());
             out.readRawData(m_baContent.data(), wavFile.size());
             wavFile.close();
-            m_bytesPerSec = wavFile.fileFormat().sampleRate() * wavFile.fileFormat().channelCount()
-                * wavFile.fileFormat().sampleSize() / 8;
+            m_bytesPerSec = wavFile.fileFormat().bytesForDuration(1e6);
             Q_EMIT sig_duration((m_baContent.size() - TotalHeadSize) / m_bytesPerSec);
             qtout << "load RIFF" << qreal(m_baContent.size() - TotalHeadSize) / m_bytesPerSec;
         }

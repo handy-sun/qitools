@@ -1,5 +1,6 @@
 ﻿#include <QAudioOutput>
 #include <QCoreApplication>
+#include <QDebug>
 #include "audiodataplay.h"
 
 AudioDataPlay::AudioDataPlay(AudioDataPlay::PlayMode mode, QObject *parent)

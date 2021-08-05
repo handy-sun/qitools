@@ -2,6 +2,8 @@
 #define AUDIOWIDGET_H
 
 #include <QWidget>
+#include <QBuffer>
+#include <QThread>
 #include <QByteArray>
 
 class AudioDataPlay;
