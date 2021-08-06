@@ -55,7 +55,8 @@ private:
     qint32           m_playTime;
     int              m_bytesPerSec;
 
-    bool initialize();
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
     void sig_startGet();
@@ -66,12 +67,13 @@ public Q_SLOTS:
     void slot_setDuration(qint32 d);
     void slot_handleData(const QByteArray &ba, int sign);
 
+
 private Q_SLOTS:
     void onTimerPull();
     void on_btnPlay_clicked();
     void on_btnOpenFile_clicked();
     void on_btnStop_clicked();
-    void on_verticalSliderVol_valueChanged(int value);
+    void on_vSliderVol_valueChanged(int value);
 };
 
 #endif // AUDIOWIDGET_H

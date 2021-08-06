@@ -79,7 +79,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QSlider" name="verticalSliderVol">
+  <widget class="QSlider" name="vSliderVol">
    <property name="geometry">
     <rect>
      <x>510</x>
@@ -95,13 +95,13 @@
     <enum>Qt::Vertical</enum>
    </property>
   </widget>
-  <widget class="QSlider" name="horizontalSliderProgress">
+  <widget class="QSlider" name="hSliderProgress">
    <property name="geometry">
     <rect>
      <x>120</x>
      <y>277</y>
      <width>471</width>
-     <height>16</height>
+     <height>23</height>
     </rect>
    </property>
    <property name="orientation">

@@ -27,7 +27,7 @@ AudioWidget::AudioWidget(QWidget *parent)
     ui->setupUi(this);
     ui->btnPlay->setIcon(QIcon(style()->standardPixmap(QStyle::SP_MediaPlay)));
     ui->btnStop->setIcon(QIcon(style()->standardPixmap(QStyle::SP_MediaStop)));
-
+    ui->hSliderProgress->installEventFilter(this);
     m_timer->setTimerType(Qt::PreciseTimer);
     connect(m_timer, &QTimer::timeout, this, &AudioWidget::onTimerPull);
 
@@ -39,8 +39,13 @@ AudioWidget::AudioWidget(QWidget *parent)
     connect(this, &AudioWidget::sig_preLoad, m_te, &TestStream::load);
     connect(m_te, &TestStream::sig_data, this, &AudioWidget::slot_handleData);
     connect(m_te, &TestStream::sig_duration, this, &AudioWidget::slot_setDuration);
-    //initialize();
 //    QTimer::singleShot(20, [=](){ Q_EMIT sig_preLoad(); });
+    // 滑动条
+    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect(this);
+    effect->setOffset(4,4);
+    effect->setColor(QColor(0,0,0,50));
+    effect->setBlurRadius(10);
+    ui->hSliderProgress->setGraphicsEffect(effect);
 }
 
 AudioWidget::~AudioWidget()
@@ -50,40 +55,33 @@ AudioWidget::~AudioWidget()
     delete ui;
 }
 
-bool AudioWidget::initialize()
+bool AudioWidget::eventFilter(QObject *watched, QEvent *event)
 {
-    WavFile wavFile;
-    if (wavFile.open(QStringLiteral("澤野弘之 - DRAGON RISES.wav")))
+    if (watched == ui->hSliderProgress)
     {
-        if (wavFile.fileFormat().sampleType() == QAudioFormat::SignedInt
-            && wavFile.fileFormat().sampleSize() == 16
-            && wavFile.fileFormat().byteOrder() == QAudioFormat::LittleEndian)
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+        if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseMove)
         {
-            m_baContent = wavFile.readAll();
-            qtout << "fileSize:" << wavFile.size();
-            m_baContent.remove(0, wavFile.headerLength());
-            m_audioPlayer->setAudioFormat(wavFile.fileFormat());
-            m_bytesPerSec = wavFile.fileFormat().sampleRate() * wavFile.fileFormat().channelCount() * wavFile.fileFormat().sampleSize() / 8;
-            m_readBuffer.close();
-            m_readBuffer.setBuffer(&m_baContent);
-            m_readBuffer.open(QIODevice::ReadOnly);
-//            if (m_audioPlayer->playMode() == AudioDataPlay::PushMode)
-//                m_audioPlayer->setAudioData(m_baContent);
+            QSlider *slider = static_cast<QSlider *>(watched);
+            int range = slider->maximum() - slider->minimum();
+            int pos = slider->minimum() + range * ((double)mouseEvent->x() / slider->width());
+            if (pos != slider->sliderPosition())
+            {
+                slider->setValue(pos);
+                return true;
+            }
         }
-        wavFile.close();
-        return true;
     }
-    else
-        return false;
+    return QObject::eventFilter(watched, event);
 }
 
 void AudioWidget::slot_setDuration(qint32 d)
 {
     m_duration = d;
     m_playTime = 0;
-    ui->horizontalSliderProgress->setRange(0, m_duration);
+    ui->hSliderProgress->setRange(0, m_duration);
     ui->labelProgress->setText("00:00/" + QTime(0, 0).addSecs(m_duration).toString("mm:ss"));
-    ui->horizontalSliderProgress->setValue(m_playTime);
+    ui->hSliderProgress->setValue(m_playTime);
 }
 
 void AudioWidget::slot_handleData(const QByteArray &ba, int sign)
@@ -117,7 +115,7 @@ void AudioWidget::slot_handleData(const QByteArray &ba, int sign)
         m_audioPlayer->stopPlay();
         slot_setDuration(m_duration);
     }
-    ui->horizontalSliderProgress->setValue(m_playTime);
+    ui->hSliderProgress->setValue(m_playTime);
 //    QTime timeEla;
     ui->labelProgress->setText(QTime(0, 0).addSecs(m_playTime).toString("mm:ss") + "/"
                                + QTime(0, 0).addSecs(m_duration).toString("mm:ss"));
@@ -315,7 +313,7 @@ void TestStream::onTimer()
     }
 }
 
-void AudioWidget::on_verticalSliderVol_valueChanged(int value)
+void AudioWidget::on_vSliderVol_valueChanged(int value)
 {
     m_audioPlayer->slot_setVolume(qreal(value) / 100.0);
 }

@@ -32,10 +32,20 @@ QiToolsWindow::~QiToolsWindow()
 
 void QiToolsWindow::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_Escape)
+    switch (event->key())
     {
+    case Qt::Key_Escape:
         close();
+        break;
+    case Qt::Key_F11:
+//        if (event->modifiers() & Qt::AltModifier)
+        qApp->setStyleSheet("file:///" + qApp->applicationDirPath() + "/QiTools.css");
+        break;
+    default:
+        break;
+
     }
+
 //    else if (event->key() == Qt::Key_Minus)
 //    {
 //        showMinimized();
