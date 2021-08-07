@@ -28,8 +28,8 @@ Q_SIGNALS:
     void sig_data(const QByteArray &ba, int sign);
 public Q_SLOTS:
     void load(const QString &fileName);
-    void slot_startGet();
-    void slot_stopGet();
+    void slot_playbackStateChanged(int state);
+
 private Q_SLOTS:
     void onTimer();
 };
@@ -54,25 +54,26 @@ private:
     qint32           m_duration;
     qint32           m_playTime;
     int              m_bytesPerSec;
+    int              m_playbackState; // 0 stop 1 play 2 suspend
+
+    void changeStateIcon(int state);
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
-    void sig_startGet();
-    void sig_stopGet();
+    void sig_playbackStateChanged(int state);
     void sig_preLoad(const QString &fileName);
 
 public Q_SLOTS:
     void slot_setDuration(qint32 d);
     void slot_handleData(const QByteArray &ba, int sign);
 
-
 private Q_SLOTS:
     void onTimerPull();
     void on_btnPlay_clicked();
-    void on_btnOpenFile_clicked();
     void on_btnStop_clicked();
+    void on_btnOpenFile_clicked();
     void on_vSliderVol_valueChanged(int value);
 };
 

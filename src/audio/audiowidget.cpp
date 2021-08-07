@@ -9,9 +9,7 @@
 #include "downvscvsixwidget.h"
 #include "stable.h"
 
-static
-//Q_DECL_CONSTEXPR const
-constexpr int TotalHeadSize = sizeof(CombinedHeader) + sizeof(DATAHeader);
+static Q_DECL_CONSTEXPR const int TotalHeadSize = sizeof(CombinedHeader) + sizeof(DATAHeader);
 
 AudioWidget::AudioWidget(QWidget *parent)
     : QWidget(parent)
@@ -23,10 +21,11 @@ AudioWidget::AudioWidget(QWidget *parent)
     , m_duration(0)
     , m_playTime(0)
     , m_bytesPerSec(0)
+    , m_playbackState(0)
 {
     ui->setupUi(this);
-    ui->btnPlay->setIcon(QIcon(style()->standardPixmap(QStyle::SP_MediaPlay)));
-    ui->btnStop->setIcon(QIcon(style()->standardPixmap(QStyle::SP_MediaStop)));
+    ui->btnPlay->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaPlay)));
+    ui->btnStop->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaStop)));
     ui->hSliderProgress->installEventFilter(this);
     m_timer->setTimerType(Qt::PreciseTimer);
     connect(m_timer, &QTimer::timeout, this, &AudioWidget::onTimerPull);
@@ -34,16 +33,16 @@ AudioWidget::AudioWidget(QWidget *parent)
     m_te->moveToThread(&m_thread);
     m_thread.start();
     connect(&m_thread, &QThread::finished, m_te, &TestStream::deleteLater);
-    connect(this, &AudioWidget::sig_startGet, m_te, &TestStream::slot_startGet);
-    connect(this, &AudioWidget::sig_stopGet, m_te, &TestStream::slot_stopGet);
+    connect(this, &AudioWidget::sig_playbackStateChanged, m_te, &TestStream::slot_playbackStateChanged);
+//    connect(this, &AudioWidget::sig_stopGet, m_te, &TestStream::slot_stopGet);
     connect(this, &AudioWidget::sig_preLoad, m_te, &TestStream::load);
     connect(m_te, &TestStream::sig_data, this, &AudioWidget::slot_handleData);
     connect(m_te, &TestStream::sig_duration, this, &AudioWidget::slot_setDuration);
 //    QTimer::singleShot(20, [=](){ Q_EMIT sig_preLoad(); });
     // 滑动条
     QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect(this);
-    effect->setOffset(4,4);
-    effect->setColor(QColor(0,0,0,50));
+    effect->setOffset(4, 4);
+    effect->setColor(QColor(0, 0, 0, 50));
     effect->setBlurRadius(10);
     ui->hSliderProgress->setGraphicsEffect(effect);
 }
@@ -53,6 +52,22 @@ AudioWidget::~AudioWidget()
     m_thread.quit();
     m_thread.wait();
     delete ui;
+}
+
+void AudioWidget::changeStateIcon(int state)
+{
+    if (m_playbackState == state)
+        return;
+
+    m_playbackState = state;
+    if (m_playbackState == 1)
+    {
+        ui->btnPlay->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaPause)));
+    }
+    else if (m_playbackState == 2 || m_playbackState == 0)
+    {
+        ui->btnPlay->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaPlay)));
+    }
 }
 
 bool AudioWidget::eventFilter(QObject *watched, QEvent *event)
@@ -86,8 +101,10 @@ void AudioWidget::slot_setDuration(qint32 d)
 
 void AudioWidget::slot_handleData(const QByteArray &ba, int sign)
 {
-    if (sign == 0)
+    if (sign == 0) // 第一包包含wav头信息
     {
+        Q_ASSERT(ba.size() > 0);
+
         CombinedHeader ch;
         DATAHeader dataH;
         memcpy(&ch, ba.constData(), sizeof(CombinedHeader));
@@ -104,19 +121,21 @@ void AudioWidget::slot_handleData(const QByteArray &ba, int sign)
         m_audioPlayer->setAudioFormat(_format);
         m_audioPlayer->startPlay();
         m_audioPlayer->appendAudioData(ba.mid(TotalHeadSize));
+        changeStateIcon(1);
     }
     else if (sign == 1)
     {
+        changeStateIcon(1);
         m_audioPlayer->appendAudioData(ba);
         ++m_playTime;
     }
-    else if (sign == 2)
+    else if (sign == 2) // 播放结束
     {
+        changeStateIcon(0);
         m_audioPlayer->stopPlay();
         slot_setDuration(m_duration);
     }
     ui->hSliderProgress->setValue(m_playTime);
-//    QTime timeEla;
     ui->labelProgress->setText(QTime(0, 0).addSecs(m_playTime).toString("mm:ss") + "/"
                                + QTime(0, 0).addSecs(m_duration).toString("mm:ss"));
 }
@@ -135,6 +154,8 @@ void AudioWidget::onTimerPull()
 
 void AudioWidget::on_btnPlay_clicked()
 {
+    if (!m_audioPlayer->isAudioValid())
+        return;
 //    if (m_audioPlayer->playMode() == AudioDataPlay::PushMode)
 //    {
 //        m_audioPlayer->startPlay();
@@ -144,27 +165,52 @@ void AudioWidget::on_btnPlay_clicked()
 //        QByteArray baBlock = m_readBuffer.read(m_bytesPerSec);
 //        m_timer->start(1000);
 //        m_audioPlayer->startPlay();
-//        m_audioPlayer->appendAudioData(baBlock);
-        Q_EMIT sig_startGet();
+//        m_audioPlayer->appendAudioData(baBlock);        
+        if (m_playbackState == 1)
+        {
+            changeStateIcon(2);
+            Q_EMIT sig_playbackStateChanged(m_playbackState);
+            m_audioPlayer->suspendPlay();
+        }
+        else
+        {
+            int lastState = m_playbackState;
+            changeStateIcon(1);
+            Q_EMIT sig_playbackStateChanged(m_playbackState);
+            if (lastState == 2)
+                m_audioPlayer->resumePlay();
+        }
     }
-}
-
-void AudioWidget::on_btnOpenFile_clicked()
-{
-    const QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("打开文件"), ""
-                                                          ,"All(*.*);;MPEG Player ID3(*.mp3 *.wma);;"
-                                                          "compressed(*.ape *.flac);;windows pcm(*.wav)");
-    if (fileName.isEmpty())
-        return;
-
-    Q_EMIT sig_preLoad(fileName);
-    ui->lineEdit->setText(fileName);
 }
 
 void AudioWidget::on_btnStop_clicked()
 {
     m_audioPlayer->stopPlay();
-    Q_EMIT sig_stopGet();
+    m_playbackState = 2;
+    Q_EMIT sig_playbackStateChanged(m_playbackState);
+    m_audioPlayer->resetAudio();
+    ui->btnPlay->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaPlay)));
+}
+
+void AudioWidget::on_btnOpenFile_clicked()
+{
+#if 0 // 0 直接用指定文件名
+    const QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("打开文件"), "",
+        "MPEG Audio Layer 3(*.mp3);;"
+        "Windows Media Audio(*wma);;"
+        "Windows PCM(*.wav);;"
+        "Free Lossless Audio Codec(*.flac);;"
+//        "Monkey's Audio(*.ape);;"
+        "All(*.*)"
+        );
+#else
+    const QString fileName = qApp->applicationDirPath() + "/AmpedUp.wma"; // TEST
+#endif
+    if (fileName.isEmpty())
+        return;
+
+    Q_EMIT sig_preLoad(fileName);
+    ui->lineEdit->setText(fileName);
 }
 
 /** ---------- @class TestStream ----------- */
@@ -187,7 +233,7 @@ void TestStream::load(const QString &fileName)
     file.close();
     m_timer->stop();
     m_baContent.clear();
-#ifdef Q_AUDIO_DECODER
+#ifdef Q_AUDIO_DECODER // QAudioDecoder 依赖系统自带的音频解码器，很多格式不支持，且效率一般
     QEventLoop loop;
     QSharedPointer<QAudioDecoder> decoder(new QAudioDecoder);
     connect(decoder.data(), &QAudioDecoder::bufferReady, [this, decoder]()
@@ -214,7 +260,7 @@ void TestStream::load(const QString &fileName)
 
     decoder->setSourceFilename(fileName);
     qInfo(">>> decoder start: <%s>", QFileInfo(fileName).fileName().toStdString().c_str());
-    QTimer::singleShot(5000, &loop, &QEventLoop::quit); // 超时退出事件循环
+    QTimer::singleShot(5000, &loop, &QEventLoop::quit); // 超时表示代表有可能解码失败，退出事件循环
     QTime tt(QTime::currentTime());
     decoder->start();
     loop.exec();
@@ -271,21 +317,32 @@ void TestStream::load(const QString &fileName)
     }
 }
 
-void TestStream::slot_startGet()
+void TestStream::slot_playbackStateChanged(int state)
 {
-    if (m_baContent.isEmpty())
-        return;
+    switch (state)
+    {
+    case 0: // stop
+        m_timer->stop();
+        m_readBuffer.close();
+        break;
+    case 1: // play
+        if (m_baContent.isEmpty())
+            return;
 
-    m_readBuffer.close();
-    m_readBuffer.setBuffer(&m_baContent);
-    m_readBuffer.open(QIODevice::ReadOnly);
-    onTimer();
-    m_timer->start(1000);
-}
-
-void TestStream::slot_stopGet()
-{
-    m_timer->stop();
+        if (!m_readBuffer.isOpen())
+        {
+            m_readBuffer.setBuffer(&m_baContent);
+            m_readBuffer.open(QIODevice::ReadOnly);
+        }
+        onTimer();
+        m_timer->start(1000);
+        break;
+    case 2: // suspend
+        m_timer->stop();
+        break;
+    default:
+        break;
+    }
 }
 
 void TestStream::onTimer()
@@ -294,7 +351,7 @@ void TestStream::onTimer()
     {
         QByteArray baBlock = m_readBuffer.read(TotalHeadSize + m_bytesPerSec);
         Q_EMIT sig_data(baBlock, 0);
-        qtout << "start totalSize:" << m_baContent.size();
+        qtout << "start totalSize:" << m_baContent.size() << "firstSize:" << baBlock.size();
         return;
     }
 
@@ -308,7 +365,6 @@ void TestStream::onTimer()
         Q_EMIT sig_data(QByteArray(), 2);
         qtout << "end position:" << m_readBuffer.pos();
         m_timer->stop();
-        m_readBuffer.seek(0);
         m_readBuffer.close();
     }
 }

@@ -6,7 +6,7 @@
 AudioDataPlay::AudioDataPlay(AudioDataPlay::PlayMode mode, QObject *parent)
     : QObject(parent)
     , m_playMode(mode)
-      , m_state(QAudio::StoppedState)
+    , m_state(QAudio::StoppedState)
     , m_format(QAudioFormat())
     , m_outputDeviceInfo(QAudioDeviceInfo::defaultOutputDevice())
     , m_audioOutput(nullptr)
@@ -83,6 +83,28 @@ void AudioDataPlay::stopPlay()
         m_playPosition = 0;
     }
     resetAudio();
+}
+
+void AudioDataPlay::resumePlay()
+{
+    if (m_audioOutput)
+    {
+        if (m_playMode == PlayMode::PushMode)
+            m_audioOutput->resume();
+        else if (m_playMode == PlayMode::PullMode)
+            m_timerPull.start();
+    }
+}
+
+void AudioDataPlay::suspendPlay()
+{
+    if (m_audioOutput)
+    {
+        if (m_playMode == PlayMode::PushMode)
+            m_audioOutput->suspend();
+        else if (m_playMode == PlayMode::PullMode)
+            m_timerPull.stop();
+    }
 }
 
 void AudioDataPlay::startAudio()
