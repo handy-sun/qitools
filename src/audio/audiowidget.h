@@ -25,10 +25,11 @@ public:
     explicit TestStream();
 Q_SIGNALS:
     void sig_duration(qint32 d);
-    void sig_data(const QByteArray &ba, int sign);
+    void sig_data(int sign, int time, const QByteArray &ba);
 public Q_SLOTS:
     void load(const QString &fileName);
     void slot_playbackStateChanged(int state);
+    void slot_timePositioning(int second);
 
 private Q_SLOTS:
     void onTimer();
@@ -64,10 +65,11 @@ protected:
 Q_SIGNALS:
     void sig_playbackStateChanged(int state);
     void sig_preLoad(const QString &fileName);
+    void sig_timePositioning(int second);
 
 public Q_SLOTS:
     void slot_setDuration(qint32 d);
-    void slot_handleData(const QByteArray &ba, int sign);
+    void slot_handleData(int sign, int time, const QByteArray &ba);
 
 private Q_SLOTS:
     void onTimerPull();
@@ -75,6 +77,7 @@ private Q_SLOTS:
     void on_btnStop_clicked();
     void on_btnOpenFile_clicked();
     void on_vSliderVol_valueChanged(int value);
+
 };
 
 #endif // AUDIOWIDGET_H

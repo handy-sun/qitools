@@ -107,6 +107,25 @@ void AudioDataPlay::suspendPlay()
     }
 }
 
+void AudioDataPlay::seekTime(int t)
+{
+    if (t < 0)
+    {
+        if (m_bufferDevice.isOpen())
+        {
+            m_bufferDevice.seek(0);
+            m_baBuf.clear();
+        }
+        return;
+    }
+    if (m_playMode == PlayMode::PushMode)
+    {
+        int pos = m_audioOutput->format().bytesForDuration(t * 1e6);
+        if (pos < m_baBuf.size())
+            m_bufferDevice.seek(pos);
+    }
+}
+
 void AudioDataPlay::startAudio()
 {
     m_bufferDevice.close();

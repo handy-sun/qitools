@@ -26,6 +26,8 @@ AudioWidget::AudioWidget(QWidget *parent)
     ui->setupUi(this);
     ui->btnPlay->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaPlay)));
     ui->btnStop->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaStop)));
+    ui->hSliderProgress->setRange(0, 0);
+    ui->hSliderProgress->setTracking(false);
     ui->hSliderProgress->installEventFilter(this);
     m_timer->setTimerType(Qt::PreciseTimer);
     connect(m_timer, &QTimer::timeout, this, &AudioWidget::onTimerPull);
@@ -34,12 +36,15 @@ AudioWidget::AudioWidget(QWidget *parent)
     m_thread.start();
     connect(&m_thread, &QThread::finished, m_te, &TestStream::deleteLater);
     connect(this, &AudioWidget::sig_playbackStateChanged, m_te, &TestStream::slot_playbackStateChanged);
-//    connect(this, &AudioWidget::sig_stopGet, m_te, &TestStream::slot_stopGet);
     connect(this, &AudioWidget::sig_preLoad, m_te, &TestStream::load);
+    connect(this, &AudioWidget::sig_timePositioning, m_te, &TestStream::slot_timePositioning);
     connect(m_te, &TestStream::sig_data, this, &AudioWidget::slot_handleData);
     connect(m_te, &TestStream::sig_duration, this, &AudioWidget::slot_setDuration);
-//    QTimer::singleShot(20, [=](){ Q_EMIT sig_preLoad(); });
-    // 滑动条
+    connect(ui->hSliderProgress, &QSlider::valueChanged, this, [=](int position){
+        Q_EMIT sig_timePositioning(position);
+        m_audioPlayer->seekTime(-1); // NOTE: PushMode?
+    });
+
     QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect(this);
     effect->setOffset(4, 4);
     effect->setColor(QColor(0, 0, 0, 50));
@@ -97,9 +102,10 @@ void AudioWidget::slot_setDuration(qint32 d)
     ui->hSliderProgress->setRange(0, m_duration);
     ui->labelProgress->setText("00:00/" + QTime(0, 0).addSecs(m_duration).toString("mm:ss"));
     ui->hSliderProgress->setValue(m_playTime);
+    ui->btnPlay->setEnabled(true);
 }
 
-void AudioWidget::slot_handleData(const QByteArray &ba, int sign)
+void AudioWidget::slot_handleData(int sign, int time, const QByteArray &ba)
 {
     if (sign == 0) // 第一包包含wav头信息
     {
@@ -127,7 +133,7 @@ void AudioWidget::slot_handleData(const QByteArray &ba, int sign)
     {
         changeStateIcon(1);
         m_audioPlayer->appendAudioData(ba);
-        ++m_playTime;
+        m_playTime = time;
     }
     else if (sign == 2) // 播放结束
     {
@@ -135,7 +141,9 @@ void AudioWidget::slot_handleData(const QByteArray &ba, int sign)
         m_audioPlayer->stopPlay();
         slot_setDuration(m_duration);
     }
+    ui->hSliderProgress->blockSignals(true);
     ui->hSliderProgress->setValue(m_playTime);
+    ui->hSliderProgress->blockSignals(false);
     ui->labelProgress->setText(QTime(0, 0).addSecs(m_playTime).toString("mm:ss") + "/"
                                + QTime(0, 0).addSecs(m_duration).toString("mm:ss"));
 }
@@ -154,7 +162,7 @@ void AudioWidget::onTimerPull()
 
 void AudioWidget::on_btnPlay_clicked()
 {
-    if (!m_audioPlayer->isAudioValid())
+    if (m_duration == 0)
         return;
 //    if (m_audioPlayer->playMode() == AudioDataPlay::PushMode)
 //    {
@@ -186,15 +194,14 @@ void AudioWidget::on_btnPlay_clicked()
 void AudioWidget::on_btnStop_clicked()
 {
     m_audioPlayer->stopPlay();
-    m_playbackState = 2;
+    changeStateIcon(0);
     Q_EMIT sig_playbackStateChanged(m_playbackState);
-    m_audioPlayer->resetAudio();
     ui->btnPlay->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaPlay)));
 }
 
 void AudioWidget::on_btnOpenFile_clicked()
 {
-#if 0 // 0 直接用指定文件名
+#if 1 // 0 直接用指定文件名
     const QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("打开文件"), "",
         "MPEG Audio Layer 3(*.mp3);;"
         "Windows Media Audio(*wma);;"
@@ -211,6 +218,12 @@ void AudioWidget::on_btnOpenFile_clicked()
 
     Q_EMIT sig_preLoad(fileName);
     ui->lineEdit->setText(fileName);
+    ui->btnPlay->setEnabled(false);
+}
+
+void AudioWidget::on_vSliderVol_valueChanged(int value)
+{
+    m_audioPlayer->slot_setVolume(qreal(value) / 100.0);
 }
 
 /** ---------- @class TestStream ----------- */
@@ -231,11 +244,12 @@ void TestStream::load(const QString &fileName)
     }
     QByteArray head = file.peek(10);
     file.close();
+    Q_EMIT sig_data(2, 0, QByteArray()); // 播放结束信号
     m_timer->stop();
     m_baContent.clear();
 #ifdef Q_AUDIO_DECODER // QAudioDecoder 依赖系统自带的音频解码器，很多格式不支持，且效率一般
     QEventLoop loop;
-    QSharedPointer<QAudioDecoder> decoder(new QAudioDecoder);
+    QSharedPointer<QAudioDecoder> decoder(new QAudioDecoder);    
     connect(decoder.data(), &QAudioDecoder::bufferReady, [this, decoder]()
     {
         if (decoder->bufferAvailable())
@@ -345,12 +359,30 @@ void TestStream::slot_playbackStateChanged(int state)
     }
 }
 
+void TestStream::slot_timePositioning(int second)
+{
+    if (m_readBuffer.isOpen() && m_bytesPerSec != 0)
+    {
+        if (m_timer->isActive())
+        {
+            m_timer->stop();
+            m_readBuffer.seek(TotalHeadSize + second * m_bytesPerSec);
+            onTimer();
+            m_timer->start(1000);
+        }
+        else
+        {
+            m_readBuffer.seek(TotalHeadSize + second * m_bytesPerSec);
+        }
+    }
+}
+
 void TestStream::onTimer()
 {    
     if (m_readBuffer.pos() == 0)
     {
         QByteArray baBlock = m_readBuffer.read(TotalHeadSize + m_bytesPerSec);
-        Q_EMIT sig_data(baBlock, 0);
+        Q_EMIT sig_data(0, 0, baBlock);
         qtout << "start totalSize:" << m_baContent.size() << "firstSize:" << baBlock.size();
         return;
     }
@@ -358,18 +390,13 @@ void TestStream::onTimer()
     if (m_readBuffer.pos() < m_baContent.size() - m_bytesPerSec / 25)
     {
         QByteArray baBlock = m_readBuffer.read(m_bytesPerSec);
-        Q_EMIT sig_data(baBlock, 1);
+        Q_EMIT sig_data(1, (m_readBuffer.pos() - TotalHeadSize) / m_bytesPerSec, baBlock);
     }
     else
     {
-        Q_EMIT sig_data(QByteArray(), 2);
+        Q_EMIT sig_data(2, 0, QByteArray());
         qtout << "end position:" << m_readBuffer.pos();
         m_timer->stop();
         m_readBuffer.close();
     }
-}
-
-void AudioWidget::on_vSliderVol_valueChanged(int value)
-{
-    m_audioPlayer->slot_setVolume(qreal(value) / 100.0);
 }

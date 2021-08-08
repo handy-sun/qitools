@@ -36,8 +36,7 @@ public:
     void stopPlay();
     void resumePlay();
     void suspendPlay();
-
-    void resetAudio();
+    void seekTime(int t = -1); // 定位播放时间
 
 private:
     PlayMode            m_playMode;
@@ -55,6 +54,7 @@ private:
     qreal               m_linearVolume;
 
     void startAudio();
+    void resetAudio();
 
 public Q_SLOTS:
     void slot_setVolume(qreal vol);
