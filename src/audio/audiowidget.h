@@ -13,6 +13,13 @@ namespace Ui {
 class AudioWidget;
 }
 
+struct Mp3FrameHeader
+{
+    char FrameID[4]; /*用四个字符标识一个帧，说明其内容*/
+    char Size[4]; /*帧内容的大小，不包括帧头，不得小于1*/
+    char Flags[2]; /*存放标志，只定义了6位*/
+};
+
 // 模拟音频流发送端
 class TestStream : public QObject
 {

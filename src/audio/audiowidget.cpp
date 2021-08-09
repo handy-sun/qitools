@@ -237,12 +237,12 @@ TestStream::TestStream()
 void TestStream::load(const QString &fileName)
 {
     QFile file(fileName);
-    if (!file.exists() || !file.open(QIODevice::ReadOnly) || file.size() < 10)
+    if (!file.exists() || !file.open(QIODevice::ReadOnly) || file.size() < 500000)
     {
         qtout << file.errorString() << file.size();
         return;
     }
-    QByteArray head = file.peek(10);
+    QByteArray head = file.peek(500000);
     file.close();
     Q_EMIT sig_data(2, 0, QByteArray()); // 播放结束信号
     m_timer->stop();
@@ -301,8 +301,41 @@ void TestStream::load(const QString &fileName)
         quint32 rate, totalCount, channels;
         QTime t(QTime::currentTime());
         qint16 *shBuf = DecodeToBuffer(fileName, &rate, &totalCount, &channels);
-        //    qint16 *shBuf = DecodeToBuffer(QStringLiteral("Ring09.mp3"), &rate, &totalCount, &channels);
-        qtout << "load ID3:" << rate << totalCount << channels << "elapsed:" << t.elapsed();
+
+        uchar *headerTagSize = reinterpret_cast<uchar *>(head.data() + 6);
+        int mp3_TagSize = ((headerTagSize[0] & 0xff) << 21) |
+            ((headerTagSize[1] & 0xff) << 14) |
+            ((headerTagSize[2] & 0xff) << 7) |
+            (headerTagSize[3] & 0xff);
+
+        qtout << (headerTagSize[0]&0x7F) * 0x200000 +
+            (headerTagSize[1] & 0x7F)*0x400+
+            (headerTagSize[2] & 0x7F)*0x80+
+            (headerTagSize[3] & 0x7F);
+
+        qtout << "load ID3:" << mp3_TagSize << totalCount << "elapsed:" << t.elapsed();
+        QBuffer bufAnalysis(&head);
+        bufAnalysis.open(QIODevice::ReadOnly);
+        bufAnalysis.seek(10);
+        while (!bufAnalysis.atEnd())
+        {
+            auto frameID = bufAnalysis.read(4);
+            if (frameID == "APIC")
+            {
+                qtout << frameID << bufAnalysis.pos();
+                break;
+            }
+            else
+            {
+                QByteArray _ba = bufAnalysis.read(4);
+                uchar *frameSize = reinterpret_cast<uchar *>(_ba.data());
+                int frameCount = (frameSize[0] << 24) | (frameSize[1] << 16) | (frameSize[2] << 8) | frameSize[3];
+                bufAnalysis.skip(frameCount + sizeof(Mp3FrameHeader) - 8);
+                qtout << frameID << frameCount << bufAnalysis.pos();
+            }
+
+        }
+
         m_baContent.resize(totalCount * channels * 2);
         memcpy(m_baContent.data(), shBuf, m_baContent.size());
         free(shBuf);
