@@ -29,6 +29,7 @@ AudioWidget::AudioWidget(QWidget *parent)
     ui->hSliderProgress->setRange(0, 0);
     ui->hSliderProgress->setTracking(false);
     ui->hSliderProgress->installEventFilter(this);
+
     m_timer->setTimerType(Qt::PreciseTimer);
     connect(m_timer, &QTimer::timeout, this, &AudioWidget::onTimerPull);
 
@@ -40,6 +41,7 @@ AudioWidget::AudioWidget(QWidget *parent)
     connect(this, &AudioWidget::sig_timePositioning, m_te, &TestStream::slot_timePositioning);
     connect(m_te, &TestStream::sig_data, this, &AudioWidget::slot_handleData);
     connect(m_te, &TestStream::sig_duration, this, &AudioWidget::slot_setDuration);
+
     connect(ui->hSliderProgress, &QSlider::valueChanged, this, [=](int position){
         Q_EMIT sig_timePositioning(position);
         m_audioPlayer->seekTime(-1); // NOTE: PushMode?
@@ -93,6 +95,26 @@ bool AudioWidget::eventFilter(QObject *watched, QEvent *event)
         }
     }
     return QObject::eventFilter(watched, event);
+}
+
+void AudioWidget::paintEvent(QPaintEvent *)
+{
+    if (m_coverImage.isNull())
+        return;
+
+    QPainter p(this);
+    QRect imgRect = m_coverImage.rect();
+    imgRect.moveCenter(rect().center());
+//    if (width() > imgRect.width())
+//    {
+//        imgRect.translate((width() - imgRect.width()) / 2, 0);
+//    }
+//    if (height() > imgRect.height())
+//    {
+//        imgRect.translate(0, (height() - imgRect.height()) / 2);
+//    }
+    p.drawImage(imgRect, m_coverImage);
+    p.end();
 }
 
 void AudioWidget::slot_setDuration(qint32 d)
@@ -219,9 +241,45 @@ void AudioWidget::on_btnOpenFile_clicked()
     Q_EMIT sig_preLoad(fileName);
     ui->lineEdit->setText(fileName);
     ui->btnPlay->setEnabled(false);
+    /// load image from mp3
+    QFile file(fileName);
+    if (!file.exists() || !file.open(QIODevice::ReadOnly) || file.size() < 10)
+    {
+        qtout << file.errorString() << file.size();
+        return;
+    }
+    auto head = file.peek(10);
+    if (!head.startsWith("ID3") && !fileName.endsWith(".mp3"))
+    {
+        return;
+    }
+
+    const uchar *headerTagSize = reinterpret_cast<const uchar *>(head.constData() + 6);
+    int mp3_TagSize = (headerTagSize[0] << 21) | (headerTagSize[1] << 14) | (headerTagSize[2] << 7) | headerTagSize[3];
+
+    file.seek(10);
+    while (!file.atEnd() && file.pos() < mp3_TagSize)
+    {
+        auto frameID = file.read(4);
+
+        auto _size = file.read(4);
+        const uchar *frameSize = reinterpret_cast<const uchar *>(_size.constData());
+        int frameCount = (frameSize[0] << 24) | (frameSize[1] << 16) | (frameSize[2] << 8) | frameSize[3];
+        auto flags = file.read(2);
+        // qtout << int((uchar)flags.at(0) & 0b11100000);
+        auto content = file.read(frameCount);
+        if (frameID == "APIC")
+        {
+            content.remove(0, 14);// 跳过 14 byte 读取图片类型信息
+            m_coverImage = QImage::fromData(reinterpret_cast<const uchar *>(content.data()), content.size());
+            update();
+            break;
+        }
+    }
+    file.close();
 }
 
-void AudioWidget::on_vSliderVol_valueChanged(int value)
+void AudioWidget::on_sliderVol_valueChanged(int value)
 {
     m_audioPlayer->slot_setVolume(qreal(value) / 100.0);
 }
@@ -237,13 +295,14 @@ TestStream::TestStream()
 void TestStream::load(const QString &fileName)
 {
     QFile file(fileName);
-    if (!file.exists() || !file.open(QIODevice::ReadOnly) || file.size() < 500000)
+    if (!file.exists() || !file.open(QIODevice::ReadOnly) || file.size() < 10)
     {
         qtout << file.errorString() << file.size();
         return;
     }
-    QByteArray head = file.peek(500000);
+    QByteArray head = file.peek(10);
     file.close();
+
     Q_EMIT sig_data(2, 0, QByteArray()); // 播放结束信号
     m_timer->stop();
     m_baContent.clear();
@@ -288,6 +347,7 @@ void TestStream::load(const QString &fileName)
 
     if (decoder->error() == QAudioDecoder::NoError && m_baContent.size() > TotalHeadSize)
     {
+        file.close();
         Q_EMIT sig_duration(decoder->duration() / 1000); // 解析成功
         return;
     }
@@ -302,44 +362,11 @@ void TestStream::load(const QString &fileName)
         QTime t(QTime::currentTime());
         qint16 *shBuf = DecodeToBuffer(fileName, &rate, &totalCount, &channels);
 
-        uchar *headerTagSize = reinterpret_cast<uchar *>(head.data() + 6);
-        int mp3_TagSize = ((headerTagSize[0] & 0xff) << 21) |
-            ((headerTagSize[1] & 0xff) << 14) |
-            ((headerTagSize[2] & 0xff) << 7) |
-            (headerTagSize[3] & 0xff);
-
-        qtout << (headerTagSize[0]&0x7F) * 0x200000 +
-            (headerTagSize[1] & 0x7F)*0x400+
-            (headerTagSize[2] & 0x7F)*0x80+
-            (headerTagSize[3] & 0x7F);
-
-        qtout << "load ID3:" << mp3_TagSize << totalCount << "elapsed:" << t.elapsed();
-        QBuffer bufAnalysis(&head);
-        bufAnalysis.open(QIODevice::ReadOnly);
-        bufAnalysis.seek(10);
-        while (!bufAnalysis.atEnd())
-        {
-            auto frameID = bufAnalysis.read(4);
-            if (frameID == "APIC")
-            {
-                qtout << frameID << bufAnalysis.pos();
-                break;
-            }
-            else
-            {
-                QByteArray _ba = bufAnalysis.read(4);
-                uchar *frameSize = reinterpret_cast<uchar *>(_ba.data());
-                int frameCount = (frameSize[0] << 24) | (frameSize[1] << 16) | (frameSize[2] << 8) | frameSize[3];
-                bufAnalysis.skip(frameCount + sizeof(Mp3FrameHeader) - 8);
-                qtout << frameID << frameCount << bufAnalysis.pos();
-            }
-
-        }
-
         m_baContent.resize(totalCount * channels * 2);
         memcpy(m_baContent.data(), shBuf, m_baContent.size());
         free(shBuf);
         m_bytesPerSec = rate * channels * 2;
+        qtout << "load Mp3:" << m_baContent.size() << "elapsed:" << t.elapsed();
         Q_EMIT sig_duration(m_baContent.size() / m_bytesPerSec);
 
         QByteArray header(TotalHeadSize, 0);
@@ -362,6 +389,7 @@ void TestStream::load(const QString &fileName)
             qtout << "load RIFF" << qreal(m_baContent.size() - TotalHeadSize) / m_bytesPerSec;
         }
     }
+
 }
 
 void TestStream::slot_playbackStateChanged(int state)

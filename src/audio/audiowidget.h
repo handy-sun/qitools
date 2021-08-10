@@ -13,12 +13,12 @@ namespace Ui {
 class AudioWidget;
 }
 
-struct Mp3FrameHeader
-{
-    char FrameID[4]; /*用四个字符标识一个帧，说明其内容*/
-    char Size[4]; /*帧内容的大小，不包括帧头，不得小于1*/
-    char Flags[2]; /*存放标志，只定义了6位*/
-};
+//struct Mp3FrameHeader
+//{
+//    char FrameID[4]; /*用四个字符标识一个帧，说明其内容*/
+//    char Size[4]; /*帧内容的大小，不包括帧头，不得小于1*/
+//    char Flags[2]; /*存放标志，只定义了6位*/
+//};
 
 // 模拟音频流发送端
 class TestStream : public QObject
@@ -37,7 +37,6 @@ public Q_SLOTS:
     void load(const QString &fileName);
     void slot_playbackStateChanged(int state);
     void slot_timePositioning(int second);
-
 private Q_SLOTS:
     void onTimer();
 };
@@ -56,6 +55,7 @@ private:
     QByteArray       m_baContent;
     QBuffer          m_readBuffer;
     QThread          m_thread;
+    QImage           m_coverImage;
     QTimer          *m_timer;
     TestStream      *m_te;
     quint32          m_contentPos;
@@ -68,6 +68,7 @@ private:
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) Q_DECL_OVERRIDE;
+    void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
     void sig_playbackStateChanged(int state);
@@ -83,7 +84,7 @@ private Q_SLOTS:
     void on_btnPlay_clicked();
     void on_btnStop_clicked();
     void on_btnOpenFile_clicked();
-    void on_vSliderVol_valueChanged(int value);
+    void on_sliderVol_valueChanged(int value);
 
 };
 
