@@ -26,6 +26,8 @@ AudioWidget::AudioWidget(QWidget *parent)
     ui->setupUi(this);
     ui->btnPlay->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaPlay)));
     ui->btnStop->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaStop)));
+    ui->btnVol->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaVolume)));
+    ui->btnOpenFile->setIcon(QIcon(style()->standardIcon(QStyle::SP_DialogOpenButton)));
     ui->hSliderProgress->setRange(0, 0);
     ui->hSliderProgress->setTracking(false);
     ui->hSliderProgress->installEventFilter(this);
@@ -47,11 +49,11 @@ AudioWidget::AudioWidget(QWidget *parent)
         m_audioPlayer->seekTime(-1); // NOTE: PushMode?
     });
 
-    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect(this);
-    effect->setOffset(4, 4);
-    effect->setColor(QColor(0, 0, 0, 50));
-    effect->setBlurRadius(10);
-    ui->hSliderProgress->setGraphicsEffect(effect);
+//    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect(this);
+//    effect->setOffset(4, 4);
+//    effect->setColor(QColor(0, 0, 0, 50));
+//    effect->setBlurRadius(10);
+//    ui->hSliderProgress->setGraphicsEffect(effect);
 }
 
 AudioWidget::~AudioWidget()
@@ -103,16 +105,13 @@ void AudioWidget::paintEvent(QPaintEvent *)
         return;
 
     QPainter p(this);
+    const QRect availableRect = ui->labelImage->geometry();
     QRect imgRect = m_coverImage.rect();
-    imgRect.moveCenter(rect().center());
-//    if (width() > imgRect.width())
-//    {
-//        imgRect.translate((width() - imgRect.width()) / 2, 0);
-//    }
-//    if (height() > imgRect.height())
-//    {
-//        imgRect.translate(0, (height() - imgRect.height()) / 2);
-//    }
+    if (imgRect.height() > availableRect.height())
+        imgRect.setSize(QSize(imgRect.width() * availableRect.height() / imgRect.height(), availableRect.height()));
+
+    imgRect.moveCenter(availableRect.center());
+
     p.drawImage(imgRect, m_coverImage);
     p.end();
 }
@@ -122,7 +121,8 @@ void AudioWidget::slot_setDuration(qint32 d)
     m_duration = d;
     m_playTime = 0;
     ui->hSliderProgress->setRange(0, m_duration);
-    ui->labelProgress->setText("00:00/" + QTime(0, 0).addSecs(m_duration).toString("mm:ss"));
+    ui->labelTotalTime->setText(QTime(0, 0).addSecs(m_duration).toString("m:ss"));
+    ui->labelPlayedTime->setText("0:00");
     ui->hSliderProgress->setValue(m_playTime);
     ui->btnPlay->setEnabled(true);
 }
@@ -166,8 +166,9 @@ void AudioWidget::slot_handleData(int sign, int time, const QByteArray &ba)
     ui->hSliderProgress->blockSignals(true);
     ui->hSliderProgress->setValue(m_playTime);
     ui->hSliderProgress->blockSignals(false);
-    ui->labelProgress->setText(QTime(0, 0).addSecs(m_playTime).toString("mm:ss") + "/"
-                               + QTime(0, 0).addSecs(m_duration).toString("mm:ss"));
+
+    ui->labelTotalTime->setText(QTime(0, 0).addSecs(m_duration).toString("m:ss"));
+    ui->labelPlayedTime->setText(QTime(0, 0).addSecs(m_playTime).toString("m:ss"));
 }
 
 void AudioWidget::onTimerPull()
@@ -238,8 +239,7 @@ void AudioWidget::on_btnOpenFile_clicked()
     if (fileName.isEmpty())
         return;
 
-    Q_EMIT sig_preLoad(fileName);
-    ui->lineEdit->setText(fileName);
+    Q_EMIT sig_preLoad(fileName);    
     ui->btnPlay->setEnabled(false);
     /// load image from mp3
     QFile file(fileName);
@@ -256,6 +256,7 @@ void AudioWidget::on_btnOpenFile_clicked()
 
     const uchar *headerTagSize = reinterpret_cast<const uchar *>(head.constData() + 6);
     int mp3_TagSize = (headerTagSize[0] << 21) | (headerTagSize[1] << 14) | (headerTagSize[2] << 7) | headerTagSize[3];
+    QString title, author;
 
     file.seek(10);
     while (!file.atEnd() && file.pos() < mp3_TagSize)
@@ -266,16 +267,31 @@ void AudioWidget::on_btnOpenFile_clicked()
         const uchar *frameSize = reinterpret_cast<const uchar *>(_size.constData());
         int frameCount = (frameSize[0] << 24) | (frameSize[1] << 16) | (frameSize[2] << 8) | frameSize[3];
         auto flags = file.read(2);
-        // qtout << int((uchar)flags.at(0) & 0b11100000);
         auto content = file.read(frameCount);
         if (frameID == "APIC")
         {
             content.remove(0, 14);// 跳过 14 byte 读取图片类型信息
             m_coverImage = QImage::fromData(reinterpret_cast<const uchar *>(content.data()), content.size());
             update();
-            break;
+            //break;
+        }
+        else if (frameID == "TIT2")
+        {   // 标题
+            if (content.mid(0, 3) != QByteArray::fromHex("01FFFE"))
+                continue;
+
+            content.remove(0, 3);
+            QTextCodec *codec = QTextCodec::codecForName("GBK");
+            title = codec->toUnicode(content);
+        }
+        else if (frameID == "TPE1")
+        {   // 作者
+            content.remove(0, 3);
+            QTextCodec *codec = QTextCodec::codecForName("GBK");
+            author = codec->toUnicode(content);
         }
     }
+    ui->labelSongMsg->setText(title + " -\n" + author);
     file.close();
 }
 

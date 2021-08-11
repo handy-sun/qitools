@@ -37,19 +37,13 @@ void QiToolsWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Escape:
         close();
         break;
-    case Qt::Key_F11:
-//        if (event->modifiers() & Qt::AltModifier)
+    case Qt::Key_F12:
         qApp->setStyleSheet("file:///" + qApp->applicationDirPath() + "/QiTools.css");
         break;
     default:
         break;
 
     }
-
-//    else if (event->key() == Qt::Key_Minus)
-//    {
-//        showMinimized();
-//    }
 }
 
 void QiToolsWindow::closeEvent(QCloseEvent *event)
@@ -57,6 +51,7 @@ void QiToolsWindow::closeEvent(QCloseEvent *event)
     event->accept();
     QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
     ini.setValue("Preference/index", QVariant(ui->stackedWidget->currentIndex()));
+    ini.setValue("Preference/geometry", saveGeometry());
 }
 
 QString readStyleSheetFile(const QString &rcFile)

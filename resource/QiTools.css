@@ -54,14 +54,14 @@ QSlider#hSliderProgress {
     /* border: 1px dashed rgb(175, 175, 175); */
 }
 QSlider#hSliderProgress::groove:horizontal {
-        height: 4px;
+    height: 4px;
     background-color: rgba(138, 152, 163, 150);
 }
 QSlider#hSliderProgress::handle:horizontal {	
-        width: 10px;
-        height: 10px;
-        margin: -6px 0px -6px 0px;
-        border-radius: 8px;
+    width: 10px;
+    height: 10px;
+    margin: -6px 0px -6px 0px;
+    border-radius: 8px;
     border: 3px solid rgb(221, 221, 221);
     background-color: rgb(0, 66, 114); 
 }
@@ -71,3 +71,21 @@ QSlider#hSliderProgress::handle:horizontal {
 QSlider#hSliderProgress::sub-page:horizontal {                               
     background-color: rgb(24, 74, 112);                     
 }
+QSlider#sliderVol::groove:horizontal {
+    height: 4px;
+    background-color: rgba(138, 152, 163, 150);
+}
+QSlider#sliderVol::handle:horizontal {	
+    width: 6px;
+    height: 8px;
+    margin: -6px 0px -6px 0px;
+    border-radius: 8px;
+    background-color: rgb(0, 66, 114); 
+}
+QSlider#sliderVol::sub-page:horizontal {                               
+    background-color: rgb(24, 74, 112);                     
+}
+QFrame#framePlayTool {
+    border-top: 1px solid rgb(110, 108, 108);
+}
+
