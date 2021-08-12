@@ -234,7 +234,7 @@ void AudioWidget::on_btnOpenFile_clicked()
         "All(*.*)"
         );
 #else
-    const QString fileName = qApp->applicationDirPath() + "/AmpedUp.wma"; // TEST
+    const QString fileName = qApp->applicationDirPath() + QStringLiteral("/敢爱敢做 - 林子祥.mp3");
 #endif
     if (fileName.isEmpty())
         return;
@@ -250,16 +250,14 @@ void AudioWidget::on_btnOpenFile_clicked()
     }
     auto head = file.peek(10);
     if (!head.startsWith("ID3") && !fileName.endsWith(".mp3"))
-    {
         return;
-    }
 
     const uchar *headerTagSize = reinterpret_cast<const uchar *>(head.constData() + 6);
     int mp3_TagSize = (headerTagSize[0] << 21) | (headerTagSize[1] << 14) | (headerTagSize[2] << 7) | headerTagSize[3];
     QString title, author;
-
+    qtout << "mp3_TagSize =" << mp3_TagSize;
     file.seek(10);
-    while (!file.atEnd() && file.pos() < mp3_TagSize)
+    while (file.pos() < mp3_TagSize && !file.atEnd())
     {
         auto frameID = file.read(4);
 
@@ -268,30 +266,40 @@ void AudioWidget::on_btnOpenFile_clicked()
         int frameCount = (frameSize[0] << 24) | (frameSize[1] << 16) | (frameSize[2] << 8) | frameSize[3];
         auto flags = file.read(2);
         auto content = file.read(frameCount);
-        if (frameID == "APIC")
+        if (frameID == "APIC") // 读取显示歌曲封面，一般为jpg或png
         {
-            content.remove(0, 14);// 跳过 14 byte 读取图片类型信息
-            m_coverImage = QImage::fromData(reinterpret_cast<const uchar *>(content.data()), content.size());
+            content.remove(0, 1);
+            if (content.startsWith("image/jpeg"))
+            {
+                content.remove(0, qstrlen("image/jpeg") + 3);
+                m_coverImage = QImage::fromData(content, "JPG");
+            }
+            else if (content.startsWith("image/png"))
+            {
+                content.remove(0, qstrlen("image/png") + 3);
+                m_coverImage = QImage::fromData(content, "PNG");
+            }
             update();
-            //break;
         }
-        else if (frameID == "TIT2")
-        {   // 标题
-            if (content.mid(0, 3) != QByteArray::fromHex("01FFFE"))
-                continue;
-
-            content.remove(0, 3);
-            QTextCodec *codec = QTextCodec::codecForName("GBK");
-            title = codec->toUnicode(content);
+        else if (frameID == "TIT2") // 标题
+        {
+            if (content.mid(0, 3) == QByteArray::fromHex("01FFFE"))
+            {
+                content.remove(0, 3);
+                title = QTextCodec::codecForName("UTF-16LE")->toUnicode(content);
+            }
         }
-        else if (frameID == "TPE1")
-        {   // 作者
-            content.remove(0, 3);
-            QTextCodec *codec = QTextCodec::codecForName("GBK");
-            author = codec->toUnicode(content);
+        else if (frameID == "TPE1") // 作者
+        {
+            if (content.mid(0, 3) == QByteArray::fromHex("01FFFE"))
+            {
+                content.remove(0, 3);
+                author = QTextCodec::codecForName("UTF-16LE")->toUnicode(content);
+            }
         }
     }
-    ui->labelSongMsg->setText(title + " -\n" + author);
+    ui->labelSongTIT2->setText(title);
+    ui->labelSongTPE2->setText(author);
     file.close();
 }
 

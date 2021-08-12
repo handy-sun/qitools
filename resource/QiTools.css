@@ -37,6 +37,14 @@ QHeaderView#hHeader::section {
 #widgetTool {
     border: 1px solid white;
 }
+QFrame#framePlayTool {
+    border-top: 1px solid rgb(110, 108, 108);
+}
+QFrame#frameSongMsg {
+    background-color: rgba(241, 217, 181, 50);
+    /* border-top: 1px solid rgb(110, 108, 108); */
+    border-radius: 3px;
+}
 /*QToolBox::tab {
     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                               stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
@@ -85,7 +93,3 @@ QSlider#sliderVol::handle:horizontal {
 QSlider#sliderVol::sub-page:horizontal {                               
     background-color: rgb(24, 74, 112);                     
 }
-QFrame#framePlayTool {
-    border-top: 1px solid rgb(110, 108, 108);
-}
-
