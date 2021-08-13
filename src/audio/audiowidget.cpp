@@ -249,7 +249,7 @@ void AudioWidget::on_btnOpenFile_clicked()
         return;
     }
     auto head = file.peek(10);
-    if (!head.startsWith("ID3") && !fileName.endsWith(".mp3"))
+    if (!head.startsWith("ID3") && !fileName.endsWith(".mp3")) // 不严谨
         return;
 
     const uchar *headerTagSize = reinterpret_cast<const uchar *>(head.constData() + 6);
@@ -260,7 +260,6 @@ void AudioWidget::on_btnOpenFile_clicked()
     while (file.pos() < mp3_TagSize && !file.atEnd())
     {
         auto frameID = file.read(4);
-
         auto _size = file.read(4);
         const uchar *frameSize = reinterpret_cast<const uchar *>(_size.constData());
         int frameCount = (frameSize[0] << 24) | (frameSize[1] << 16) | (frameSize[2] << 8) | frameSize[3];
@@ -271,13 +270,30 @@ void AudioWidget::on_btnOpenFile_clicked()
             content.remove(0, 1);
             if (content.startsWith("image/jpeg"))
             {
-                content.remove(0, qstrlen("image/jpeg") + 3);
-                m_coverImage = QImage::fromData(content, "JPG");
+                content.remove(0, qstrlen("image/jpeg"));
+                for (int i = 0; i < content.size() - 1; ++i)
+                {
+                    if ((uchar)content.at(i) == 0xFF && (uchar)content.at(i + 1) == 0xD8)
+                    {
+                        content.remove(0, i);
+                        // the same as: m_coverImage = QImage::fromData(content, "JPG");
+                        m_coverImage.loadFromData(content, "JPG");
+                        break;
+                    }
+                }
             }
             else if (content.startsWith("image/png"))
             {
-                content.remove(0, qstrlen("image/png") + 3);
-                m_coverImage = QImage::fromData(content, "PNG");
+                content.remove(0, qstrlen("image/png"));
+                for (int i = 0; i < content.size() - 7; ++i)
+                {
+                    if (content.mid(i, 8) == QByteArray::fromHex("89504E470D0A1A0A"))
+                    {
+                        content.remove(0, i);
+                        m_coverImage.loadFromData(content, "PNG");
+                        break;
+                    }
+                }
             }
             update();
         }
