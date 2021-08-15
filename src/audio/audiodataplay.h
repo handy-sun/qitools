@@ -27,6 +27,7 @@ public:
     QAudio::State state() const { return m_state; }
     QAudioFormat audioFormat() const { return m_format; }
     bool isAudioValid() const { return m_audioOutput != nullptr; }
+    int bytesReadyRead() const;
 
     void setAudioFormat(const QAudioFormat &format);// 设置音频格式(有缺省格式)，需在设置数据前设置格式
     void setAudioData(const QByteArray &ba) { m_baBuf = ba; } // PushMode时设置完整的数据

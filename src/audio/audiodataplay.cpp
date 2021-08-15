@@ -25,6 +25,21 @@ AudioDataPlay::AudioDataPlay(AudioDataPlay::PlayMode mode, QObject *parent)
     connect(&m_timerPull, &QTimer::timeout, this, &AudioDataPlay::onTimerPull);
 }
 
+int AudioDataPlay::bytesReadyRead() const
+{
+    if (!m_audioOutput)
+        return -1;
+
+    if (m_playMode == PlayMode::PullMode)
+    {
+        return m_baBuf.size() - m_bufferDevice.pos();
+    }
+    else if (m_playMode == PlayMode::PushMode)
+    {
+        return m_audioOutput->bytesFree();
+    }
+}
+
 void AudioDataPlay::setAudioFormat(const QAudioFormat &format)
 {
     if (m_outputDeviceInfo.isFormatSupported(format))
@@ -41,7 +56,15 @@ void AudioDataPlay::setAudioFormat(const QAudioFormat &format)
 void AudioDataPlay::appendAudioData(const QByteArray &ba)
 {
     if (m_playMode == PlayMode::PullMode)
+    {
+        //qDebug() << m_bufferDevice.pos() << m_baBuf.size() - m_bufferDevice.pos();
+        if (m_baBuf.size() > m_format.bytesForDuration(20 * 1.0e6))
+        {
+            m_baBuf.remove(0, m_bufferDevice.pos());
+            m_bufferDevice.seek(0);
+        }
         m_baBuf.append(ba);
+    }
 }
 
 void AudioDataPlay::startPlay()

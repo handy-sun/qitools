@@ -2,7 +2,7 @@
 #include <QNetworkReply>
 #include <QFileInfo>
 #include <QEventLoop>
-//#include <QSslSocket>
+#include <QSslSocket>
 #include <QTimer>
 #include <QDir>
 
@@ -13,7 +13,9 @@ NetworkControl::NetworkControl(QObject *parent)
     , m_netReply(Q_NULLPTR)
     , m_writtenFile(Q_NULLPTR)
 {
-    qDebug() << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString();
+#ifndef QT_NO_SSL
+    qDebug() << "isSupportSSL:" << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString();
+#endif
 }
 
 NetworkControl::~NetworkControl()
