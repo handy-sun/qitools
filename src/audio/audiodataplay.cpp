@@ -34,7 +34,7 @@ int AudioDataPlay::bytesReadyRead() const
     {
         return m_baBuf.size() - m_bufferDevice.pos();
     }
-    else if (m_playMode == PlayMode::PushMode)
+    else
     {
         return m_audioOutput->bytesFree();
     }

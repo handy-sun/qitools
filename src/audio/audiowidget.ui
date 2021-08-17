@@ -248,22 +248,29 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="spacing">
-         <number>2</number>
-        </property>
+       <layout class="QGridLayout" name="gridLayout" rowstretch="1,1" columnstretch="1,1,3">
         <property name="leftMargin">
          <number>6</number>
         </property>
         <property name="rightMargin">
          <number>6</number>
         </property>
-        <item>
+        <property name="verticalSpacing">
+         <number>1</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="btnLoadImage">
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
          <widget class="QPushButton" name="btnVol">
           <property name="minimumSize">
            <size>
             <width>32</width>
-            <height>32</height>
+            <height>26</height>
            </size>
           </property>
           <property name="flat">
@@ -271,7 +278,14 @@
           </property>
          </widget>
         </item>
-        <item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="btnSaveNew">
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" colspan="2">
          <widget class="QSlider" name="sliderVol">
           <property name="value">
            <number>99</number>

@@ -14,7 +14,7 @@ NetworkControl::NetworkControl(QObject *parent)
     , m_writtenFile(Q_NULLPTR)
 {
 #ifndef QT_NO_SSL
-    qDebug() << "isSupportSSL:" << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString();
+    qInfo() << "isSupportsSSL:" << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString();
 #endif
 }
 
