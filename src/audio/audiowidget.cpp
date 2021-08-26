@@ -270,6 +270,8 @@ void AudioWidget::on_btnOpenFile_clicked()
     if (!head.startsWith("ID3") && !fileName.endsWith(".mp3")) // 不严谨
         return;
 
+    on_btnStop_clicked();
+    m_whichImage = 0;
     m_openedFileName = fileName;
     const uchar *headerTagSize = reinterpret_cast<const uchar *>(head.constData() + 6);
     int mp3TagSize = (headerTagSize[0] << 21) | (headerTagSize[1] << 14) | (headerTagSize[2] << 7) | headerTagSize[3];
@@ -281,10 +283,9 @@ void AudioWidget::on_btnOpenFile_clicked()
     m_hashFrames.clear();
     while (file.pos() < totalTagSize && !file.atEnd())
     {
-        qtout << "pos:" << file.pos();
-        QSharedPointer<ID3v2_frame> sptr_frame(new ID3v2_frame);
+        QSharedPointer<ID3v2Frame> sptr_frame(new ID3v2Frame);
         sptr_frame->beginPos = file.pos();
-        file.read(reinterpret_cast<char *>(&sptr_frame.data()->header), sizeof(ID3v2_header));
+        file.read(reinterpret_cast<char *>(&sptr_frame.data()->header), sizeof(ID3v2FrameTag));
 //        auto frameID = file.read(4);
 //        auto _size = file.read(4);
         const uchar *ptrSize = reinterpret_cast<const uchar *>(&sptr_frame->header.size[0]);
@@ -292,39 +293,21 @@ void AudioWidget::on_btnOpenFile_clicked()
 //        auto flags = file.read(2);
         auto content = file.read(frameCount);
         sptr_frame->frameData = content;
-        sptr_frame->frameLength = frameCount + sizeof(ID3v2_header);
+        sptr_frame->frameLength = frameCount + sizeof(ID3v2FrameTag);
         QByteArray baFrameID(sptr_frame->header.frameID, 4);
 
         if (baFrameID == "APIC") // 读取显示歌曲封面，一般为jpg或png
         {
-            content.remove(0, 1);
-            if (content.startsWith("image/jpeg"))
+            Q_ASSERT_X(content.size() > 7, "Open Mp3", "APIC content's size less than 7 Bytes!");
+            for (int i = 0; i < content.size() - 7; ++i)
             {
-                content.remove(0, qstrlen("image/jpeg"));
-                for (int i = 0; i < content.size() - 1; ++i)
+                if (content.mid(i, 2) == QByteArray::fromHex("FFD8")
+                    || content.mid(i, 8) == QByteArray::fromHex("89504E470D0A1A0A"))
                 {
-                    if ((uchar)content.at(i) == 0xFF && (uchar)content.at(i + 1) == 0xD8)
-                    {
-                        content.remove(0, i);
-                        // the same as: m_coverImage = QImage::fromData(content, "JPG");
-                        m_coverImage.loadFromData(content, "JPG");
-                        imageFlag = true;
-                        break;
-                    }
-                }
-            }
-            else if (content.startsWith("image/png"))
-            {
-                content.remove(0, qstrlen("image/png"));
-                for (int i = 0; i < content.size() - 7; ++i)
-                {
-                    if (content.mid(i, 8) == QByteArray::fromHex("89504E470D0A1A0A"))
-                    {
-                        content.remove(0, i);
-                        m_coverImage.loadFromData(content, "PNG");
-                        imageFlag = true;
-                        break;
-                    }
+                    content.remove(0, i);
+                    m_coverImage.loadFromData(content);
+                    imageFlag = true;
+                    break;
                 }
             }
             update();
@@ -439,6 +422,7 @@ void AudioWidget::on_btnLoadImage_clicked()
         m_shallAddImage = qMove(tempImg);
     }
     m_imageFileByteData = apicFrameHeader + _ba;
+    m_whichImage = 1;
     update();
 }
 
@@ -448,16 +432,29 @@ void AudioWidget::on_btnSaveNew_clicked()
         return;
 
     QFile file(m_openedFileName);
+
     if (!file.open(QIODevice::ReadOnly))
         return;
 
     QByteArray temp = file.readAll();
     file.close();
+
+    if (!temp.startsWith("ID3")) // 文件开头若没有ID3v2的头，加上
+    {
+        ID3v2Header hdr;
+        memset(&hdr, 0, sizeof(hdr));
+        qstrcpy(&hdr.header[0], "ID3");
+        hdr.ver = 3;
+        hdr.revision = 0;
+        hdr.flag = 0;
+        temp.prepend(reinterpret_cast<char *>(&hdr), sizeof(hdr));
+    }
+
     uchar *headerTag = reinterpret_cast<uchar *>(temp.data() + 6);
     int mp3TagSize = (headerTag[0] << 21) | (headerTag[1] << 14) | (headerTag[2] << 7) | headerTag[3];
     int frameSize = m_imageFileByteData.size();
 
-    ID3v2_header fh;
+    ID3v2FrameTag fh;
     memset(&fh, 0, sizeof(fh));
     qstrcpy(&fh.frameID[0], "APIC");
     fh.size[0] = frameSize >> 24;
@@ -497,13 +494,14 @@ void AudioWidget::on_btnSaveNew_clicked()
             temp.insert(mp3TagSize + 10, insertFrame);
         }
     }
+
     temp[6] = newHeaderTagSize >> 21;
     temp[7] = newHeaderTagSize >> 14;
     temp[8] = (newHeaderTagSize >> 7) % 128;
     temp[9] = newHeaderTagSize % 128;
 
     QFile fileN(m_openedFileName + ".mp3");
-    if (fileN.open(QIODevice::WriteOnly))
+    if (fileN.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
         fileN.write(temp);
         fileN.close();
