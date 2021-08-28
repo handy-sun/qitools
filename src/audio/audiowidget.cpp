@@ -30,7 +30,11 @@ AudioWidget::AudioWidget(QWidget *parent)
     ui->btnVol->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaVolume)));
     ui->btnOpenFile->setIcon(QIcon(style()->standardIcon(QStyle::SP_DialogOpenButton)));
     ui->btnLoadImage->setIcon(QIcon(style()->standardIcon(QStyle::SP_ComputerIcon)));
+    ui->btnLoadImage->setToolTip(QStringLiteral("加载要作为新封面的图片"));
     ui->btnSaveNew->setIcon(QIcon(style()->standardIcon(QStyle::SP_DriveFDIcon)));
+    ui->btnSaveNew->setToolTip(QStringLiteral("保存为带新封面的文件"));
+    ui->btnSaveCover->setIcon(QIcon(style()->standardIcon(QStyle::SP_DialogSaveButton)));
+    ui->btnSaveCover->setToolTip(QStringLiteral("保存封面"));
     ui->hSliderProgress->setRange(0, 0);
     ui->hSliderProgress->setTracking(false);
     ui->hSliderProgress->installEventFilter(this);
@@ -273,6 +277,8 @@ void AudioWidget::on_btnOpenFile_clicked()
     on_btnStop_clicked();
     m_whichImage = 0;
     m_openedFileName = fileName;
+    m_coverFormatStr = "";
+    m_hashFrames.clear();
     const uchar *headerTagSize = reinterpret_cast<const uchar *>(head.constData() + 6);
     int mp3TagSize = (headerTagSize[0] << 21) | (headerTagSize[1] << 14) | (headerTagSize[2] << 7) | headerTagSize[3];
     int totalTagSize = mp3TagSize + 10; // 数据帧前的所有标签总长度
@@ -280,7 +286,7 @@ void AudioWidget::on_btnOpenFile_clicked()
     qtout << "mp3_TagSize =" << mp3TagSize;
     file.seek(10);
     bool imageFlag = false;
-    m_hashFrames.clear();
+
     while (file.pos() < totalTagSize && !file.atEnd())
     {
         QSharedPointer<ID3v2Frame> sptr_frame(new ID3v2Frame);
@@ -304,8 +310,14 @@ void AudioWidget::on_btnOpenFile_clicked()
                 if (content.mid(i, 2) == QByteArray::fromHex("FFD8")
                     || content.mid(i, 8) == QByteArray::fromHex("89504E470D0A1A0A"))
                 {
+                    if (static_cast<uchar>(content.at(i)) == 0xFF)
+                        m_coverFormatStr = "jpg";
+                    else
+                        m_coverFormatStr = "png";
+
                     content.remove(0, i);
                     m_coverImage.loadFromData(content);
+
                     imageFlag = true;
                     break;
                 }
@@ -500,12 +512,25 @@ void AudioWidget::on_btnSaveNew_clicked()
     temp[8] = (newHeaderTagSize >> 7) % 128;
     temp[9] = newHeaderTagSize % 128;
 
-    QFile fileN(m_openedFileName + ".mp3");
-    if (fileN.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    QString bakName = m_openedFileName;
+    bakName.insert(bakName.lastIndexOf('.'), "_BAK");
+    file.rename(bakName);
+
+    QFile fileNew(m_openedFileName);
+    if (fileNew.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
-        fileN.write(temp);
-        fileN.close();
-        qtout << "save success:" << fileN.fileName();
+        fileNew.write(temp);
+        fileNew.close();
+        qtout << "save success:" << fileNew.fileName();
+    }
+}
+
+void AudioWidget::on_btnSaveCover_clicked()
+{
+    if (m_hashFrames.contains("APIC") && !m_coverImage.isNull())
+    {
+        auto imgName = m_openedFileName.left(m_openedFileName.lastIndexOf('.'));
+        m_coverImage.save(imgName + "." + m_coverFormatStr, m_coverFormatStr.toStdString().c_str());
     }
 }
 
@@ -686,4 +711,6 @@ void TestStream::onTimer()
         m_readBuffer.close();
     }
 }
+
+
 

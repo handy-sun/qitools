@@ -49,9 +49,9 @@ void QiToolsWindow::keyPressEvent(QKeyEvent *event)
 void QiToolsWindow::closeEvent(QCloseEvent *event)
 {
     event->accept();
-    QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
-    ini.setValue("Preference/index", QVariant(ui->stackedWidget->currentIndex()));
-    ini.setValue("Preference/geometry", saveGeometry());
+//    QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
+//    ini.setValue("Preference/index", QVariant(ui->stackedWidget->currentIndex()));
+//    ini.setValue("Preference/geometry", saveGeometry());
 }
 
 QString readStyleSheetFile(const QString &rcFile)

@@ -75,6 +75,7 @@ private:
     QString          m_openedFileName;
     QBuffer          m_readBuffer;
     QThread          m_thread;
+    QString          m_coverFormatStr;
     QImage           m_coverImage;
     QImage           m_shallAddImage;
     QTimer          *m_timer;
@@ -113,6 +114,8 @@ private Q_SLOTS:
 
     void on_btnLoadImage_clicked();
     void on_btnSaveNew_clicked();
+    void on_btnSaveCover_clicked();
+
 };
 
 #endif // AUDIOWIDGET_H
