@@ -8,6 +8,7 @@ class ColorConvert;
 }
 
 class QTableWidget;
+class QColorDialog;
 class ScreenColorPicker;
 
 class ColorConvert : public QWidget
@@ -25,6 +26,7 @@ private:
     QColor              m_color;
     QPixmap             m_pmDecoration;
     //decltype(connect(0, 0, 0, 0)) m_connection;
+    static QColorDialog *s_clrDlg;
 
     void initTableWidget();
     void convertFromRgb();
@@ -39,6 +41,7 @@ public Q_SLOTS:
 private Q_SLOTS:
     void on_toolButtonPick_clicked();
     void onTableCellChanged(int row, int);
+    void on_toolButtonPal_clicked();
 
 };
 

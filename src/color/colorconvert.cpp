@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <typeinfo>
-//#include <cstdio>
+#include <QColorDialog>
 
 static bool toColor(const QStringList &strlist, uchar arr[])
 {
@@ -74,6 +74,8 @@ static bool toColorF(const QStringList &strlist, uchar arr[])
     return true;
 }
 
+QColorDialog *ColorConvert::s_clrDlg = nullptr;
+
 ColorConvert::ColorConvert(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ColorConvert)
@@ -86,8 +88,11 @@ ColorConvert::ColorConvert(QWidget *parent)
     initTableWidget();
     connect(m_scrPicker, &ScreenColorPicker::pickFinished, this, &ColorConvert::slot_PickFinished);
     connect(m_table, &QTableWidget::cellChanged, this, &ColorConvert::onTableCellChanged);
-
     m_table->item(0, 1)->setText("rgba(102, 204, 253, 0.76)");
+
+    s_clrDlg = new QColorDialog(this);
+    s_clrDlg->resize(522, 411); // to avoid QWindowsWindow::setGeometry() warning;
+    s_clrDlg->setOption(QColorDialog::ShowAlphaChannel);
 }
 
 ColorConvert::~ColorConvert()
@@ -353,4 +358,16 @@ void ColorConvert::onTableCellChanged(int row, int)
         break;
     }
     m_table->blockSignals(false);
+}
+
+void ColorConvert::on_toolButtonPal_clicked()
+{
+    s_clrDlg->exec();
+    QColor color = s_clrDlg->selectedColor();
+//        QColor color = QColorDialog::getColor(Qt::white, nullptr, QString(), QColorDialog::ShowAlphaChannel);
+    if (color.isValid())
+    {
+        m_color = color;
+        setColorValue({ 0, 1, 3, 4, 5, 6 });
+    }
 }

@@ -18,15 +18,21 @@
     <widget class="QTableWidget" name="tableWidgetColor"/>
    </item>
    <item row="0" column="1">
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="3,1,1,9">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="3,1,1,1,11">
      <property name="spacing">
-      <number>7</number>
+      <number>6</number>
      </property>
      <property name="leftMargin">
       <number>2</number>
      </property>
+     <property name="topMargin">
+      <number>1</number>
+     </property>
      <property name="rightMargin">
-      <number>0</number>
+      <number>1</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
      </property>
      <item>
       <spacer name="verticalSpacer_2">
@@ -40,6 +46,28 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="toolButtonPal">
+       <property name="minimumSize">
+        <size>
+         <width>154</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei</family>
+         <pointsize>13</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>调色板</string>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextOnly</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QToolButton" name="toolButtonPick">
