@@ -1,7 +1,8 @@
 ﻿#include "qitoolswindow.h"
 #include <QApplication>
+#include <QSettings>
 
- int main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     setvbuf(stdout, nullptr, _IONBF, 1024);

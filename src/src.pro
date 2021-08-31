@@ -1,13 +1,12 @@
 INCLUDEPATH += $$PWD
 
-
-TARGET_NAME = QiTools
-
 greaterThan(QT_MAJOR_VERSION, 4) {
     TARGET_ARCH = $${QT_ARCH}
 } else {
     TARGET_ARCH = $${QMAKE_HOST.arch}
 }
+
+TARGET_NAME = QiTools_$${TARGET_ARCH}
 
 win32 {
     msvc: TARGET_NAME = $${TARGET_NAME}_msvc
@@ -16,11 +15,11 @@ win32 {
     gcc: TARGET_NAME = $${TARGET_NAME}_gcc
 }
 
-contains(TARGET_ARCH, x86_64) {
-    TARGET_NAME = $${TARGET_NAME}64
-} else {
-    TARGET_NAME = $${TARGET_NAME}32
-}
+#contains(TARGET_ARCH, 64) {
+#    TARGET_NAME = $${TARGET_NAME}64
+#} else {
+#    TARGET_NAME = $${TARGET_NAME}32
+#}
 
 CONFIG(debug, debug | release) {
     TARGET_NAME = $${TARGET_NAME}_dbg

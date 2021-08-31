@@ -2,6 +2,7 @@
 #include <QKeyEvent>
 #include <QDebug>
 #include <QListWidget>
+#include <QSettings>
 #include "qitoolswindow.h"
 #include "ui_qitoolswindow.h"
 
@@ -42,16 +43,15 @@ void QiToolsWindow::keyPressEvent(QKeyEvent *event)
         break;
     default:
         break;
-
     }
 }
 
 void QiToolsWindow::closeEvent(QCloseEvent *event)
 {
     event->accept();
-//    QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
-//    ini.setValue("Preference/index", QVariant(ui->stackedWidget->currentIndex()));
-//    ini.setValue("Preference/geometry", saveGeometry());
+    QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
+    ini.setValue("Preference/index", QVariant(ui->stackedWidget->currentIndex()));
+    ini.setValue("Preference/geometry", saveGeometry());
 }
 
 QString readStyleSheetFile(const QString &rcFile)
