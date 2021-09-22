@@ -28,7 +28,8 @@ ui_*.h
 *.jsc
 Makefile*
 *build-*
-
+QiTools_*_gcc
+QiTools_*_gcc*
 # Qt unit tests
 target_wrapper.*
 
@@ -41,3 +42,4 @@ target_wrapper.*
 
 # QtCreator CMake
 CMakeLists.txt.user*
+
