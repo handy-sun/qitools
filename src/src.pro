@@ -6,23 +6,10 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     TARGET_ARCH = $${QMAKE_HOST.arch}
 }
 
-TARGET_NAME = QiTools_$${TARGET_ARCH}
-
-win32 {
-    msvc: TARGET_NAME = $${TARGET_NAME}_msvc
-    else: mingw: TARGET_NAME = $${TARGET_NAME}_mingw
-} else: unix {
-    gcc: TARGET_NAME = $${TARGET_NAME}_gcc
-}
-
-#contains(TARGET_ARCH, 64) {
-#    TARGET_NAME = $${TARGET_NAME}64
-#} else {
-#    TARGET_NAME = $${TARGET_NAME}32
-#}
+TARGET_NAME = QiTools_$${TARGET_ARCH}_$${QMAKE_CC}
 
 CONFIG(debug, debug | release) {
-    TARGET_NAME = $${TARGET_NAME}_dbg
+    TARGET_NAME = $${TARGET_NAME}_d
 }
 
 TARGET = $$TARGET_NAME
