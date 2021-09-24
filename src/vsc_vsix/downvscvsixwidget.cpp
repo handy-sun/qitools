@@ -15,7 +15,7 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
 {
     ui->setupUi(this);
     ui->widgetDown->layout()->setMargin(3);
-    ui->lineEditWebUrl->setText("https://marketplace.visualstudio.com/items?itemName=VisualStudioExptTeam.vscodeintellicode");
+    ui->textEditWebUrl->setText("https://marketplace.visualstudio.com/items?itemName=VisualStudioExptTeam.vscodeintellicode");
     ui->lineEditVersion->setText("1.2.14");
 //    m_dowoloadDir = QDir(qApp->applicationDirPath());
     ui->labelRecvTotal->setText("");
@@ -35,7 +35,7 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
     connect(m_netDownloadCtrl, &NetworkControl::sig_eventMessge, this, &DownVscVsixWidget::slot_eventMessge);
     connect(m_netDownloadCtrl, &NetworkControl::sig_requesetFileInfo, this, &DownVscVsixWidget::slot_requesetFileInfo);
 
-    connect(ui->pushButtonShowToolBox, &QPushButton::toggled, ui->toolBox, &QToolBox::setVisible);
+    connect(ui->pushButtonShowToolBox, &QPushButton::toggled, ui->tabWidget, &QToolBox::setVisible);
     connect(ui->lineEditDownloadUrl, &QLineEdit::textChanged, this, [=]()
     {
         ui->pushButtonDownload->setEnabled(!ui->lineEditDownloadUrl->text().isEmpty());
@@ -49,8 +49,7 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
         m_defaultFileName.remove(m_dowoloadDir.absolutePath() + "/");
     });
 
-//    ui->pushButtonShowToolBox->setChecked(false);
-    ui->toolBox->setVisible(false);
+    ui->pushButtonShowToolBox->setChecked(true);
     ui->pushButtonDownload->setEnabled(false);
 }
 
@@ -192,13 +191,13 @@ void DownVscVsixWidget::on_pushButtonDownload_clicked()
 
 void DownVscVsixWidget::on_pushButtonGenVsixUrl_clicked()
 {
-    if (ui->lineEditWebUrl->text().isEmpty() || ui->lineEditVersion->text().isEmpty())
+    if (ui->textEditWebUrl->toPlainText().isEmpty() || ui->lineEditVersion->text().isEmpty())
     {
         QMessageBox::warning(this, "warning", QStringLiteral("两个输入框内容不能为空。"));
         return;
     }
 
-    QStringList spList = ui->lineEditWebUrl->text().split('=');
+    QStringList spList = ui->textEditWebUrl->toPlainText().split('=');
     QStringList allName = spList.last().split('.');
     if (spList.size() != 2 && allName.size() != 2)
     {
@@ -222,7 +221,7 @@ void DownVscVsixWidget::on_pushButtonGenVsixUrl_clicked()
 
 void DownVscVsixWidget::on_pushButtonGenVscUrl_clicked()
 {
-    QString cnUrl = ui->lineEditWebVscUrl->text();
+    QString cnUrl = ui->textEditVscUrl->toPlainText();
     cnUrl.replace("az764295.vo.msecnd.net", "vscode.cdn.azure.cn");
     m_defaultFileName = cnUrl.mid(cnUrl.lastIndexOf('/') + 1);
     ui->lineEditFilePath->setText(m_dowoloadDir.absoluteFilePath(m_defaultFileName));

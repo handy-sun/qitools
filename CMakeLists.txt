@@ -42,7 +42,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
     include(cotire)
 else()
-    include(pch_gcc4)
+#    include(pch_gcc4)
 endif()
 include(get_depends)
 
@@ -67,7 +67,7 @@ add_executable(${PROJECT_NAME} WIN32 ${qrc_file} ${win_rc})
 add_subdirectory(src)
 add_subdirectory(third_party)
 
-set(EXECUTABLE_OUTPUT_PATH ../bin)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${app_name})
 #${CMAKE_THREAD_LIBS_INIT}
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Multimedia)
@@ -86,4 +86,4 @@ foreach(_dep IN LISTS _deps)
     endforeach()
 endforeach()
 
-ADD_PCH_RULE(src/stable.h out_list)
+#ADD_PCH_RULE(src/stable.h out_list)

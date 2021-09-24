@@ -9,7 +9,7 @@ QStackedWidget {
 QListWidget {
     outline: 0px;
     border: 2px groove gray;
-    border-radius: 10px;
+    /* border-radius: 10px; */
     background: transparent;
 }
 QListWidget::item {
@@ -35,7 +35,7 @@ QHeaderView#hHeader::section {
     background: qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #F2F3F4,stop:1 #E7E9EB);
 }
 #widgetTool {
-    border: 1px solid white;
+    border: 1px solid rgba(255, 255, 255, 160);
 }
 QFrame#framePlayTool {
     border-top: 1px solid rgb(110, 108, 108);
@@ -45,18 +45,13 @@ QFrame#frameSongMsg {
     /* border-top: 1px solid rgb(110, 108, 108); */
     border-radius: 3px;
 }
-/*QToolBox::tab {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                              stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
-                              stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);
-    border-radius: 2px;
-}*/
-QToolBox::tab:selected { /* italicize selected tabs */
+/* QTabWidget::tab:selected {
     color: darkblue;
 }
-QToolBox .QWidget#page {
+QTabWidget .QWidget {
     background: transparent;
-}
+    border: none;
+} */
 QSlider#hSliderProgress {
     background: transparent;
     /* border: 1px dashed rgb(175, 175, 175); */
