@@ -25,8 +25,20 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
 
     QFont font;
     font.setPixelSize(15);
-    for (auto *le : findChildren<QLineEdit *>())
-        le->setFont(font);
+    QFont fontInTab("Microsoft YaHei", 13);
+
+    ui->lineEditDownloadUrl->setFont(font);
+    ui->lineEditFilePath->setFont(font);
+    font.setPointSize(18);
+    ui->lineEditVersion->setFont(font);
+
+    ui->textEditWebUrl->setFont(fontInTab);
+    ui->pushButtonGenVsixUrl->setFont(fontInTab);
+    ui->textEditVscUrl->setFont(fontInTab);
+    ui->pushButtonGenVscUrl->setFont(fontInTab);
+
+    ui->textEditWebUrl->setWordWrapMode(QTextOption::WrapAnywhere);
+    ui->textEditVscUrl->setWordWrapMode(QTextOption::WrapAnywhere);
 
     connect(this, &DownVscVsixWidget::sig_getFileInfo, m_netDownloadCtrl, &NetworkControl::slot_getFileInfo);
     connect(this, &DownVscVsixWidget::sig_startRequeset, m_netDownloadCtrl, &NetworkControl::slot_startRequese);
@@ -35,7 +47,7 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
     connect(m_netDownloadCtrl, &NetworkControl::sig_eventMessge, this, &DownVscVsixWidget::slot_eventMessge);
     connect(m_netDownloadCtrl, &NetworkControl::sig_requesetFileInfo, this, &DownVscVsixWidget::slot_requesetFileInfo);
 
-    connect(ui->pushButtonShowToolBox, &QPushButton::toggled, ui->tabWidget, &QToolBox::setVisible);
+    connect(ui->pushButtonShowToolBox, &QPushButton::toggled, ui->tabWidgetTool, &QToolBox::setVisible);
     connect(ui->lineEditDownloadUrl, &QLineEdit::textChanged, this, [=]()
     {
         ui->pushButtonDownload->setEnabled(!ui->lineEditDownloadUrl->text().isEmpty());

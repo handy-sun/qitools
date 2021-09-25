@@ -331,6 +331,7 @@ void ColorConvert::on_toolButtonPick_clicked()
     QTimer::singleShot(delayTime, [=](){
         m_scrPicker->grabColor();
         m_scrPicker->show();
+        qDebug() << m_scrPicker->geometry();
     });
 }
 

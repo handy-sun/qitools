@@ -281,7 +281,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QTabWidget" name="tabWidget">
+       <widget class="QTabWidget" name="tabWidgetTool">
         <property name="font">
          <font>
           <pointsize>14</pointsize>
@@ -309,11 +309,11 @@
           </property>
           <item row="1" column="0">
            <widget class="QLineEdit" name="lineEditVersion">
-            <property name="font">
-             <font>
-              <family>Microsoft YaHei</family>
-              <pointsize>14</pointsize>
-             </font>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
             </property>
             <property name="placeholderText">
              <string>输入扩展的版本号</string>
@@ -322,12 +322,6 @@
           </item>
           <item row="1" column="1">
            <widget class="QPushButton" name="pushButtonGenVsixUrl">
-            <property name="font">
-             <font>
-              <family>Century Gothic</family>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
             <property name="cursor">
              <cursorShape>PointingHandCursor</cursorShape>
             </property>
@@ -370,11 +364,6 @@
          <layout class="QGridLayout" name="gridLayout_5" columnstretch="3,2,3">
           <item row="1" column="1">
            <widget class="QPushButton" name="pushButtonGenVscUrl">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
             <property name="cursor">
              <cursorShape>PointingHandCursor</cursorShape>
             </property>

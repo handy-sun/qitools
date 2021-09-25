@@ -1,7 +1,7 @@
 ﻿QMainWindow {
     background-color: qconicalgradient(cx:0.5, cy:0.5, angle:0, stop:0 rgba(30,144,255, 255), stop:0.19 rgba(135,206,250, 255), stop:0.38 rgba(135,206,235, 255), stop:0.57 rgba(0,191,255, 255),stop:0.71 rgba(173,216,230, 255),stop:0.82 rgba(100,149,237, 255) stop:1 rgba(30,144,255,255));
 }
-QStackedWidget {
+QStackedWidget#stackedWidget {
     border: 2px groove gray;
     border-radius: 10px;
     background-color: qlineargradient(x1:1,y1:0,x2:0,y2:0,stop:0 rgba(65,105,225,100),stop:1 rgba(100,149,237,110));
@@ -45,13 +45,18 @@ QFrame#frameSongMsg {
     /* border-top: 1px solid rgb(110, 108, 108); */
     border-radius: 3px;
 }
-/* QTabWidget::tab:selected {
+QTabWidget#tabWidgetTool QTabBar::tab {
+    min-width: 280px;
+} 
+QTabWidget#tabWidgetTool QTabBar::tab:selected {
     color: darkblue;
+    border: 1px groove rgba(110, 108, 108, 150);
+    border-width: 1px 1px 0px 1px;
+    background-color: rgb(180, 205, 245);
+} 
+QTabWidget#tabWidgetTool, QTabWidget#tabWidgetTool .QWidget {
+    background-color: rgb(180, 205, 245);
 }
-QTabWidget .QWidget {
-    background: transparent;
-    border: none;
-} */
 QSlider#hSliderProgress {
     background: transparent;
     /* border: 1px dashed rgb(175, 175, 175); */

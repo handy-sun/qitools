@@ -32,8 +32,9 @@ void ScreenColorPicker::grabColor()
 #else
 #ifdef Q_OS_LINUX
 //    m_pmScreen = QApplication::primaryScreen()->grabWindow(QApplication::desktop()->winId(), m_multiScreenRect.x(), m_multiScreenRect.y(), m_multiScreenRect.width(), m_multiScreenRect.height());
-    qDebug() << system("gnome-screenshot -f gnome_screenshot.jpg");
+    qDebug() << "system.command return:" << system("gnome-screenshot -f gnome_screenshot.jpg");
     m_pmScreen = QPixmap("gnome_screenshot.jpg");
+    QFile::remove("gnome_screenshot.jpg");
 #endif // Q_OS_LINUX
 #endif // Q_OS_WIN
     update();

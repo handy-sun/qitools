@@ -17,7 +17,6 @@ TARGET = $$TARGET_NAME
 CONFIG += c++11 \
     no_keywords \
 
-
 DEFINES += QT_MESSAGELOGCONTEXT \
     QT_DEPRECATED_WARNINGS \
 #    Q_AUDIO_DECODER
@@ -29,6 +28,8 @@ win32 {
     CONFIG += precompiled_header
     PRECOMPILED_HEADER = $$PWD/stable.h
 }
+
+linux: !android: gcc: QMAKE_LFLAGS += -no-pie
 
 SOURCES += \
     $$PWD/main.cpp \
