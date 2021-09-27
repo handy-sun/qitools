@@ -47,15 +47,16 @@ QFrame#frameSongMsg {
 }
 QTabWidget#tabWidgetTool QTabBar::tab {
     min-width: 280px;
+    min-height: 30px;
 } 
-QTabWidget#tabWidgetTool QTabBar::tab:selected {
+/* QTabWidget#tabWidgetTool QTabBar::tab:selected {
     color: darkblue;
     border: 1px groove rgba(110, 108, 108, 150);
     border-width: 1px 1px 0px 1px;
     background-color: rgb(180, 205, 245);
-} 
+} */
 QTabWidget#tabWidgetTool, QTabWidget#tabWidgetTool .QWidget {
-    background-color: rgb(180, 205, 245);
+/*    background-color: rgb(180, 205, 245);*/
 }
 QSlider#hSliderProgress {
     background: transparent;

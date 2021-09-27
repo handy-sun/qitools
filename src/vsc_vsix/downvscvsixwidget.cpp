@@ -1,4 +1,5 @@
-﻿#include "downvscvsixwidget.h"
+﻿#include <QSslSocket>
+#include "downvscvsixwidget.h"
 #include "ui_downvscvsixwidget.h"
 #include "networkcontrol.h"
 #include "stable.h"
@@ -15,27 +16,12 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
 {
     ui->setupUi(this);
     ui->widgetDown->layout()->setMargin(3);
-    ui->textEditWebUrl->setText("https://marketplace.visualstudio.com/items?itemName=VisualStudioExptTeam.vscodeintellicode");
-    ui->lineEditVersion->setText("1.2.14");
+    ui->textEditWebUrl->setText("https://marketplace.visualstudio.com/items?itemName=marp-team.marp-vscode");
+    ui->lineEditVersion->setText("1.4.0");
 //    m_dowoloadDir = QDir(qApp->applicationDirPath());
     ui->labelRecvTotal->setText("");
     ui->lineEditFilePath->setText(m_dowoloadDir.absolutePath());
     ui->pushButtonShowToolBox->setCheckable(true);
-//    ui->textBrowserMessage->setFont(QFont("SimHei", 12));
-
-    QFont font;
-    font.setPixelSize(15);
-    QFont fontInTab("Microsoft YaHei", 13);
-
-    ui->lineEditDownloadUrl->setFont(font);
-    ui->lineEditFilePath->setFont(font);
-    font.setPointSize(18);
-    ui->lineEditVersion->setFont(font);
-
-    ui->textEditWebUrl->setFont(fontInTab);
-    ui->pushButtonGenVsixUrl->setFont(fontInTab);
-    ui->textEditVscUrl->setFont(fontInTab);
-    ui->pushButtonGenVscUrl->setFont(fontInTab);
 
     ui->textEditWebUrl->setWordWrapMode(QTextOption::WrapAnywhere);
     ui->textEditVscUrl->setWordWrapMode(QTextOption::WrapAnywhere);
@@ -52,7 +38,7 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
     {
         ui->pushButtonDownload->setEnabled(!ui->lineEditDownloadUrl->text().isEmpty());
     });
-    connect(ui->lineEditDownloadUrl, &QLineEdit::/*editingFinished*/textChanged, this, &DownVscVsixWidget::fillInFileName);
+    connect(ui->lineEditDownloadUrl, &QLineEdit::textChanged, this, &DownVscVsixWidget::fillInFileName);
     connect(ui->lineEditDownloadUrl, &QLineEdit::textChanged, this, &DownVscVsixWidget::getFileSize);
 
     connect(ui->lineEditFilePath, &QLineEdit::textChanged, this, [=](const QString &text)
@@ -63,6 +49,16 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
 
     ui->pushButtonShowToolBox->setChecked(true);
     ui->pushButtonDownload->setEnabled(false);
+    auto _font = ui->textBrowserMessage->font();
+    _font.setFamily("MS Shell Dlg 2"); // Tahoma
+    _font.setPointSize(13);
+    ui->textBrowserMessage->setFont(_font);
+#ifndef QT_NO_SSL
+    qInfo() << "isSupportsSSL:" << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString();
+    ui->textBrowserMessage->append(QStringLiteral("是否找到支持的SSL库: %1\n支持的SSL版本信息: <%2>")
+                                   .arg(QSslSocket::supportsSsl() ? "true" : "false").arg(QSslSocket::sslLibraryBuildVersionString()));
+#endif
+    ui->textBrowserMessage->append(QStringLiteral("-------- 显示历次下载的信息 --------"));
 }
 
 DownVscVsixWidget::~DownVscVsixWidget()
@@ -146,16 +142,17 @@ void DownVscVsixWidget::slot_requesetFileInfo(const QByteArray &ba)
 
 void DownVscVsixWidget::fillInFileName()
 {
-//    if (m_defaultFileName.isEmpty())
-//    {
-        QUrl u = QUrl::fromUserInput(ui->lineEditDownloadUrl->text().trimmed());
-        if (u.fileName().isEmpty())
-            m_defaultFileName = "Untitled_" + QDateTime::currentDateTime().toString("yyyy-MM-dd-hh:mm:ss");
-        else
-            m_defaultFileName = u.fileName();
+    QUrl u = QUrl::fromUserInput(ui->lineEditDownloadUrl->text().trimmed());
+    if (u.fileName().isEmpty())
+        m_defaultFileName = "Untitled_" + QDateTime::currentDateTime().toString("yyyy-MM-dd-hh:mm:ss");
+    else
+        m_defaultFileName = u.fileName();
 
-        ui->lineEditFilePath->setText(m_dowoloadDir.absoluteFilePath(m_defaultFileName));
-//    }
+    if (m_defaultFileName == "Microsoft.VisualStudio.Services.VSIXPackage")
+        return;
+
+    // NOTE: ui->lineEditFilePath TextChanged触发
+    ui->lineEditFilePath->setText(m_dowoloadDir.absoluteFilePath(m_defaultFileName));
 }
 
 void DownVscVsixWidget::getFileSize()
@@ -220,15 +217,18 @@ void DownVscVsixWidget::on_pushButtonGenVsixUrl_clicked()
     QString publisher = allName.at(0);
     QString extension = allName.at(1);
     QString version = ui->lineEditVersion->text();
-    m_defaultFileName = QString("%1.%2-%3.vsix").arg(publisher).arg(extension).arg(version);
+    QString vsixName = QString("%1.%2-%3.vsix").arg(publisher).arg(extension).arg(version);
+    m_defaultFileName = vsixName;
     QString downloadUrl = QString("https://%1.gallery.vsassets.io/_apis/public/gallery/publisher/%1"
                                   "/extension/%2/%3/assetbyname"
                                   "/Microsoft.VisualStudio.Services.VSIXPackage")
                           .arg(publisher).arg(extension).arg(version);
 
 //    ui->pushButtonGenVsixUrl->setText(fileName);
-    ui->lineEditFilePath->setText(m_dowoloadDir.absoluteFilePath(m_defaultFileName));
+    // NOTE: ui->lineEditDownloadUrl TextChanged触发
     ui->lineEditDownloadUrl->setText(downloadUrl);
+    // NOTE: ui->lineEditFilePath TextChanged触发
+    ui->lineEditFilePath->setText(m_dowoloadDir.absoluteFilePath(vsixName));
 }
 
 void DownVscVsixWidget::on_pushButtonGenVscUrl_clicked()

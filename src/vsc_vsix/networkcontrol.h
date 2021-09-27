@@ -4,11 +4,9 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QUrl>
-//#include <QDir>
 
 QT_BEGIN_NAMESPACE
 class QFile;
-//class QSslError;
 class QAuthenticator;
 class QNetworkReply;
 QT_END_NAMESPACE

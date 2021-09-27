@@ -2,7 +2,6 @@
 #include <QNetworkReply>
 #include <QFileInfo>
 #include <QEventLoop>
-#include <QSslSocket>
 #include <QTimer>
 #include <QDir>
 
@@ -13,9 +12,7 @@ NetworkControl::NetworkControl(QObject *parent)
     , m_netReply(Q_NULLPTR)
     , m_writtenFile(Q_NULLPTR)
 {
-#ifndef QT_NO_SSL
-    qInfo() << "isSupportsSSL:" << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString();
-#endif
+
 }
 
 NetworkControl::~NetworkControl()
@@ -40,7 +37,7 @@ void NetworkControl::slot_getFileInfo(const QUrl &inputUrl, const QByteArray &he
     if (!inputUrl.isValid())
         return;
 
-    const int tryTimes = 1;
+    const int tryTimes = 3;
     int i;
 
     for (i = 0; i < tryTimes; ++i)
@@ -61,8 +58,12 @@ void NetworkControl::slot_getFileInfo(const QUrl &inputUrl, const QByteArray &he
 
         if (headReply->error() != QNetworkReply::NoError)
         {
-            Q_EMIT sig_eventMessge(headReply->errorString(), true);
-            continue;
+            QString estr = headReply->errorString();
+            if (estr.contains(inputUrl.url()))
+                estr.replace(inputUrl.url(), "URL");
+
+            Q_EMIT sig_eventMessge(estr, true);
+            break;//continue;
         }
         if (!timer.isActive())
         {

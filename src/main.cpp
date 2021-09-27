@@ -13,6 +13,9 @@ int main(int argc, char *argv[])
     int styleMode = ini.value("Preference/styleMode").toInt();
     qApp->setStyleSheet(0 == styleMode ? "file:///:/QiTools.css" : "file:///./QiTools.css");
     QiToolsWindow w;
+//    QFont font;
+//    font.setFamily("MS Shell Dlg 2"); // Tahoma 宋体
+//    qApp->setFont(font);
     if (!_ba.isEmpty())
         w.restoreGeometry(_ba);
     else
