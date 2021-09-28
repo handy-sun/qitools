@@ -39,11 +39,20 @@ void NetworkControl::slot_getFileInfo(const QUrl &inputUrl, const QByteArray &he
 
     const int tryTimes = 3;
     int i;
+    QNetworkAccessManager::Operation operation = QNetworkAccessManager::Operation::HeadOperation;
+    // 向Web服务器的请求动作的简单判断 ...VSIXPackage 要用Get,其他的一般都是Head
+    if (inputUrl.url().endsWith("Microsoft.VisualStudio.Services.VSIXPackage"))
+        operation = QNetworkAccessManager::Operation::GetOperation;
 
     for (i = 0; i < tryTimes; ++i)
     {
         QNetworkAccessManager manager;
-        QNetworkReply *headReply = manager.head(QNetworkRequest(inputUrl));
+        QNetworkReply *headReply = nullptr;
+        if (operation == QNetworkAccessManager::Operation::HeadOperation)
+            headReply = manager.head(QNetworkRequest(inputUrl));
+        else if (operation == QNetworkAccessManager::Operation::GetOperation)
+            headReply = manager.get(QNetworkRequest(inputUrl));
+
         if (!headReply)
             continue;
 
