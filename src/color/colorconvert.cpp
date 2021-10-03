@@ -7,6 +7,7 @@
 #include <typeinfo>
 #include <QColorDialog>
 
+
 static bool toColor(const QStringList &strlist, uchar arr[])
 {
     bool isInt, isFloat;
@@ -300,10 +301,11 @@ void ColorConvert::setColorValue(const QVector<int> &usedRows)
 
 void ColorConvert::slot_PickFinished(bool isUseful, const QColor &color)
 {
-    if (topLevelWidget()->isMinimized())
-    {
-        topLevelWidget()->showNormal();
+    if (topLevelWidget()->isHidden()) {
+        topLevelWidget()->show();
+//        topLevelWidget()->activateWindow();
     }
+
     ui->toolButtonPick->setEnabled(true);
 
     if (!isUseful)
@@ -319,8 +321,7 @@ void ColorConvert::on_toolButtonPick_clicked()
     int delayTime;
     if (ui->checkBoxIsHideWindow->isChecked())
     {
-        topLevelWidget()->showMinimized();
-        topLevelWidget()->activateWindow();
+        topLevelWidget()->hide();
         delayTime = 300;
     }
     else
@@ -329,9 +330,12 @@ void ColorConvert::on_toolButtonPick_clicked()
         delayTime = 50;
     }
     QTimer::singleShot(delayTime, [=](){
-        m_scrPicker->grabColor();
-        m_scrPicker->show();
-        qDebug() << m_scrPicker->geometry();
+        if (m_scrPicker->grabDesktopPixmap())
+        {
+//            m_scrPicker->setAttribute(Qt::WA_TranslucentBackground, true);
+            m_scrPicker->show();
+            m_scrPicker->raise();
+        }
     });
 }
 

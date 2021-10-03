@@ -13,43 +13,65 @@ static const int blockSize = greyHeight - 2 * blockOffset;
 ScreenColorPicker::ScreenColorPicker(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+    setWindowFlags(windowFlags()
+                   | Qt::BypassWindowManagerHint
+                   | Qt::FramelessWindowHint
+                   );
 
+//    setAttribute(Qt::WA_TranslucentBackground, true);
     setCursor(QCursor(QPixmap(":/colorpicker.png"), 0, 19));
-    setMouseTracking(true);
-
-    setMultiScreen();
+    setMouseTracking(true);   
+    setGeometry(getUnitedScreenRect());
 }
 
-void ScreenColorPicker::grabColor()
+bool ScreenColorPicker::grabDesktopPixmap()
 {
-    setMultiScreen();
-    m_mousePos = QCursor::pos() - m_multiScreenRect.topLeft();
-#ifdef Q_OS_WIN
-    m_pmScreen = QApplication::primaryScreen()->grabWindow(QApplication::desktop()->winId(),
-                                                           m_multiScreenRect.x(), m_multiScreenRect.y(),
-                                                           m_multiScreenRect.width(), m_multiScreenRect.height());
-#else
-#ifdef Q_OS_LINUX
-//    m_pmScreen = QApplication::primaryScreen()->grabWindow(QApplication::desktop()->winId(), m_multiScreenRect.x(), m_multiScreenRect.y(), m_multiScreenRect.width(), m_multiScreenRect.height());
-    qDebug() << "system.command return:" << system("gnome-screenshot -f gnome_screenshot.jpg");
-    m_pmScreen = QPixmap("gnome_screenshot.jpg");
-    QFile::remove("gnome_screenshot.jpg");
-#endif // Q_OS_LINUX
-#endif // Q_OS_WIN
+    QRect unitedGeometry = getUnitedScreenRect();
+    setGeometry(unitedGeometry);
+    m_mousePos = QCursor::pos() - unitedGeometry.topLeft();
+
+    m_pmScreen = QApplication::primaryScreen()->grabWindow(
+        QApplication::desktop()->winId(),
+        unitedGeometry.x(),
+        unitedGeometry.y(),
+        unitedGeometry.width(),
+        unitedGeometry.height()
+    );
+
+    if (m_pmScreen.isNull())
+        return false;
+
+    int screenNumber = QApplication::desktop()->screenNumber();
+    if (screenNumber >= 0)
+    {
+        QScreen *screen = QApplication::screens().at(screenNumber);
+        m_pmScreen.setDevicePixelRatio(screen->devicePixelRatio());
+    }
     update();
+    return true;
 }
 
-void ScreenColorPicker::setMultiScreen()
+QRect ScreenColorPicker::getUnitedScreenRect()
 {
+    QRect geometry;
+#if 0
     QPainterPath paPath;
     auto scrList = QApplication::screens();
     for (const QScreen *scr : scrList)
     {
          paPath.addRect(scr->geometry());
     }
-    m_multiScreenRect = paPath.boundingRect().toRect();
-    setGeometry(m_multiScreenRect);
+    geometry = paPath.boundingRect().toRect();
+#else
+    for (const QScreen *screen : QGuiApplication::screens())
+    {
+        QRect scrRect = screen->geometry();
+        scrRect.moveTo(scrRect.x() / screen->devicePixelRatio(),
+                       scrRect.y() / screen->devicePixelRatio());
+        geometry = geometry.united(scrRect);
+    }
+#endif
+    return geometry;
 }
 
 void ScreenColorPicker::drawPickedRect(QPainter *painter, const QRect &magnifier, const QColor &pickColor) const

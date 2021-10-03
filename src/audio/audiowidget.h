@@ -44,19 +44,20 @@ class TestStream : public QObject
     Q_OBJECT
     QByteArray       m_baContent;
     QBuffer          m_readBuffer;
-    QTimer          *m_timer;
+//    QTimer          *m_timer;
     int              m_bytesPerSec;
 public:
     explicit TestStream();
 Q_SIGNALS:
     void sig_duration(qint32 d);
+    void sig_readyData(const QByteArray &header, const QByteArray &audioData);
     void sig_data(int sign, int time, const QByteArray &ba);
 public Q_SLOTS:
     void load(const QString &fileName);
-    void slot_playbackStateChanged(int state);
-    void slot_timePositioning(int second);
+//    void slot_playbackStateChanged(int state);
+//    void slot_timePositioning(int second);
 private Q_SLOTS:
-    void onTimer();
+//    void onTimer();
 };
 
 class AudioWidget : public QWidget
@@ -70,7 +71,7 @@ public:
 private:
     Ui::AudioWidget *ui;
     AudioDataPlay   *m_audioPlayer;
-    QByteArray       m_baContent;
+//    QByteArray       m_baContent;
     QByteArray       m_imageFileByteData;
     QString          m_openedFileName;
     QBuffer          m_readBuffer;
@@ -78,7 +79,7 @@ private:
     QString          m_coverFormatStr;
     QImage           m_coverImage;
     QImage           m_shallAddImage;
-    QTimer          *m_timer;
+//    QTimer          *m_timer;
     TestStream      *m_te;
     quint32          m_contentPos;
     qint32           m_duration;
@@ -103,10 +104,12 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void slot_setDuration(qint32 d);
-    void slot_handleData(int sign, int time, const QByteArray &ba);
+    void slot_readyData(const QByteArray &header, const QByteArray &audioData);
+//    void slot_handleData(int sign, int time, const QByteArray &ba);
+    void slot_processedUSecs(int usec);
 
 private Q_SLOTS:
-    void onTimerPull();
+//    void onTimerPull();
     void on_btnPlay_clicked();
     void on_btnStop_clicked();
     void on_btnOpenFile_clicked();

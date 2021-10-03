@@ -57,6 +57,9 @@ private:
     void startAudio();
     void resetAudio();
 
+Q_SIGNALS:
+    void sig_processedUSecs(int t);
+
 public Q_SLOTS:
     void slot_setVolume(qreal vol);
 

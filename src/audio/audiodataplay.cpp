@@ -89,7 +89,9 @@ void AudioDataPlay::startPlay()
     {
         m_audioOutput = new QAudioOutput(m_outputDeviceInfo, m_format, this);
         connect(m_audioOutput, &QAudioOutput::stateChanged, this, &AudioDataPlay::onStateChanged);
-//        connect(m_audioOutput, &QAudioOutput::notify, this, [=](){ qDebug() << m_bufferDevice.pos() << m_baBuf.size(); });
+        connect(m_audioOutput, &QAudioOutput::notify, this, [=]() {
+            Q_EMIT sig_processedUSecs(m_audioOutput->processedUSecs());
+        });
         m_audioOutput->setNotifyInterval(200);
         startAudio();
     }
@@ -105,7 +107,8 @@ void AudioDataPlay::stopPlay()
         QCoreApplication::instance()->processEvents();
         m_playPosition = 0;
     }
-    resetAudio();
+    if (m_playMode == PlayMode::PullMode)
+        resetAudio();
 }
 
 void AudioDataPlay::resumePlay()
@@ -168,7 +171,7 @@ void AudioDataPlay::startAudio()
         }
         else
         {
-            qDebug() << "QIODevice(m_filledIODevice) = QObject(0x0)" << m_audioOutput->state();
+            qWarning() << "QIODevice(m_filledIODevice) = QObject(0x0)" << m_audioOutput->state();
             m_bufferDevice.close();
             m_bufferDevice.open(QIODevice::ReadWrite);
             m_audioOutput->reset();
@@ -223,7 +226,7 @@ void AudioDataPlay::onStateChanged(QAudio::State state)
     {
         if (!m_baBuf.isEmpty() && m_bufferDevice.pos() == m_baBuf.size())
             stopPlay();
-//        qtout << "onStateChanged: stop" << m_bufferDevice.pos() << m_baBuf.size();
+//        qDebug() << "onStateChanged: stop" << m_bufferDevice.pos() << m_baBuf.size();
     }
     else
     {
@@ -238,4 +241,5 @@ void AudioDataPlay::onStateChanged(QAudio::State state)
         }
     }
     m_state = state;
+    qDebug() << "onStateChanged:" << m_state;
 }

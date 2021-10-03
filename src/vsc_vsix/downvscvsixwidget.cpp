@@ -16,8 +16,8 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
 {
     ui->setupUi(this);
     ui->widgetDown->layout()->setMargin(3);
-    ui->textEditWebUrl->setText("https://marketplace.visualstudio.com/items?itemName=marp-team.marp-vscode");
-    ui->lineEditVersion->setText("1.4.0");
+    ui->textEditWebUrl->setText("https://marketplace.visualstudio.com/items?itemName=GitHub.codespaces");
+    ui->lineEditVersion->setText("1.1.0");
 //    m_dowoloadDir = QDir(qApp->applicationDirPath());
     ui->labelRecvTotal->setText("");
     ui->lineEditFilePath->setText(m_dowoloadDir.absolutePath());
@@ -54,7 +54,7 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
     _font.setPointSize(13);
     ui->textBrowserMessage->setFont(_font);
 #ifndef QT_NO_SSL
-    qInfo() << "isSupportsSSL:" << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString();
+//    qInfo() << "isSupportsSSL:" << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString();
     ui->textBrowserMessage->append(QStringLiteral("是否找到支持的SSL库: %1\n支持的SSL版本信息: <%2>")
                                    .arg(QSslSocket::supportsSsl() ? "true" : "false").arg(QSslSocket::sslLibraryBuildVersionString()));
 #endif
