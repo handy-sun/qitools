@@ -16,10 +16,8 @@ AudioWidget::AudioWidget(QWidget *parent)
     , ui(new Ui::AudioWidget)
     , m_audioPlayer(new AudioDataPlay(AudioDataPlay::PushMode, this))
     , m_te(new TestStream)
-    , m_contentPos(0)
+//    , m_contentPos(0)
     , m_duration(0)
-    , m_playTime(0)
-    , m_bytesPerSec(0)
     , m_playbackState(0)
     , m_whichImage(0)
 {
@@ -34,9 +32,9 @@ AudioWidget::AudioWidget(QWidget *parent)
     ui->btnSaveNew->setToolTip(QStringLiteral("保存为带新封面的文件"));
     ui->btnSaveCover->setIcon(QIcon(style()->standardIcon(QStyle::SP_DialogSaveButton)));
     ui->btnSaveCover->setToolTip(QStringLiteral("保存封面"));
-    ui->hSliderProgress->setRange(0, 0);
-    ui->hSliderProgress->setTracking(false);
-    ui->hSliderProgress->installEventFilter(this);
+    ui->sliderProgress->setRange(0, 0);
+    ui->sliderProgress->setTracking(false);
+    ui->sliderProgress->installEventFilter(this);
 
     m_te->moveToThread(&m_thread);
     m_thread.start();
@@ -44,16 +42,13 @@ AudioWidget::AudioWidget(QWidget *parent)
     connect(this, &AudioWidget::sig_preLoad, m_te, &TestStream::load);
     connect(m_te, &TestStream::sig_readyData, this, &AudioWidget::slot_readyData);
     connect(m_te, &TestStream::sig_duration, this, &AudioWidget::slot_setDuration);
-    connect(m_audioPlayer, &AudioDataPlay::sig_processedUSecs, this, &AudioWidget::slot_processedUSecs);
-
-    connect(ui->hSliderProgress, &QSlider::valueChanged, this, [=](int position){
-        m_audioPlayer->seekTime(position);
-        qtout << "value:" << position << ui->hSliderProgress->maximum();
-        if (position == ui->hSliderProgress->maximum())
-        {
-            changeStateIcon(2);
-            return;
-        }
+    connect(m_audioPlayer, &AudioDataPlay::sig_playedUSecs, this, &AudioWidget::slot_playedUSecs);
+    connect(m_audioPlayer, &AudioDataPlay::sig_stateChanged, this, &AudioWidget::slot_stateChanged);
+//    ui->sliderProgress->setTracking(false);
+    connect(ui->sliderProgress, &QSlider::sliderReleased/*valueChanged*/, this, [=](){
+        if (m_audioPlayer->state() != QAudio::ActiveState)
+            m_audioPlayer->startPlay();
+        m_audioPlayer->seekTime(ui->sliderProgress->value());
     });
 }
 
@@ -82,7 +77,7 @@ void AudioWidget::changeStateIcon(int state)
 
 bool AudioWidget::eventFilter(QObject *watched, QEvent *event)
 {
-    if (watched == ui->hSliderProgress)
+    if (watched == ui->sliderProgress)
     {
         QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
         if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseMove)
@@ -93,6 +88,7 @@ bool AudioWidget::eventFilter(QObject *watched, QEvent *event)
             if (pos != slider->sliderPosition())
             {
                 slider->setValue(pos);
+                slider->sliderReleased();
                 return true;
             }
         }
@@ -104,7 +100,6 @@ void AudioWidget::paintEvent(QPaintEvent *)
 {
     const QImage &targetImage = m_whichImage == 0 ? m_coverImage : m_shallAddImage;
     const QRect availableRect = ui->labelImage->geometry();
-
     if (targetImage.isNull())
         return;
 
@@ -135,18 +130,15 @@ void AudioWidget::keyPressEvent(QKeyEvent *event)
 void AudioWidget::slot_setDuration(qint32 d)
 {
     m_duration = d;
-    m_playTime = 0;
-    ui->hSliderProgress->setRange(0, m_duration);
+    ui->sliderProgress->setRange(0, m_duration);
     ui->labelTotalTime->setText(QTime(0, 0).addSecs(m_duration).toString("m:ss"));
     ui->labelPlayedTime->setText("0:00");
-    ui->hSliderProgress->setValue(m_playTime);
-    ui->btnPlay->setEnabled(true);
+    ui->sliderProgress->setValue(0);
 }
 
 void AudioWidget::slot_readyData(const QByteArray &header, const QByteArray &audioData)
 {
     Q_ASSERT(audioData.size() > 0);
-//    m_baContent = ba;
 
     CombinedHeader ch;
     DATAHeader dataH;
@@ -161,26 +153,43 @@ void AudioWidget::slot_readyData(const QByteArray &header, const QByteArray &aud
     _format.setByteOrder(QAudioFormat::LittleEndian);
     _format.setSampleType(ch.wave.bitsPerSample == 8 ? QAudioFormat::UnSignedInt : QAudioFormat::SignedInt);
 
-//    changeStateIcon(1);
-    m_playTime = 0;
+    m_audioPlayer->resetAudio();
     m_audioPlayer->setAudioFormat(_format);
     m_audioPlayer->setAudioData(audioData);
     ui->labelTotalTime->setText(QTime(0, 0).addSecs(m_duration).toString("m:ss"));
+    ui->btnPlay->setEnabled(true);
+
     QApplication::beep();
 }
 
-void AudioWidget::slot_processedUSecs(int usec)
+void AudioWidget::slot_stateChanged(QAudio::State state)
 {
-    m_playTime = usec / 1e6;
-    ui->hSliderProgress->blockSignals(true);
-    ui->hSliderProgress->setValue(m_playTime);
-    ui->hSliderProgress->blockSignals(false);
-    ui->labelPlayedTime->setText(QTime(0, 0).addSecs(m_playTime).toString("m:ss"));
-    if (ui->hSliderProgress->value() >= ui->hSliderProgress->maximum())
+    switch (state)
     {
-        on_btnStop_clicked();
-        qtout << "stop on_btnStop_clicked";
+    case QAudio::ActiveState:
+        changeStateIcon(1);
+        break;
+    case QAudio::SuspendedState:
+        changeStateIcon(2);
+        break;
+    case QAudio::StoppedState:
+        changeStateIcon(0);
+        break;
+    default:
+        break;
     }
+}
+
+void AudioWidget::slot_playedUSecs(int USecs)
+{
+    int playedSecs = USecs / 1e6;
+    if (!ui->sliderProgress->isSliderDown())
+    {
+        ui->sliderProgress->blockSignals(true);
+        ui->sliderProgress->setValue(playedSecs);
+        ui->sliderProgress->blockSignals(false);
+    }
+    ui->labelPlayedTime->setText(QTime(0, 0).addSecs(playedSecs).toString("m:ss"));
 }
 
 void AudioWidget::on_btnPlay_clicked()
@@ -191,15 +200,12 @@ void AudioWidget::on_btnPlay_clicked()
     switch (m_playbackState)
     {
     case 0:
-        changeStateIcon(1);
         m_audioPlayer->startPlay();
         break;
     case 1:
-        changeStateIcon(2);
         m_audioPlayer->suspendPlay();
         break;
     case 2:
-        changeStateIcon(1);
         m_audioPlayer->resumePlay();
         break;
     }
@@ -209,15 +215,13 @@ void AudioWidget::on_btnStop_clicked()
 {
     m_audioPlayer->stopPlay();
     changeStateIcon(0);
-//    Q_EMIT sig_playbackStateChanged(m_playbackState);
-    ui->btnPlay->setIcon(QIcon(style()->standardIcon(QStyle::SP_MediaPlay)));
 }
 
 void AudioWidget::on_btnOpenFile_clicked()
 {
 #if 1 // 0 直接用指定文件名
     const QString fileName = QFileDialog::getOpenFileName(
-        this, QStringLiteral("打开文件"), "",
+        this, QStringLiteral("打开文件"), QDir::homePath() + "/Music",
         "MPEG Audio Layer 3(*.mp3);;"
         "Windows PCM(*.wav);;"
         "Free Lossless Audio Codec(*.flac);;"
@@ -231,7 +235,9 @@ void AudioWidget::on_btnOpenFile_clicked()
     if (fileName.isEmpty())
         return;
 
-    Q_EMIT sig_preLoad(fileName);    
+    Q_EMIT sig_preLoad(fileName);
+    m_coverImage = QImage();
+    m_shallAddImage = QImage();
     ui->btnPlay->setEnabled(false);
     /// load image from mp3
     QFile file(fileName);
@@ -505,13 +511,6 @@ void AudioWidget::on_btnSaveCover_clicked()
 }
 
 /** ---------- @class TestStream ----------- */
-TestStream::TestStream()
-//    : m_timer(new QTimer(this))
-//    , m_bytesPerSec(0)
-{
-//    connect(m_timer, &QTimer::timeout, this, &TestStream::onTimer);
-}
-
 void TestStream::load(const QString &fileName)
 {
     QFile file(fileName);
@@ -522,8 +521,6 @@ void TestStream::load(const QString &fileName)
     }
     QByteArray head = file.peek(10);
     file.close();
-
-//    Q_EMIT sig_data(2, 0, QByteArray()); // 播放结束信号
 
     QByteArray _baContent;
 #ifdef Q_AUDIO_DECODER // QAudioDecoder 依赖系统自带的音频解码器，很多格式不支持，且效率一般
@@ -542,7 +539,7 @@ void TestStream::load(const QString &fileName)
         QAudioFormat fmt = decoder->audioFormat();
         QByteArray header(TotalHeadSize, 0);
         WavFile::writeBaseHeader(header.data(), fmt.sampleRate(), fmt.sampleSize(), fmt.channelCount(), _baContent.size());
-        m_bytesPerSec = fmt.sampleRate() * fmt.channelCount() * 2;
+        auto bytesPerSec = fmt.sampleRate() * fmt.channelCount() * 2;
         qtout << "format:" <<  fmt.sampleRate() << fmt.sampleSize() << fmt.channelCount();
         _baContent.prepend(header);
     });
@@ -587,9 +584,9 @@ void TestStream::load(const QString &fileName)
         _baContent.resize(totalCount * channels * 2);
         memcpy(_baContent.data(), shBuf, _baContent.size());
         free(shBuf);
-        m_bytesPerSec = rate * channels * 2;
+        auto _bytesPerSec = rate * channels * 2;
         qtout << "load Mp3:" << _baContent.size() << "elapsed:" << t.elapsed() << "ms";
-        secDuration = _baContent.size() / m_bytesPerSec;
+        secDuration = _baContent.size() / _bytesPerSec;
 
         WavFile::writeBaseHeader(header.data(), rate, sizeof(qint16) * 8, channels, _baContent.size());
     }
@@ -604,8 +601,8 @@ void TestStream::load(const QString &fileName)
             out.readRawData(header.data(), TotalHeadSize);
             out.readRawData(_baContent.data(), wavFile.size() - TotalHeadSize);
             wavFile.close();
-            m_bytesPerSec = wavFile.fileFormat().bytesForDuration(1e6);
-            secDuration = _baContent.size() / m_bytesPerSec;
+            auto _bytesPerSec = wavFile.fileFormat().bytesForDuration(1e6);
+            secDuration = _baContent.size() / _bytesPerSec;
             qtout << "load RIFF" << secDuration << _baContent.size();
         }
     }

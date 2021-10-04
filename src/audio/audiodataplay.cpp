@@ -90,7 +90,7 @@ void AudioDataPlay::startPlay()
         m_audioOutput = new QAudioOutput(m_outputDeviceInfo, m_format, this);
         connect(m_audioOutput, &QAudioOutput::stateChanged, this, &AudioDataPlay::onStateChanged);
         connect(m_audioOutput, &QAudioOutput::notify, this, [=]() {
-            Q_EMIT sig_processedUSecs(m_audioOutput->processedUSecs());
+            Q_EMIT sig_playedUSecs(m_format.durationForBytes(m_bufferDevice.pos()));
         });
         m_audioOutput->setNotifyInterval(200);
         startAudio();
@@ -224,9 +224,9 @@ void AudioDataPlay::onStateChanged(QAudio::State state)
 {
     if (QAudio::IdleState == state)
     {
+//        qDebug() << "onStateChanged: stop" << m_bufferDevice.pos() << m_baBuf.size();
         if (!m_baBuf.isEmpty() && m_bufferDevice.pos() == m_baBuf.size())
             stopPlay();
-//        qDebug() << "onStateChanged: stop" << m_bufferDevice.pos() << m_baBuf.size();
     }
     else
     {
@@ -241,5 +241,5 @@ void AudioDataPlay::onStateChanged(QAudio::State state)
         }
     }
     m_state = state;
-    qDebug() << "onStateChanged:" << m_state;
+    Q_EMIT sig_stateChanged(m_state);
 }

@@ -4,7 +4,8 @@
 #include <QWidget>
 #include <QBuffer>
 #include <QThread>
-#include <QByteArray>
+#include <QAudio>
+#include "struct_id3v2.h"
 
 class AudioDataPlay;
 class QAudioDecoder;
@@ -13,52 +14,7 @@ namespace Ui {
 class AudioWidget;
 }
 
-struct ID3v2Header // ID3v2文件头
-{
-    char header[3];   /*必须为“ID3”否则认为标签不存在*/
-    char ver;         /*版本号ID3V2.3 就记录3*/
-    char revision;    /*副版本号此版本记录为0*/
-    char flag;        /*标志字节，只使用高三位，其它位为0 */
-    char size[4];     /*标签大小*/
-};
-
-struct ID3v2FrameTag // ID3v2标签帧的头
-{
-    char frameID[4]; /*用四个字符标识一个帧，说明其内容*/
-    char size[4]; /*帧内容的大小，不包括帧头*/
-    char flags[2]; /*存放标志，只定义了6位*/
-};
-
-struct ID3v2Frame // ID3v2标签帧整体 + 自定义的辅助信息
-{
-    ID3v2FrameTag header;
-    QByteArray frameData;
-    // 以下为自定义的辅助信息
-    quint32 beginPos;// 此标签帧位于文件的位置
-    quint32 frameLength;// 此标签帧的总长度
-};
-
-// 模拟音频流发送端
-class TestStream : public QObject
-{
-    Q_OBJECT
-    QByteArray       m_baContent;
-    QBuffer          m_readBuffer;
-//    QTimer          *m_timer;
-    int              m_bytesPerSec;
-public:
-    explicit TestStream();
-Q_SIGNALS:
-    void sig_duration(qint32 d);
-    void sig_readyData(const QByteArray &header, const QByteArray &audioData);
-    void sig_data(int sign, int time, const QByteArray &ba);
-public Q_SLOTS:
-    void load(const QString &fileName);
-//    void slot_playbackStateChanged(int state);
-//    void slot_timePositioning(int second);
-private Q_SLOTS:
-//    void onTimer();
-};
+class TestStream;
 
 class AudioWidget : public QWidget
 {
@@ -71,20 +27,17 @@ public:
 private:
     Ui::AudioWidget *ui;
     AudioDataPlay   *m_audioPlayer;
-//    QByteArray       m_baContent;
     QByteArray       m_imageFileByteData;
     QString          m_openedFileName;
-    QBuffer          m_readBuffer;
+//    QBuffer          m_readBuffer;
     QThread          m_thread;
     QString          m_coverFormatStr;
     QImage           m_coverImage;
     QImage           m_shallAddImage;
-//    QTimer          *m_timer;
     TestStream      *m_te;
-    quint32          m_contentPos;
+//    quint32          m_contentPos;
     qint32           m_duration;
-    qint32           m_playTime;
-    int              m_bytesPerSec;
+
     int              m_playbackState; // 0 stop 1 play 2 suspend
     int              m_whichImage; // 0 m_coverImage 1 m_shallAddImage
 
@@ -105,8 +58,8 @@ Q_SIGNALS:
 public Q_SLOTS:
     void slot_setDuration(qint32 d);
     void slot_readyData(const QByteArray &header, const QByteArray &audioData);
-//    void slot_handleData(int sign, int time, const QByteArray &ba);
-    void slot_processedUSecs(int usec);
+    void slot_stateChanged(QAudio::State state);
+    void slot_playedUSecs(int USecs);
 
 private Q_SLOTS:
 //    void onTimerPull();
@@ -119,6 +72,18 @@ private Q_SLOTS:
     void on_btnSaveNew_clicked();
     void on_btnSaveCover_clicked();
 
+};
+
+class TestStream : public QObject
+{
+    Q_OBJECT
+
+Q_SIGNALS:
+    void sig_duration(qint32 d);
+    void sig_readyData(const QByteArray &header, const QByteArray &audioData);
+
+public Q_SLOTS:
+    void load(const QString &fileName);
 };
 
 #endif // AUDIOWIDGET_H
