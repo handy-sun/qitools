@@ -25,7 +25,7 @@ set(CMAKE_AUTOUIC ON)
 #打开全局rcc，非必须，
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt5 COMPONENTS Core Gui Widgets Multimedia REQUIRED)
+find_package(Qt5 CONFIG REQUIRED Core Gui Widgets Network Multimedia)
 #find_package(Threads)
 
 #if(CMAKE_CL_64)
@@ -40,10 +40,10 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-    include(cotire)
 else()
-#    include(pch_gcc4)
+    include(pch_gcc4)
 endif()
+include(cotire)
 include(get_depends)
 
 string(TOLOWER ${CMAKE_CXX_COMPILER_ID} compiler_id)
@@ -71,10 +71,10 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${app_name})
 #${CMAKE_THREAD_LIBS_INIT}
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Multimedia)
-#cotire(${PROJECT_NAME})
+cotire(${PROJECT_NAME})
 
 set(out_list )
-set(_reg_exp "\\.cpp|\\.h|\\.ui")
+set(_reg_exp "\\.cpp|\\.h")
 
 get_link_dependencies(${PROJECT_NAME} _deps)
 foreach(_dep IN LISTS _deps)

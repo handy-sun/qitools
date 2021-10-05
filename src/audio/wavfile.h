@@ -13,7 +13,7 @@ struct chunk
 
 struct RIFFHeader
 {
-    chunk descriptor;  // "RIFF"
+    chunk descriptor;  // "RIFF" descriptor.size don't contain itself
     char type[4];      // "WAVE"
 };
 

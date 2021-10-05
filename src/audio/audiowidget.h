@@ -29,13 +29,11 @@ private:
     AudioDataPlay   *m_audioPlayer;
     QByteArray       m_imageFileByteData;
     QString          m_openedFileName;
-//    QBuffer          m_readBuffer;
     QThread          m_thread;
     QString          m_coverFormatStr;
     QImage           m_coverImage;
     QImage           m_shallAddImage;
     TestStream      *m_te;
-//    quint32          m_contentPos;
     qint32           m_duration;
 
     int              m_playbackState; // 0 stop 1 play 2 suspend
@@ -62,12 +60,10 @@ public Q_SLOTS:
     void slot_playedUSecs(int USecs);
 
 private Q_SLOTS:
-//    void onTimerPull();
     void on_btnPlay_clicked();
     void on_btnStop_clicked();
     void on_btnOpenFile_clicked();
     void on_sliderVol_valueChanged(int value);
-
     void on_btnLoadImage_clicked();
     void on_btnSaveNew_clicked();
     void on_btnSaveCover_clicked();
@@ -77,7 +73,6 @@ private Q_SLOTS:
 class TestStream : public QObject
 {
     Q_OBJECT
-
 Q_SIGNALS:
     void sig_duration(qint32 d);
     void sig_readyData(const QByteArray &header, const QByteArray &audioData);

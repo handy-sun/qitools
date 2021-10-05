@@ -194,8 +194,12 @@ void AudioDataPlay::resetAudio()
 
 void AudioDataPlay::slot_setVolume(qreal vol)
 {
+#if QT_VERSION >= 0x050800
     qreal linearVolume = QAudio::convertVolume(vol, QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
     m_linearVolume = linearVolume;
+#else
+    m_linearVolume = vol;
+#endif
     if (m_audioOutput)
         m_audioOutput->setVolume(m_linearVolume);
 }

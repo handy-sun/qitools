@@ -10,4 +10,5 @@ target_sources(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/audiowidget.ui
     ${CMAKE_CURRENT_SOURCE_DIR}/wavfile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/wavfile.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/struct_id3v2.h
 )

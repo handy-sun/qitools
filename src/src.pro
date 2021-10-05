@@ -30,8 +30,7 @@ win32 {
 }
 
 linux: !android: gcc: QMAKE_LFLAGS += -no-pie
-LIBS += -lxcb \
-        -lX11
+#LIBS += -lxcb -lX11
 
 SOURCES += \
     $$PWD/main.cpp \

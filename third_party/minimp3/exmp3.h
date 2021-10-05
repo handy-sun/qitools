@@ -11,9 +11,11 @@
 #define MINIMP3_IMPLEMENTATION
 #include "minimp3.h"
 
-#ifdef QT_VERSION
+#if (QT_VERSION >= 0x050000)
 #include <QString>
 #include <QFile>
+#include <QTime>
+#include <QDebug>
 #include <QByteArray>
 
 // qt - mp3解码
@@ -30,25 +32,27 @@ qint16 *DecodeToBuffer(const QString &filename, quint32 *sampleRate, quint32 *to
     }
 
     QByteArray _baBuf = file.readAll();
-    unsigned char *file_buf = reinterpret_cast<unsigned char *>(_baBuf.data());
+    unsigned char *fileBuf = reinterpret_cast<unsigned char *>(_baBuf.data());
     music_size = _baBuf.size();
-    if (file_buf != nullptr)
+    if (fileBuf != nullptr)
     {
-        unsigned char *buf = file_buf;
+        unsigned char *buf = fileBuf;
         mp3dec_frame_info_t info;
         mp3dec_t dec;
 
         mp3dec_init(&dec);
         while (true)
         {
-            qint16 frame_buf[2 * 1152];
+            qint16 frame_buf[MINIMP3_MAX_SAMPLES_PER_FRAME];
             int samples = mp3dec_decode_frame(&dec, buf, music_size, frame_buf, &info);
-            if (alloc_samples < (num_samples + samples))
+            if (alloc_samples < num_samples + samples)
             {
                 alloc_samples *= 2;
                 qint16 *tmp = (qint16 *)realloc(music_buf, alloc_samples * 2 * info.channels);
-                if (tmp)
+                if (tmp) {
                     music_buf = tmp;
+                    qDebug() << "rell:" << music_size << num_samples << alloc_samples;
+                }
             }
             if (music_buf)
                 memcpy(music_buf + num_samples * info.channels, frame_buf, samples * info.channels * 2);
@@ -61,10 +65,11 @@ qint16 *DecodeToBuffer(const QString &filename, quint32 *sampleRate, quint32 *to
             music_size -= info.frame_bytes;
         }
 
+
         if (alloc_samples > num_samples)
         {
             qint16 *tmp = (qint16 *)realloc(music_buf, num_samples * 2 * info.channels);
-            //std::cout << "resize: " << num_samples * 2 * info.channels << std::endl;
+            //qDebug() << "final:" << alloc_samples << num_samples;
             if (tmp)
                 music_buf = tmp;
         }
@@ -76,7 +81,6 @@ qint16 *DecodeToBuffer(const QString &filename, quint32 *sampleRate, quint32 *to
         if (num_samples)
             *totalSampleCount = num_samples;
 
-        //free(file_buf);
         return music_buf;
     }
     if (music_buf)
@@ -124,7 +128,7 @@ int16_t *DecodeMp3ToBuffer(char *filename, uint32_t *sampleRate, uint32_t *total
 
         mp3dec_init(&dec);
         for (;;) {
-            int16_t frame_buf[2 * 1152];
+            int16_t frame_buf[MINIMP3_MAX_SAMPLES_PER_FRAME];
             int samples = mp3dec_decode_frame(&dec, buf, music_size, frame_buf, &info);
             if (alloc_samples < (num_samples + samples)) {
                 alloc_samples *= 2;

@@ -28,6 +28,8 @@ ui_*.h
 *.qmlc
 *.jsc
 Makefile*
+bin
+build
 *build-*
 QiTools_*_gcc
 QiTools_*_gcc*

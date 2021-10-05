@@ -9,6 +9,8 @@
 #include "downvscvsixwidget.h"
 #include "stable.h"
 
+#define SLIDERDOWN_WHEN_DRAGGING
+
 static Q_DECL_CONSTEXPR const int TotalHeadSize = sizeof(CombinedHeader) + sizeof(DATAHeader);
 
 AudioWidget::AudioWidget(QWidget *parent)
@@ -16,7 +18,6 @@ AudioWidget::AudioWidget(QWidget *parent)
     , ui(new Ui::AudioWidget)
     , m_audioPlayer(new AudioDataPlay(AudioDataPlay::PushMode, this))
     , m_te(new TestStream)
-//    , m_contentPos(0)
     , m_duration(0)
     , m_playbackState(0)
     , m_whichImage(0)
@@ -44,8 +45,8 @@ AudioWidget::AudioWidget(QWidget *parent)
     connect(m_te, &TestStream::sig_duration, this, &AudioWidget::slot_setDuration);
     connect(m_audioPlayer, &AudioDataPlay::sig_playedUSecs, this, &AudioWidget::slot_playedUSecs);
     connect(m_audioPlayer, &AudioDataPlay::sig_stateChanged, this, &AudioWidget::slot_stateChanged);
-//    ui->sliderProgress->setTracking(false);
-    connect(ui->sliderProgress, &QSlider::sliderReleased/*valueChanged*/, this, [=](){
+
+    connect(ui->sliderProgress, &QSlider::sliderReleased, this, [=](){
         if (m_audioPlayer->state() != QAudio::ActiveState)
             m_audioPlayer->startPlay();
         m_audioPlayer->seekTime(ui->sliderProgress->value());
@@ -54,6 +55,7 @@ AudioWidget::AudioWidget(QWidget *parent)
 
 AudioWidget::~AudioWidget()
 {
+    m_audioPlayer->stopPlay();
     m_thread.quit();
     m_thread.wait();
     delete ui;
@@ -79,20 +81,51 @@ bool AudioWidget::eventFilter(QObject *watched, QEvent *event)
 {
     if (watched == ui->sliderProgress)
     {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
         if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseMove)
         {
-            QSlider *slider = static_cast<QSlider *>(watched);
-            int range = slider->maximum() - slider->minimum();
-            int pos = slider->minimum() + range * ((double)mouseEvent->x() / slider->width());
-            if (pos != slider->sliderPosition())
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+            QSlider *slider = qobject_cast<QSlider *>(watched);
+            qreal range = slider->maximum() - slider->minimum();
+            qreal totalWH;
+            qreal ctrlWH;
+            qreal mousePosF;
+            if (Qt::Horizontal == slider->orientation())
             {
-                slider->setValue(pos);
-                slider->sliderReleased();
-                return true;
+                totalWH = slider->width();
+                ctrlWH = slider->minimumSizeHint().width();
+                mousePosF = slider->invertedAppearance() ? totalWH - mouseEvent->localPos().x()
+                                                         : mouseEvent->localPos().x();
+            }
+            else
+            {
+                totalWH = slider->height();
+                ctrlWH = slider->minimumSizeHint().height();
+                mousePosF = slider->invertedAppearance() ? totalWH - mouseEvent->localPos().y()
+                                                         : mouseEvent->localPos().y();
+            }
+
+            if (totalWH <= ctrlWH)
+                goto otherFilter;
+
+            int accuratePos = slider->minimum() +
+                              range * (mousePosF - ctrlWH / 2.0) / (totalWH - ctrlWH);
+
+            if (accuratePos != slider->sliderPosition()
+                && accuratePos >= slider->minimum()
+                && accuratePos <= slider->maximum())
+            {
+                slider->setValue(accuratePos);
+#ifdef SLIDERDOWN_WHEN_DRAGGING
+                if (mouseEvent->type() == QEvent::MouseMove && mouseEvent->buttons() & Qt::LeftButton)
+                {
+                    ui->labelPlayedTime->setText(QTime(0, 0).addSecs(accuratePos).toString("m:ss"));
+                    slider->setSliderDown(true);
+                }
+#endif
             }
         }
     }
+otherFilter:
     return QObject::eventFilter(watched, event);
 }
 
@@ -156,7 +189,7 @@ void AudioWidget::slot_readyData(const QByteArray &header, const QByteArray &aud
     m_audioPlayer->resetAudio();
     m_audioPlayer->setAudioFormat(_format);
     m_audioPlayer->setAudioData(audioData);
-    ui->labelTotalTime->setText(QTime(0, 0).addSecs(m_duration).toString("m:ss"));
+//    ui->labelTotalTime->setText(QTime(0, 0).addSecs(m_duration).toString("m:ss"));
     ui->btnPlay->setEnabled(true);
 
     QApplication::beep();
@@ -188,8 +221,8 @@ void AudioWidget::slot_playedUSecs(int USecs)
         ui->sliderProgress->blockSignals(true);
         ui->sliderProgress->setValue(playedSecs);
         ui->sliderProgress->blockSignals(false);
+        ui->labelPlayedTime->setText(QTime(0, 0).addSecs(playedSecs).toString("m:ss"));
     }
-    ui->labelPlayedTime->setText(QTime(0, 0).addSecs(playedSecs).toString("m:ss"));
 }
 
 void AudioWidget::on_btnPlay_clicked()
@@ -219,18 +252,21 @@ void AudioWidget::on_btnStop_clicked()
 
 void AudioWidget::on_btnOpenFile_clicked()
 {
-#if 1 // 0 直接用指定文件名
+    QString defaultOpenPath = QDir::homePath() + "/Music";
+#if 1
     const QString fileName = QFileDialog::getOpenFileName(
-        this, QStringLiteral("打开文件"), QDir::homePath() + "/Music",
+        this, QStringLiteral("打开文件"), defaultOpenPath,
+        "All(*.*);;"
         "MPEG Audio Layer 3(*.mp3);;"
         "Windows PCM(*.wav);;"
         "Free Lossless Audio Codec(*.flac);;"
         "Windows Media Audio(*wma);;"
 //        "Monkey's Audio(*.ape);;"
-        "All(*.*)"
         );
-#else
-    const QString fileName = qApp->applicationDirPath() + QStringLiteral("/敢爱敢做 - 林子祥.mp3");
+#else // TEST: 直接用指定文件名
+//    QString fileName = defaultOpenPath + QStringLiteral("/IVANA SPAGNA - Con il tuo nome.mp3");
+//    QString fileName = defaultOpenPath + QStringLiteral("/原声母带《老鹰乐队-加州旅馆》WAV-192KHZ-64bit(precise)(ED2000.COM).wav");
+    QString fileName = defaultOpenPath + QStringLiteral("/HOTEL CALIFORNIA(加州旅馆)-eagle1994墨尔本不插电版本.wav");
 #endif
     if (fileName.isEmpty())
         return;
@@ -238,6 +274,8 @@ void AudioWidget::on_btnOpenFile_clicked()
     Q_EMIT sig_preLoad(fileName);
     m_coverImage = QImage();
     m_shallAddImage = QImage();
+    ui->labelSongTIT2->clear();
+    ui->labelSongTPE2->clear();
     ui->btnPlay->setEnabled(false);
     /// load image from mp3
     QFile file(fileName);
@@ -340,6 +378,7 @@ void AudioWidget::on_btnOpenFile_clicked()
     ui->labelSongTIT2->setText(title);
     ui->labelSongTPE2->setText(author);
     file.close();
+    update();
 }
 
 void AudioWidget::on_sliderVol_valueChanged(int value)
@@ -349,13 +388,14 @@ void AudioWidget::on_sliderVol_valueChanged(int value)
 
 void AudioWidget::on_btnLoadImage_clicked()
 {
+    QString defaultOpenPath = QDir::homePath() + "/Music";
 #if 1
-    const QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("打开图片"), "",
+    const QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("打开图片"), defaultOpenPath,
                                                           "Image File(*.jpg *.png);;"
                                                           "All(*.*)"
                                                           );
 #else
-    const QString fileName = qApp->applicationDirPath() + QStringLiteral("/敢爱敢做 - 林子祥.mp3");
+    const QString fileName = defaultOpenPath + QStringLiteral("/IVANA SPAGNA - Con il tuo nome.mp3");
 #endif
     if (fileName.isEmpty())
         return;
@@ -429,6 +469,13 @@ void AudioWidget::on_btnSaveNew_clicked()
 
     if (!temp.startsWith("ID3")) // 文件开头若没有ID3v2的头，加上
     {
+        if (temp.size() <= 128)
+            return;
+
+        QByteArray id3v1Tag = temp.right(128);
+        if (!id3v1Tag.startsWith("TAG"))
+            return;
+
         ID3v2Header hdr;
         memset(&hdr, 0, sizeof(hdr));
         qstrcpy(&hdr.header[0], "ID3");
@@ -593,18 +640,18 @@ void TestStream::load(const QString &fileName)
     else if (head.startsWith("RIFF"))
     {
         WavFile wavFile;
-        if (wavFile.open(fileName))
-        {
-            QDataStream out(&wavFile);
-            wavFile.seek(0);
-            _baContent.resize(wavFile.size());
-            out.readRawData(header.data(), TotalHeadSize);
-            out.readRawData(_baContent.data(), wavFile.size() - TotalHeadSize);
-            wavFile.close();
-            auto _bytesPerSec = wavFile.fileFormat().bytesForDuration(1e6);
-            secDuration = _baContent.size() / _bytesPerSec;
-            qtout << "load RIFF" << secDuration << _baContent.size();
-        }
+        if (!wavFile.open(fileName))
+            return;
+
+        QDataStream out(&wavFile);
+        wavFile.seek(0);
+        _baContent.resize(wavFile.size());
+        out.readRawData(header.data(), TotalHeadSize);
+        out.readRawData(_baContent.data(), wavFile.size() - TotalHeadSize);
+        wavFile.close();
+        auto _bytesPerSec = wavFile.fileFormat().bytesForDuration(1e6);
+        secDuration = _baContent.size() / _bytesPerSec;
+        qtout << "load RIFF" << secDuration << _baContent.size();
     }
     Q_EMIT sig_readyData(header, _baContent);
     Q_EMIT sig_duration(secDuration);

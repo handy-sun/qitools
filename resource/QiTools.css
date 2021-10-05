@@ -58,14 +58,14 @@ QTabWidget#tabWidgetTool QTabBar::tab {
 QTabWidget#tabWidgetTool, QTabWidget#tabWidgetTool .QWidget {
 /*    background-color: rgb(180, 205, 245);*/
 }
-QSlider#hSliderProgress {
+QSlider#sliderProgress {
     background: transparent;
 }
-QSlider#hSliderProgress::groove:horizontal {
+QSlider#sliderProgress::groove:horizontal {
     height: 4px;
     background-color: rgba(138, 152, 163, 150);
 }
-QSlider#hSliderProgress::handle:horizontal {
+QSlider#sliderProgress::handle:horizontal {
     width: 10px;
     height: 10px;
     margin: -6px 0px -6px 0px;
@@ -73,10 +73,10 @@ QSlider#hSliderProgress::handle:horizontal {
     border: 3px solid rgb(221, 221, 221);
     background-color: rgb(0, 66, 114); 
 }
-QSlider#hSliderProgress::sub-page:horizontal {                               
+QSlider#sliderProgress::sub-page:horizontal {
     background-color: rgb(24, 74, 112);                     
 }
-/* QSlider#hSliderProgress::add-page:horizontal {
+/* QSlider#sliderProgress::add-page:horizontal {
     background-color: rgb(255, 0, 0);
 } */
 QSlider#sliderVol::groove:horizontal {
