@@ -16,6 +16,7 @@ TARGET = $$TARGET_NAME
 
 CONFIG += c++11 \
     no_keywords \
+    skip_target_version_ext
 
 DEFINES += QT_MESSAGELOGCONTEXT \
     QT_DEPRECATED_WARNINGS \
