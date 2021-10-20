@@ -6,6 +6,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    a.setApplicationVersion(VERSION_STRING);
     setvbuf(stdout, nullptr, _IONBF, 1024);
 
     QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
