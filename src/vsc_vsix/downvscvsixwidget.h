@@ -14,7 +14,7 @@ class DownVscVsixWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit DownVscVsixWidget(QWidget *parent = Q_NULLPTR);
+    explicit DownVscVsixWidget(QWidget *parent = nullptr);
     ~DownVscVsixWidget();
 
     static QString getSuitableDecMeasure(quint64 bytes, double *outSize);

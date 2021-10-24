@@ -9,8 +9,8 @@
 #include <QtCore>
 #include <QtGui>
 #include <QtWidgets>
-#include <QtNetwork>
-#include <QtMultimedia>
+//#include <QtNetwork>
+//#include <QtMultimedia>
 #include <functional>
 #include <initializer_list>
 

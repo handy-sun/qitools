@@ -10,6 +10,8 @@ static const int greyHeight = 30;
 static const int blockOffset = 5;
 static const int blockSize = greyHeight - 2 * blockOffset;
 
+using namespace ColorTool;
+
 ScreenColorPicker::ScreenColorPicker(QWidget *parent)
     : QDialog(parent)
 {

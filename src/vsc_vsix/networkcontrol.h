@@ -15,7 +15,7 @@ class NetworkControl : public QObject
 {
     Q_OBJECT
 public:
-    explicit NetworkControl(QObject *parent = Q_NULLPTR);
+    explicit NetworkControl(QObject *parent = nullptr);
     ~NetworkControl();
 
     bool canWriteInFile(const QString &fileName);

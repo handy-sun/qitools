@@ -1,7 +1,9 @@
 ﻿#include "propertygenerator.h"
 #include "ui_propertygenerator.h"
 #include "propertymanager.h"
-#include "stable.h"
+#include <QMessageBox>
+
+using namespace CodeGen;
 
 PropertyGenerator::PropertyGenerator(QWidget *parent) :
     QWidget(parent),
@@ -64,3 +66,4 @@ void PropertyGenerator::on_pushBtnGenProperty_clicked()
 
     ui->textEditGenProperty->setText(qProperty);
 }
+

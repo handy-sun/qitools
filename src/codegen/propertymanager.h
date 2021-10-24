@@ -4,6 +4,8 @@
 #include <functional>
 #include <QHash>
 
+namespace CodeGen {
+
 class PropertyManager
 {
 public:
@@ -27,5 +29,7 @@ private:
     m_propertyType;
 
 };
+
+}
 
 #endif // PROPERTYMANAGER_H

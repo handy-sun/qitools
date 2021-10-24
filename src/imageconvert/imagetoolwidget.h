@@ -13,7 +13,7 @@ class ImageToolWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ImageToolWidget(QWidget *parent = Q_NULLPTR);
+    explicit ImageToolWidget(QWidget *parent = nullptr);
     ~ImageToolWidget();
 
 private:

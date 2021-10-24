@@ -75,6 +75,8 @@ static bool toColorF(const QStringList &strlist, uchar arr[])
     return true;
 }
 
+using namespace ColorTool;
+
 QColorDialog *ColorConvert::s_clrDlg = nullptr;
 
 ColorConvert::ColorConvert(QWidget *parent)

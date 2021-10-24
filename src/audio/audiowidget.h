@@ -22,7 +22,7 @@ class AudioWidget : public QWidget
 
 public:
     explicit AudioWidget(QWidget *parent = nullptr);
-    ~AudioWidget() Q_DECL_OVERRIDE;
+    ~AudioWidget() override;
 
 private:
     Ui::AudioWidget *ui;
@@ -44,9 +44,9 @@ private:
     void changeStateIcon(int state);
 
 protected:
-    bool eventFilter(QObject *watched, QEvent *event) Q_DECL_OVERRIDE;
-    void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
-    void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
+    bool eventFilter(QObject *watched, QEvent *event) override;
+    void paintEvent(QPaintEvent *) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 Q_SIGNALS:
     void sig_playbackStateChanged(int state);

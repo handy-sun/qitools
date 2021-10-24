@@ -1,4 +1,6 @@
-INCLUDEPATH += $$PWD
+include(../dynamicplugin.pri)
+
+TARGET = codegen
 
 SOURCES += \
     $$PWD/propertygenerator.cpp \

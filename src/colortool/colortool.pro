@@ -1,4 +1,6 @@
-INCLUDEPATH += $$PWD
+include(../dynamicplugin.pri)
+
+TARGET = colortool
 
 HEADERS += \
     $$PWD/colorconvert.h \

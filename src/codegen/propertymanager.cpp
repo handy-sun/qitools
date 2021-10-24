@@ -1,6 +1,7 @@
 ﻿#include "propertymanager.h"
 #include <QStringList>
 
+using namespace CodeGen;
 
 PropertyManager::PropertyManager()
     : m_argumentType(0)

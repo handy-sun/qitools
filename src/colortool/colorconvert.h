@@ -2,6 +2,7 @@
 #define COLORCONVERT_H
 
 #include <QWidget>
+#include "../core/pluginterface.h"
 
 namespace Ui {
 class ColorConvert;
@@ -9,15 +10,22 @@ class ColorConvert;
 
 class QTableWidget;
 class QColorDialog;
+
+namespace ColorTool {
+
 class ScreenColorPicker;
 
-class ColorConvert : public QWidget
+class ColorConvert : public QWidget, Core::PlugInterface
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.sooncheer.QiTools.PlugInterface.049c19-1.0")
+    Q_INTERFACES(Core::PlugInterface)
 
 public:
     explicit ColorConvert(QWidget *parent = nullptr);
-    ~ColorConvert();
+    ~ColorConvert() override;
+
+    QString pluginName() const override { return tr("CodeTool"); }
 
 private:
     Ui::ColorConvert    *ui;
@@ -44,5 +52,7 @@ private Q_SLOTS:
     void on_toolButtonPal_clicked();
 
 };
+
+}
 
 #endif // COLORCONVERT_H

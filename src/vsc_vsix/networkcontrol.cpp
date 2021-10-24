@@ -9,8 +9,8 @@ NetworkControl::NetworkControl(QObject *parent)
     : QObject(parent)
     , m_isHttpRequestAborted(false)
     , m_netAcManager(new QNetworkAccessManager(this))
-    , m_netReply(Q_NULLPTR)
-    , m_writtenFile(Q_NULLPTR)
+    , m_netReply(nullptr)
+    , m_writtenFile(nullptr)
 {
 
 }
@@ -85,7 +85,7 @@ void NetworkControl::slot_getFileInfo(const QUrl &inputUrl, const QByteArray &he
             Q_EMIT sig_requesetFileInfo(headReply->rawHeader(headerNameBa));
 
         headReply->deleteLater();
-        headReply = Q_NULLPTR;
+        headReply = nullptr;
         return;
     }
 }
@@ -124,14 +124,14 @@ void NetworkControl::httpFinished()
         fi.setFile(m_writtenFile->fileName());
         m_writtenFile->close();
         delete m_writtenFile;
-        m_writtenFile = Q_NULLPTR;
+        m_writtenFile = nullptr;
     }
 
     if (m_isHttpRequestAborted)
     {
         Q_EMIT sig_eventMessge("Aborted!", true);
         m_netReply->deleteLater();
-        m_netReply = Q_NULLPTR;
+        m_netReply = nullptr;
         return;
     }
 
@@ -140,14 +140,14 @@ void NetworkControl::httpFinished()
         QFile::remove(fi.absoluteFilePath());
         Q_EMIT sig_eventMessge("Download failed: " + m_netReply->errorString() + "\n", true);
         m_netReply->deleteLater();
-        m_netReply = Q_NULLPTR;
+        m_netReply = nullptr;
         return;
     }
 
     const QVariant redirectionTarget = m_netReply->attribute(QNetworkRequest::RedirectionTargetAttribute);
 
     m_netReply->deleteLater();
-    m_netReply = Q_NULLPTR;
+    m_netReply = nullptr;
 
     if (!redirectionTarget.isNull())
     {

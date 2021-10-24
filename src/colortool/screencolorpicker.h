@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+namespace ColorTool {
+
 class ScreenColorPicker : public QDialog
 {
     Q_OBJECT
@@ -26,5 +28,7 @@ Q_SIGNALS:
     void pickFinished(bool isUseful, const QColor &color);
 
 };
+
+}
 
 #endif // SCREENCOLORPICKER_H
