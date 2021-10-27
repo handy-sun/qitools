@@ -80,10 +80,6 @@
        <property name="text">
         <string>   拾取屏幕颜色</string>
        </property>
-       <property name="icon">
-        <iconset resource="../../resource/qitools.qrc">
-         <normaloff>:/colorpicker.png</normaloff>:/colorpicker.png</iconset>
-       </property>
        <property name="toolButtonStyle">
         <enum>Qt::ToolButtonTextBesideIcon</enum>
        </property>
@@ -122,8 +118,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../resource/qitools.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

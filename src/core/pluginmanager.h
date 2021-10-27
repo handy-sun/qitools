@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QList>
+#include <QDir>
+#include <QWidget>
 
 namespace Core {
 

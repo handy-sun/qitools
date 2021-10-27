@@ -13,4 +13,6 @@ SOURCES += \
 FORMS += \
     $$PWD/colorconvert.ui
 
+RESOURCES +=  $$PWD/colortool.qrc
+
 

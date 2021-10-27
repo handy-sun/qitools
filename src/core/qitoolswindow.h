@@ -32,6 +32,6 @@ private Q_SLOTS:
 
 }
 
-QString readStyleSheetFile(const QString &rcFile);
+//QString readStyleSheetFile(const QString &rcFile);
 
 #endif // QITOOLSWINDOW_H

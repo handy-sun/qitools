@@ -86,6 +86,7 @@ ColorConvert::ColorConvert(QWidget *parent)
     , m_pmDecoration(QPixmap(36, 36))
 {
     ui->setupUi(this);
+    ui->toolButtonPick->setIcon(QIcon(QPixmap(":/colortool/colorpicker.png")));
     m_table = ui->tableWidgetColor;
     m_pmDecoration.fill(Qt::transparent);
     initTableWidget();

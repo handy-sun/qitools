@@ -45,7 +45,7 @@ void PluginManager::loadPlugins(const QString &dirPath)
     }
 
     auto _dir = QDir(dirPath);
-#ifdef _DEBUG
+#ifdef QT_DEBUG
     if (_dir.cd("debug"))
 #endif
     {

@@ -1,5 +1,4 @@
 ﻿#include "qitoolswindow.h"
-//#include "ui_qitoolswindow.h"
 #include "pluginmanager.h"
 #include "pluginterface.h"
 
@@ -8,6 +7,9 @@
 #include <QDebug>
 #include <QListWidget>
 #include <QSettings>
+#include <QStackedWidget>
+#include <QBoxLayout>
+#include <QApplication>
 
 using namespace Core;
 
@@ -102,22 +104,22 @@ void QiToolsWindow::onListWidgetPressed(int r)
     ui->stackedWidget->setCurrentWidget(m_stackedHash.value(_str));
 }
 
-QString readStyleSheetFile(const QString &rcFile)
-{
-    QFile file(/*qApp->applicationDirPath() + */ rcFile);
-    if (!file.exists())
-    {
-        qDebug("File Is Not Exists.");
-        return "";
-    }
-    if (file.open(QFile::ReadOnly | QFile::Text))
-    {
-        QString styleSheet = file.readAll();
-        file.close();
-        return styleSheet;
-    }
-    else
-    {
-        return file.errorString();
-    }
-}
+//QString readStyleSheetFile(const QString &rcFile)
+//{
+//    QFile file(rcFile);
+//    if (!file.exists())
+//    {
+//        qDebug("File Is Not Exists.");
+//        return "";
+//    }
+//    if (file.open(QFile::ReadOnly | QFile::Text))
+//    {
+//        QString styleSheet = file.readAll();
+//        file.close();
+//        return styleSheet;
+//    }
+//    else
+//    {
+//        return file.errorString();
+//    }
+//}
