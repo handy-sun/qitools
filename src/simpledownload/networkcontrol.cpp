@@ -5,6 +5,8 @@
 #include <QTimer>
 #include <QDir>
 
+using namespace SimpleDownload;
+
 NetworkControl::NetworkControl(QObject *parent)
     : QObject(parent)
     , m_isHttpRequestAborted(false)

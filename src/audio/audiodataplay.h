@@ -12,6 +12,8 @@ QT_BEGIN_NAMESPACE
 class QAudioOutput;
 QT_END_NAMESPACE
 
+namespace Audio {
+
 class AudioDataPlay : public QObject
 {
     Q_OBJECT
@@ -69,5 +71,7 @@ private Q_SLOTS:
     void onTimerPull();
     void onStateChanged(QAudio::State state);
 };
+
+}
 
 #endif // AUDIODATAPLAY_H

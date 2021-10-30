@@ -3,6 +3,8 @@
 #include <QDebug>
 #include "audiodataplay.h"
 
+using namespace Audio;
+
 AudioDataPlay::AudioDataPlay(AudioDataPlay::PlayMode mode, QObject *parent)
     : QObject(parent)
     , m_playMode(mode)

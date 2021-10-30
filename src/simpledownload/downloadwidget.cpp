@@ -1,14 +1,19 @@
-﻿#include <QSslSocket>
-#include "downvscvsixwidget.h"
-#include "ui_downvscvsixwidget.h"
+﻿#include "downloadwidget.h"
+#include "ui_downloadwidget.h"
 #include "networkcontrol.h"
-#include "stable.h"
 
-QStringList DownVscVsixWidget::s_measures = { "B", "KB", "MB", "GB", "TB" };
+#include <QSslSocket>
+#include <QDesktopServices>
+#include <QMessageBox>
+#include <QFileDialog>
 
-DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
+using namespace SimpleDownload;
+
+QStringList DownloadWidget::s_measures = { "B", "KB", "MB", "GB", "TB" };
+
+DownloadWidget::DownloadWidget(QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::DownVscVsixWidget)
+    , ui(new Ui::DownloadWidget)
     , m_netDownloadCtrl(new NetworkControl(this))
     , m_dowoloadDir(QDir(qApp->applicationDirPath()))
     , m_fileSize(0)
@@ -26,20 +31,20 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
     ui->textEditWebUrl->setWordWrapMode(QTextOption::WrapAnywhere);
     ui->textEditVscUrl->setWordWrapMode(QTextOption::WrapAnywhere);
 
-    connect(this, &DownVscVsixWidget::sig_getFileInfo, m_netDownloadCtrl, &NetworkControl::slot_getFileInfo);
-    connect(this, &DownVscVsixWidget::sig_startRequeset, m_netDownloadCtrl, &NetworkControl::slot_startRequese);
-    connect(this, &DownVscVsixWidget::sig_cancelDownload, m_netDownloadCtrl, &NetworkControl::slot_cancelDownload);
-    connect(m_netDownloadCtrl, &NetworkControl::sig_downloadProgress, this, &DownVscVsixWidget::slot_downloadProgress);
-    connect(m_netDownloadCtrl, &NetworkControl::sig_eventMessge, this, &DownVscVsixWidget::slot_eventMessge);
-    connect(m_netDownloadCtrl, &NetworkControl::sig_requesetFileInfo, this, &DownVscVsixWidget::slot_requesetFileInfo);
+    connect(this, &DownloadWidget::sig_getFileInfo, m_netDownloadCtrl, &NetworkControl::slot_getFileInfo);
+    connect(this, &DownloadWidget::sig_startRequeset, m_netDownloadCtrl, &NetworkControl::slot_startRequese);
+    connect(this, &DownloadWidget::sig_cancelDownload, m_netDownloadCtrl, &NetworkControl::slot_cancelDownload);
+    connect(m_netDownloadCtrl, &NetworkControl::sig_downloadProgress, this, &DownloadWidget::slot_downloadProgress);
+    connect(m_netDownloadCtrl, &NetworkControl::sig_eventMessge, this, &DownloadWidget::slot_eventMessge);
+    connect(m_netDownloadCtrl, &NetworkControl::sig_requesetFileInfo, this, &DownloadWidget::slot_requesetFileInfo);
 
-    connect(ui->pushButtonShowToolBox, &QPushButton::toggled, ui->tabWidgetTool, &QToolBox::setVisible);
+//    connect(ui->pushButtonShowToolBox, &QPushButton::toggled, ui->tabWidgetTool, &QToolBox::setVisible);
     connect(ui->lineEditDownloadUrl, &QLineEdit::textChanged, this, [=]()
     {
         ui->pushButtonDownload->setEnabled(!ui->lineEditDownloadUrl->text().isEmpty());
     });
-    connect(ui->lineEditDownloadUrl, &QLineEdit::textChanged, this, &DownVscVsixWidget::fillInFileName);
-    connect(ui->lineEditDownloadUrl, &QLineEdit::textChanged, this, &DownVscVsixWidget::getFileSize);
+    connect(ui->lineEditDownloadUrl, &QLineEdit::textChanged, this, &DownloadWidget::fillInFileName);
+    connect(ui->lineEditDownloadUrl, &QLineEdit::textChanged, this, &DownloadWidget::getFileSize);
 
     connect(ui->lineEditFilePath, &QLineEdit::textChanged, this, [=](const QString &text)
     {
@@ -61,12 +66,12 @@ DownVscVsixWidget::DownVscVsixWidget(QWidget *parent)
     ui->textBrowserMessage->append(QStringLiteral("-------- 显示历次下载的信息 --------"));
 }
 
-DownVscVsixWidget::~DownVscVsixWidget()
+DownloadWidget::~DownloadWidget()
 {
     delete ui;
 }
 
-QString DownVscVsixWidget::getSuitableDecMeasure(quint64 bytes, double *outSize)
+QString DownloadWidget::getSuitableDecMeasure(quint64 bytes, double *outSize)
 {
     long double sizeAsDouble = bytes;
 
@@ -82,7 +87,7 @@ QString DownVscVsixWidget::getSuitableDecMeasure(quint64 bytes, double *outSize)
     return s_measures.at(level);
 }
 
-int DownVscVsixWidget::getSuitableDecLevel(quint64 bytes, double *outSize)
+int DownloadWidget::getSuitableDecLevel(quint64 bytes, double *outSize)
 {
     long double sizeAsDouble = bytes;
 
@@ -98,7 +103,7 @@ int DownVscVsixWidget::getSuitableDecLevel(quint64 bytes, double *outSize)
     return level;
 }
 
-void DownVscVsixWidget::slot_downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+void DownloadWidget::slot_downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     ui->progressBar->setMaximum(0 == bytesTotal ? 1 : bytesTotal);
     ui->progressBar->setValue(bytesReceived);
@@ -116,7 +121,7 @@ void DownVscVsixWidget::slot_downloadProgress(qint64 bytesReceived, qint64 bytes
                                 .arg(suitableTotalSize, 0, 'f', 2).arg(s_measures.at(totalLevel)));
 }
 
-void DownVscVsixWidget::slot_eventMessge(const QString &msg, bool isEnable)
+void DownloadWidget::slot_eventMessge(const QString &msg, bool isEnable)
 {
     ui->textBrowserMessage->append(msg);
     ui->pushButtonDownload->setEnabled(isEnable);
@@ -129,7 +134,7 @@ void DownVscVsixWidget::slot_eventMessge(const QString &msg, bool isEnable)
     }
 }
 
-void DownVscVsixWidget::slot_requesetFileInfo(const QByteArray &ba)
+void DownloadWidget::slot_requesetFileInfo(const QByteArray &ba)
 {
     if (ba.isNull())
         return;
@@ -140,7 +145,7 @@ void DownVscVsixWidget::slot_requesetFileInfo(const QByteArray &ba)
     ui->textBrowserMessage->append(QStringLiteral("已获取文件大小: %1 %2").arg(newSize, 0, 'f', 2).arg(s_measures.at(m_measureLevel)));
 }
 
-void DownVscVsixWidget::fillInFileName()
+void DownloadWidget::fillInFileName()
 {
     QUrl u = QUrl::fromUserInput(ui->lineEditDownloadUrl->text().trimmed());
     if (u.fileName().isEmpty())
@@ -155,7 +160,7 @@ void DownVscVsixWidget::fillInFileName()
     ui->lineEditFilePath->setText(m_dowoloadDir.absoluteFilePath(m_defaultFileName));
 }
 
-void DownVscVsixWidget::getFileSize()
+void DownloadWidget::getFileSize()
 {
     if (0 != m_fileSize)
         return;
@@ -164,7 +169,7 @@ void DownVscVsixWidget::getFileSize()
     Q_EMIT sig_getFileInfo(inputUrl, QString("Content-Length").toUtf8());
 }
 
-void DownVscVsixWidget::on_pushButtonDownload_clicked()
+void DownloadWidget::on_pushButtonDownload_clicked()
 {
     if (ui->lineEditDownloadUrl->text().isEmpty() /*|| ui->lineEditFilePath->text().endsWith('/')*/)
     {
@@ -198,7 +203,7 @@ void DownVscVsixWidget::on_pushButtonDownload_clicked()
     Q_EMIT sig_startRequeset(filePath, dlUrl);
 }
 
-void DownVscVsixWidget::on_pushButtonGenVsixUrl_clicked()
+void DownloadWidget::on_pushButtonGenVsixUrl_clicked()
 {
     if (ui->textEditWebUrl->toPlainText().isEmpty() || ui->lineEditVersion->text().isEmpty())
     {
@@ -231,7 +236,7 @@ void DownVscVsixWidget::on_pushButtonGenVsixUrl_clicked()
     ui->lineEditFilePath->setText(m_dowoloadDir.absoluteFilePath(vsixName));
 }
 
-void DownVscVsixWidget::on_pushButtonGenVscUrl_clicked()
+void DownloadWidget::on_pushButtonGenVscUrl_clicked()
 {
     QString cnUrl = ui->textEditVscUrl->toPlainText();
     cnUrl.replace("az764295.vo.msecnd.net", "vscode.cdn.azure.cn");
@@ -240,14 +245,14 @@ void DownVscVsixWidget::on_pushButtonGenVscUrl_clicked()
     ui->lineEditDownloadUrl->setText(cnUrl);
 }
 
-void DownVscVsixWidget::on_pushButtonOpenDir_clicked()
+void DownloadWidget::on_pushButtonOpenDir_clicked()
 {
     auto urlpath = QFileDialog::getExistingDirectory(this, QStringLiteral("选择保存路径"));
     m_dowoloadDir = QDir(urlpath);
     ui->lineEditFilePath->setText(m_dowoloadDir.absoluteFilePath(m_defaultFileName));
 }
 
-void DownVscVsixWidget::on_pushButtonCancel_clicked()
+void DownloadWidget::on_pushButtonCancel_clicked()
 {
     if (QMessageBox::question(this, QStringLiteral("取消操作?"),
                               QStringLiteral("是否取消下载？ 取消后文件将删除"),

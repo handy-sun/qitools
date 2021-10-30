@@ -5,24 +5,33 @@
 #include <QBuffer>
 #include <QThread>
 #include <QAudio>
+#include "../core/pluginterface.h"
 #include "struct_id3v2.h"
 
-class AudioDataPlay;
+QT_BEGIN_NAMESPACE
 class QAudioDecoder;
+QT_END_NAMESPACE
 
 namespace Ui {
 class AudioWidget;
 }
 
+namespace Audio {
+
+class AudioDataPlay;
 class TestStream;
 
-class AudioWidget : public QWidget
+class AudioWidget : public QWidget, Core::PlugInterface
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.sooncheer.QiTools.PlugInterface.049c19-1.0")
+    Q_INTERFACES(Core::PlugInterface)
 
 public:
     explicit AudioWidget(QWidget *parent = nullptr);
     ~AudioWidget() override;
+
+    QString pluginName() const override { return tr("Audio"); }
 
 private:
     Ui::AudioWidget *ui;
@@ -80,5 +89,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void load(const QString &fileName);
 };
+
+}
 
 #endif // AUDIOWIDGET_H

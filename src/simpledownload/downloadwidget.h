@@ -1,26 +1,34 @@
-﻿#ifndef DOWNVSCVSIXWIDGET_H
-#define DOWNVSCVSIXWIDGET_H
+﻿#ifndef DOWNLOADWIDGET_H
+#define DOWNLOADWIDGET_H
 
 #include <QWidget>
 #include <QDir>
+#include "../core/pluginterface.h"
 
 namespace Ui {
-class DownVscVsixWidget;
+class DownloadWidget;
 }
+
+namespace SimpleDownload {
 
 class NetworkControl;
 
-class DownVscVsixWidget : public QWidget
+class DownloadWidget : public QWidget, Core::PlugInterface
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.sooncheer.QiTools.PlugInterface.049c19-1.0")
+    Q_INTERFACES(Core::PlugInterface)
+
 public:
-    explicit DownVscVsixWidget(QWidget *parent = nullptr);
-    ~DownVscVsixWidget();
+    explicit DownloadWidget(QWidget *parent = nullptr);
+    ~DownloadWidget();
+
+    QString pluginName() const override { return tr("SimpleDownload"); }
 
     static QString getSuitableDecMeasure(quint64 bytes, double *outSize);
 
 private:
-    Ui::DownVscVsixWidget *ui;
+    Ui::DownloadWidget *ui;
 
     NetworkControl        *m_netDownloadCtrl;
     QDir                   m_dowoloadDir;
@@ -52,4 +60,6 @@ private Q_SLOTS:
     void on_pushButtonCancel_clicked();
 };
 
-#endif // DOWNVSCVSIXWIDGET_H
+} // namespace SimpleDownload
+
+#endif // DOWNLOADWIDGET_H

@@ -1,4 +1,10 @@
-INCLUDEPATH += $$PWD
+include(../dynamicplugin.pri)
+
+QT *= multimedia
+
+include(minimp3/minimp3.pri)
+
+DEFINES *= SLIDERDOWN_WHEN_DRAGGING
 
 FORMS += \
     $$PWD/audiowidget.ui

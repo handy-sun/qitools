@@ -1,17 +1,23 @@
-﻿#include <QAudioFormat>
-#include <QAudioDecoder>
-#include <QTimer>
-#include "audiowidget.h"
+﻿#include "audiowidget.h"
 #include "ui_audiowidget.h"
 #include "audiodataplay.h"
 #include "wavfile.h"
-#include "exmp3.h"
-#include "downvscvsixwidget.h"
-#include "stable.h"
+#include "minimp3/exmp3.h"
 
-#define SLIDERDOWN_WHEN_DRAGGING
+#include <QAudioFormat>
+#include <QAudioDecoder>
+#include <QTimer>
+#include <QDebug>
+#include <QStyle>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QDir>
+#include <QFileDialog>
+#include <QTextCodec>
 
 static Q_DECL_CONSTEXPR const int TotalHeadSize = sizeof(CombinedHeader) + sizeof(DATAHeader);
+
+using namespace Audio;
 
 AudioWidget::AudioWidget(QWidget *parent)
     : QWidget(parent)
@@ -281,7 +287,7 @@ void AudioWidget::on_btnOpenFile_clicked()
     QFile file(fileName);
     if (!file.exists() || !file.open(QIODevice::ReadOnly) || file.size() < 10)
     {
-        qtout << file.errorString() << file.size();
+        qDebug() << file.errorString() << file.size();
         return;
     }
     auto head = file.peek(10);
@@ -297,7 +303,7 @@ void AudioWidget::on_btnOpenFile_clicked()
     int mp3TagSize = (headerTagSize[0] << 21) | (headerTagSize[1] << 14) | (headerTagSize[2] << 7) | headerTagSize[3];
     int totalTagSize = mp3TagSize + 10; // 数据帧前的所有标签总长度
     QString title, author;
-    qtout << "mp3_TagSize =" << mp3TagSize;
+    qDebug() << "mp3_TagSize =" << mp3TagSize;
     file.seek(10);
     bool imageFlag = false;
 
@@ -369,7 +375,7 @@ void AudioWidget::on_btnOpenFile_clicked()
 
     if (imageFlag)
     {
-        qtout << "image size:" << m_coverImage.width() << m_coverImage.height() << m_coverImage.format();
+        qDebug() << "image size:" << m_coverImage.width() << m_coverImage.height() << m_coverImage.format();
         ui->labelImage->setToolTip(QString("%1x%2").arg(m_coverImage.width()).arg(m_coverImage.height()));
     }
     else
@@ -403,7 +409,7 @@ void AudioWidget::on_btnLoadImage_clicked()
     QFile picFile(fileName);
     if (!picFile.exists() || !picFile.open(QIODevice::ReadOnly) || picFile.size() < 8)
     {
-        qtout << picFile.errorString();
+        qDebug() << picFile.errorString();
         return;
     }
     m_imageFileByteData = picFile.readAll();
@@ -544,7 +550,7 @@ void AudioWidget::on_btnSaveNew_clicked()
     {
         fileNew.write(temp);
         fileNew.close();
-        qtout << "save success:" << fileNew.fileName();
+        qDebug() << "save success:" << fileNew.fileName();
     }
 }
 
@@ -563,14 +569,14 @@ void TestStream::load(const QString &fileName)
     QFile file(fileName);
     if (!file.exists() || !file.open(QIODevice::ReadOnly) || file.size() < 10)
     {
-        qtout << file.errorString() << file.size();
+        qDebug() << file.errorString() << file.size();
         return;
     }
     QByteArray head = file.peek(10);
     file.close();
 
     QByteArray _baContent;
-#ifdef Q_AUDIO_DECODER // QAudioDecoder 依赖系统自带的音频解码器，很多格式不支持，且效率一般
+#ifdef USE_QAUDIODECODER // QAudioDecoder 依赖系统自带的音频解码器，很多格式不支持，且效率一般
     QEventLoop loop;
     QSharedPointer<QAudioDecoder> decoder(new QAudioDecoder);    
     connect(decoder.data(), &QAudioDecoder::bufferReady, [this, decoder]()
@@ -587,12 +593,12 @@ void TestStream::load(const QString &fileName)
         QByteArray header(TotalHeadSize, 0);
         WavFile::writeBaseHeader(header.data(), fmt.sampleRate(), fmt.sampleSize(), fmt.channelCount(), _baContent.size());
         auto bytesPerSec = fmt.sampleRate() * fmt.channelCount() * 2;
-        qtout << "format:" <<  fmt.sampleRate() << fmt.sampleSize() << fmt.channelCount();
+        qDebug() << "format:" <<  fmt.sampleRate() << fmt.sampleSize() << fmt.channelCount();
         _baContent.prepend(header);
     });
     connect(decoder.data(), &QAudioDecoder::finished, &loop, &QEventLoop::quit);
     connect(decoder.data(), QOverload<QAudioDecoder::Error>::of(&QAudioDecoder::error), [decoder](QAudioDecoder::Error error)
-    { qtout << error << decoder->errorString();});
+    { qDebug() << error << decoder->errorString();});
     connect(decoder.data(), QOverload<QAudioDecoder::Error>::of(&QAudioDecoder::error), &loop, &QEventLoop::quit);
 
     decoder->setSourceFilename(fileName);
@@ -617,7 +623,7 @@ void TestStream::load(const QString &fileName)
     }
     else
     {
-        qtout << "error message" << decoder->errorString() << _baContent.size();
+        qDebug() << "error message" << decoder->errorString() << _baContent.size();
     }
 #endif
     quint32 secDuration = 0;
@@ -632,7 +638,7 @@ void TestStream::load(const QString &fileName)
         memcpy(_baContent.data(), shBuf, _baContent.size());
         free(shBuf);
         auto _bytesPerSec = rate * channels * 2;
-        qtout << "load Mp3:" << _baContent.size() << "elapsed:" << t.elapsed() << "ms";
+        qDebug() << "load Mp3:" << _baContent.size() << "elapsed:" << t.elapsed() << "ms";
         secDuration = _baContent.size() / _bytesPerSec;
 
         WavFile::writeBaseHeader(header.data(), rate, sizeof(qint16) * 8, channels, _baContent.size());
@@ -651,7 +657,7 @@ void TestStream::load(const QString &fileName)
         wavFile.close();
         auto _bytesPerSec = wavFile.fileFormat().bytesForDuration(1e6);
         secDuration = _baContent.size() / _bytesPerSec;
-        qtout << "load RIFF" << secDuration << _baContent.size();
+        qDebug() << "load RIFF" << secDuration << _baContent.size();
     }
     Q_EMIT sig_readyData(header, _baContent);
     Q_EMIT sig_duration(secDuration);

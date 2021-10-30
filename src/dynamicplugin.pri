@@ -1,7 +1,8 @@
 TEMPLATE      = lib
 QT           *= core gui
 QT           += widgets
-CONFIG       += plugin
+CONFIG       += plugin \
+                skip_target_version_ext
 DESTDIR       = $$PWD/../bin/plugins
 INCLUDEPATH  += $$PWD/core
 

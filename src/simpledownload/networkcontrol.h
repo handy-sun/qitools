@@ -11,6 +11,8 @@ class QAuthenticator;
 class QNetworkReply;
 QT_END_NAMESPACE
 
+namespace SimpleDownload {
+
 class NetworkControl : public QObject
 {
     Q_OBJECT
@@ -42,5 +44,7 @@ private Q_SLOTS:
     void httpReadyRead();
 
 };
+
+} // namespace SimpleDownload
 
 #endif // NETWORKCONTROL_H

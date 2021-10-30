@@ -51,7 +51,7 @@ qint16 *DecodeToBuffer(const QString &filename, quint32 *sampleRate, quint32 *to
                 qint16 *tmp = (qint16 *)realloc(music_buf, alloc_samples * 2 * info.channels);
                 if (tmp) {
                     music_buf = tmp;
-                    qDebug() << "rell:" << music_size << num_samples << alloc_samples;
+                    // qDebug() << "rell:" << music_size << num_samples << alloc_samples;
                 }
             }
             if (music_buf)
@@ -69,7 +69,7 @@ qint16 *DecodeToBuffer(const QString &filename, quint32 *sampleRate, quint32 *to
         if (alloc_samples > num_samples)
         {
             qint16 *tmp = (qint16 *)realloc(music_buf, num_samples * 2 * info.channels);
-            //qDebug() << "final:" << alloc_samples << num_samples;
+            // qDebug() << "final:" << alloc_samples << num_samples;
             if (tmp)
                 music_buf = tmp;
         }
