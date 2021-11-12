@@ -26,7 +26,7 @@ DownloadWidget::DownloadWidget(QWidget *parent)
 //    m_dowoloadDir = QDir(qApp->applicationDirPath());
     ui->labelRecvTotal->setText("");
     ui->lineEditFilePath->setText(m_dowoloadDir.absolutePath());
-    ui->pushButtonShowToolBox->setCheckable(true);
+    ui->pushButtonShowTab->setCheckable(true);
 
     ui->textEditWebUrl->setWordWrapMode(QTextOption::WrapAnywhere);
     ui->textEditVscUrl->setWordWrapMode(QTextOption::WrapAnywhere);
@@ -38,7 +38,7 @@ DownloadWidget::DownloadWidget(QWidget *parent)
     connect(m_netDownloadCtrl, &NetworkControl::sig_eventMessge, this, &DownloadWidget::slot_eventMessge);
     connect(m_netDownloadCtrl, &NetworkControl::sig_requesetFileInfo, this, &DownloadWidget::slot_requesetFileInfo);
 
-//    connect(ui->pushButtonShowToolBox, &QPushButton::toggled, ui->tabWidgetTool, &QToolBox::setVisible);
+    connect(ui->pushButtonShowTab, &QPushButton::toggled, ui->tabWidgetTool, &QTabWidget::setVisible);
     connect(ui->lineEditDownloadUrl, &QLineEdit::textChanged, this, [=]()
     {
         ui->pushButtonDownload->setEnabled(!ui->lineEditDownloadUrl->text().isEmpty());
@@ -52,7 +52,7 @@ DownloadWidget::DownloadWidget(QWidget *parent)
         m_defaultFileName.remove(m_dowoloadDir.absolutePath() + "/");
     });
 
-    ui->pushButtonShowToolBox->setChecked(true);
+    ui->pushButtonShowTab->setChecked(true);
     ui->pushButtonDownload->setEnabled(false);
     auto _font = ui->textBrowserMessage->font();
     _font.setFamily("MS Shell Dlg 2"); // Tahoma

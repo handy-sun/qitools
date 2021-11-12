@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
     qApp->setStyleSheet(0 == styleMode ? "file:///:/QiTools.css" : "file:///./QiTools.css");
     QiToolsWindow w;
     w.setWindowTitle("qitools");
+    w.setWindowIcon(QIcon(":/toolsimage.svg"));
     if (!_ba.isEmpty())
         w.restoreGeometry(_ba);
     else

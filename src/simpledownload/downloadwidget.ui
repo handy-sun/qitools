@@ -20,7 +20,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_4">
    <item row="0" column="0">
-    <widget class="QPushButton" name="pushButtonShowToolBox">
+    <widget class="QPushButton" name="pushButtonShowTab">
      <property name="font">
       <font>
        <family>Century Gothic</family>
