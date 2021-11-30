@@ -1,4 +1,4 @@
-#ifndef STRUCT_ID3V2_H
+﻿#ifndef STRUCT_ID3V2_H
 #define STRUCT_ID3V2_H
 
 #include <QByteArray>

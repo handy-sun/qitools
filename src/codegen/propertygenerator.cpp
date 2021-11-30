@@ -5,10 +5,10 @@
 
 using namespace CodeGen;
 
-PropertyGenerator::PropertyGenerator(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::PropertyGenerator),
-    m_manager(new PropertyManager)
+PropertyGenerator::PropertyGenerator(QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::PropertyGenerator)
+    , m_manager(new PropertyManager)
 {
     ui->setupUi(this);
     ui->lineEditPrefix->setText("m_");
@@ -20,7 +20,7 @@ PropertyGenerator::PropertyGenerator(QWidget *parent) :
 
     ui->radioBtnAlignType->hide();
     ui->radioBtnAlignVar->hide();
-    //on_pushBtnGenProperty_clicked();
+    // on_pushBtnGenProperty_clicked();
 }
 
 PropertyGenerator::~PropertyGenerator()

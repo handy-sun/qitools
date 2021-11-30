@@ -15,6 +15,8 @@ public:
 
 };
 
+//PlugInterface::~PlugInterface(){}
+
 }
 
 Q_DECLARE_INTERFACE(Core::PlugInterface, "org.sooncheer.QiTools.PlugInterface.049c19-1.0")

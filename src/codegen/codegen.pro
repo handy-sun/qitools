@@ -13,3 +13,4 @@ HEADERS += \
 FORMS += \
     $$PWD/propertygenerator.ui
 
+TRANSLATIONS = codegen-zh_CN.ts

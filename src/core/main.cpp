@@ -19,6 +19,23 @@ int main(int argc, char *argv[])
     auto _ba = ini.value("Preference/geometry").toByteArray();
     int styleMode = ini.value("Preference/styleMode").toInt();
     qApp->setStyleSheet(0 == styleMode ? "file:///:/QiTools.css" : "file:///./QiTools.css");
+
+    //一定要在界面显示之前载入翻译文件
+    auto appDir = QDir(qApp->applicationDirPath());
+    const auto entryList = appDir.entryList(QDir::Files);
+    for (const QString &fileName : entryList)
+    {
+        if (!fileName.contains(".qm"))
+            continue;
+
+        QTranslator *translator = new QTranslator(&a);
+        if (translator->load(fileName))
+        {
+            qApp->installTranslator(translator);
+            qDebug() << fileName;
+        }
+    }
+
     QiToolsWindow w;
     w.setWindowTitle("qitools");
     w.setWindowIcon(QIcon(":/toolsimage.svg"));
@@ -26,6 +43,7 @@ int main(int argc, char *argv[])
         w.restoreGeometry(_ba);
     else
         w.resize(1280, 720);
+
     w.show();
 
     int ret = a.exec();

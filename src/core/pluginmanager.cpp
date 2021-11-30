@@ -33,7 +33,7 @@ void PluginManager::loadPlugins(const QString &dirPath)
     for (QObject *staticObj : staticInstances)
     {
         auto staticPlug = qobject_cast<PlugInterface *>(staticObj);
-        qDebug("staticPlug: %x", staticPlug); // DO STH
+        qDebug() << "staticPlug: %x" << staticPlug; // DO STH
         if (staticPlug)
             m_pluginList.push_back(staticPlug);
     }

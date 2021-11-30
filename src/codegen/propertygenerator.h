@@ -22,7 +22,7 @@ public:
     explicit PropertyGenerator(QWidget *parent = nullptr);
     ~PropertyGenerator() override;
 
-    QString pluginName() const override { return tr("PropertyGenerator"); }
+    QString pluginName() const override { return tr("CodeGenerator"); }
 
 private:
     Ui::PropertyGenerator   *ui;
