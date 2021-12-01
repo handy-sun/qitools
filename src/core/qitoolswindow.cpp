@@ -10,6 +10,7 @@
 #include <QStackedWidget>
 #include <QBoxLayout>
 #include <QApplication>
+#include <QMessageBox>
 
 using namespace Core;
 
@@ -89,6 +90,11 @@ void QiToolsWindow::keyPressEvent(QKeyEvent *event)
 
 void QiToolsWindow::closeEvent(QCloseEvent *event)
 {
+//    if (QMessageBox::No == QMessageBox::warning(this, "warning", "exit?"))
+//    {
+//        event->ignore();
+//        return;
+//    }
     event->accept();
     QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
     ini.setValue("Preference/index", QVariant(ui->stackedWidget->currentIndex()));
