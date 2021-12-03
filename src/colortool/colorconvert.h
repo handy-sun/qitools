@@ -25,7 +25,7 @@ public:
     explicit ColorConvert(QWidget *parent = nullptr);
     ~ColorConvert() override;
 
-    QString pluginName() const override { return tr("CodeTool"); }
+    QString pluginName() const override { return tr("ColorTool"); }
 
 private:
     Ui::ColorConvert    *ui;
