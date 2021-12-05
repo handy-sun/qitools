@@ -14,3 +14,5 @@ SOURCES += \
 
 FORMS += \
     $$PWD/downloadwidget.ui
+
+TRANSLATIONS = simpledownload-zh_CN.ts

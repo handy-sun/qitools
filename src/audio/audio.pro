@@ -20,4 +20,5 @@ SOURCES += \
     $$PWD/audiowidget.cpp \
     $$PWD/wavfile.cpp
 
+TRANSLATIONS = audio-zh_CN.ts
 

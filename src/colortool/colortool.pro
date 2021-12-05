@@ -15,4 +15,4 @@ FORMS += \
 
 RESOURCES +=  $$PWD/colortool.qrc
 
-
+TRANSLATIONS = colortool-zh_CN.ts
