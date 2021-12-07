@@ -2,18 +2,24 @@
 #define GLSLCODECONVERT_H
 
 #include <QWidget>
+#include "../core/pluginterface.h"
 
 namespace Ui {
 class GlslCodeConvert;
 }
 
-class GlslCodeConvert : public QWidget
+namespace GlslTool {
+
+class GlslCodeConvert : public QWidget, Core::PlugInterface
 {
     Q_OBJECT
-
+    Q_PLUGIN_METADATA(IID "org.sooncheer.QiTools.PlugInterface.049c19-1.0")
+    Q_INTERFACES(Core::PlugInterface)
 public:
-    explicit GlslCodeConvert(QWidget *parent = 0);
-    ~GlslCodeConvert();
+    explicit GlslCodeConvert(QWidget *parent = nullptr);
+    ~GlslCodeConvert() override;
+
+    QString pluginName() const override { return tr("glslTool"); }
 
 private Q_SLOTS:
     void onTextCodeChanged();
@@ -21,5 +27,7 @@ private Q_SLOTS:
 private:
     Ui::GlslCodeConvert *ui;
 };
+
+}
 
 #endif // GLSLCODECONVERT_H

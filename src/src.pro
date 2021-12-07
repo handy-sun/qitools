@@ -6,4 +6,7 @@ SUBDIRS  += \
     colortool \
     simpledownload \
     audio \
+    imageconvert \
+    glsltool \
+    codecconvert \
     core \

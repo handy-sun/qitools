@@ -2,6 +2,8 @@
 #include "ui_imagetoolwidget.h"
 #include "stable.h"
 
+using namespace ImageConvert;
+
 ImageToolWidget::ImageToolWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ImageToolWidget)

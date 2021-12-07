@@ -1,6 +1,8 @@
 ﻿#include "glslcodeconvert.h"
 #include "ui_glslcodeconvert.h"
 
+using namespace GlslTool;
+
 GlslCodeConvert::GlslCodeConvert(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::GlslCodeConvert)

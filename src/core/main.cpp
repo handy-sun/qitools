@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
             continue;
 
         QTranslator *translator = new QTranslator(&a);
-        if (translator->load(fileName, trdir))
+        if (translator->load(fileName, appDir.absolutePath()))
         {
             qApp->installTranslator(translator);
             qDebug() << fileName;

@@ -6,6 +6,8 @@
 #include <QTextCodec>
 #include <QTimer>
 
+using namespace CodecConvert;
+
 CodecConvertWidget::CodecConvertWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::CodecConvertWidget)

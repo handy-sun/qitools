@@ -2,19 +2,26 @@
 #define IMAGETOOLWIDGET_H
 
 #include <QWidget>
+#include <QImage>
 #include <QFileInfo>
+#include "../core/pluginterface.h"
 
 namespace Ui {
 class ImageToolWidget;
 }
 
-class ImageToolWidget : public QWidget
+namespace ImageConvert {
+
+class ImageToolWidget : public QWidget, Core::PlugInterface
 {
     Q_OBJECT
-
+    Q_PLUGIN_METADATA(IID "org.sooncheer.QiTools.PlugInterface.049c19-1.0")
+    Q_INTERFACES(Core::PlugInterface)
 public:
     explicit ImageToolWidget(QWidget *parent = nullptr);
-    ~ImageToolWidget();
+    ~ImageToolWidget() override;
+
+    QString pluginName() const override { return tr("ImageConvert"); }
 
 private:
     Ui::ImageToolWidget *ui;
@@ -26,5 +33,7 @@ private Q_SLOTS:
     void on_pushButtonOpenImg_clicked();
 
 };
+
+}
 
 #endif // IMAGETOOLWIDGET_H

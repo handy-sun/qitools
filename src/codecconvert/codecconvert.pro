@@ -1,4 +1,6 @@
-INCLUDEPATH += $$PWD
+include(../dynamicplugin.pri)
+
+TARGET = codecconvert
 
 FORMS += \
     $$PWD/codecconvertwidget.ui
@@ -9,4 +11,4 @@ HEADERS += \
 SOURCES += \
     $$PWD/codecconvertwidget.cpp
 
-
+TRANSLATIONS = codecconvert-zh_CN.ts

@@ -3,17 +3,24 @@
 
 #include <QWidget>
 #include <QStringList>
+#include "../core/pluginterface.h"
 
 namespace Ui {
 class CodecConvertWidget;
 }
 
-class CodecConvertWidget : public QWidget
+namespace CodecConvert {
+
+class CodecConvertWidget : public QWidget, Core::PlugInterface
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.sooncheer.QiTools.PlugInterface.049c19-1.0")
+    Q_INTERFACES(Core::PlugInterface)
 public:
     explicit CodecConvertWidget(QWidget *parent = nullptr);
-    ~CodecConvertWidget();
+    ~CodecConvertWidget() override;
+
+    QString pluginName() const override { return tr("CodecConvert"); }
 
 private:
     Ui::CodecConvertWidget *ui;
@@ -24,8 +31,10 @@ private:
 private Q_SLOTS:
     void on_pushButtonOpen_clicked();
     void on_pushButtonConvert_clicked();
-
     void on_PushButtonSetDir_clicked();
+
 };
+
+}
 
 #endif  // CODECCONVERTWIDGET_H

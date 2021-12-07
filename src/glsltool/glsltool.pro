@@ -1,4 +1,6 @@
-INCLUDEPATH += $$PWD
+include(../dynamicplugin.pri)
+
+TARGET = glsltool
 
 SOURCES += \
     $$PWD/glslcodeconvert.cpp
@@ -9,3 +11,4 @@ HEADERS += \
 FORMS += \
     $$PWD/glslcodeconvert.ui
 
+TRANSLATIONS = glsltool-zh_CN.ts
