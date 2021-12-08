@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>QiTools.css</file>
         <file>toolsimage.svg</file>
+        <file>toolsimage.ico</file>
     </qresource>
 </RCC>

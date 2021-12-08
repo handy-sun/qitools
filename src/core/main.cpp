@@ -33,8 +33,7 @@ int main(int argc, char *argv[])
         QTranslator *translator = new QTranslator(&a);
         if (translator->load(fileName, appDir.absolutePath()))
         {
-            qApp->installTranslator(translator);
-            qDebug() << fileName;
+            qApp->installTranslator(translator);            
         }
     }
 

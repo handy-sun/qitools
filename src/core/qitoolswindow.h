@@ -3,6 +3,10 @@
 
 #include <QMainWindow>
 
+QT_BEGIN_NAMESPACE
+class QSystemTrayIcon;
+QT_END_NAMESPACE
+
 namespace Core {
 
 namespace Internal {
@@ -22,8 +26,9 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private:
-    Internal::QiToolsWindow_Ui *ui;
-    QHash<QString, QWidget *> m_stackedHash;
+    Internal::QiToolsWindow_Ui  *ui;
+    QSystemTrayIcon             *m_sysTrayIcon;
+    QHash<QString, QWidget *>   m_stackedHash;
 
 private Q_SLOTS:
     void onListWidgetPressed(int r);

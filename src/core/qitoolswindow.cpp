@@ -11,6 +11,8 @@
 #include <QBoxLayout>
 #include <QApplication>
 #include <QMessageBox>
+#include <QSystemTrayIcon>
+#include <QMenu>
 
 using namespace Core;
 
@@ -45,8 +47,21 @@ public:
 QiToolsWindow::QiToolsWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Internal::QiToolsWindow_Ui)
+    , m_sysTrayIcon(new QSystemTrayIcon(this))
 {
     ui->setupUi(this);
+    m_sysTrayIcon->setIcon(QIcon(":/toolsimage.ico"));
+    m_sysTrayIcon->show();
+    QMenu *menuTray = new QMenu(this);
+    QAction *actQuit = new QAction(tr("exit"), menuTray);
+    menuTray->addAction(actQuit);
+    m_sysTrayIcon->setContextMenu(menuTray);
+    m_sysTrayIcon->setToolTip(tr("qitools "));
+//    m_sysTrayIcon->showMessage(tr("tips"), tr("VERSION_STRING"), QSystemTrayIcon::Information, 5000);
+
+    connect(m_sysTrayIcon, &QSystemTrayIcon::activated, this, [=](){ });
+    connect(actQuit, &QAction::triggered, qApp, &QApplication::quit);
+
     new PluginManager;
     PluginManager::instance()->loadPlugins(qApp->applicationDirPath()  + "/plugins");
     const auto plList = PluginManager::instance()->pluginList();

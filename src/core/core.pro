@@ -54,6 +54,6 @@ RESOURCES += $$PWD/../../resource/qitools.qrc
 
 RC_ICONS = $$PWD/../../resource/toolsimage.ico
 
-VERSION = 0.9.1
+VERSION = 0.10.0
 DEFINES += VERSION_STRING=\\\"$${VERSION}\\\"
 
