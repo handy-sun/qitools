@@ -1,8 +1,4 @@
-﻿#include <QApplication>
-#include <QSettings>
-#include <QDebug>
-#include <QDir>
-#include <QTranslator>
+﻿#include "stable.h"
 #include "qitoolswindow.h"
 
 using namespace Core;
@@ -46,6 +42,18 @@ int main(int argc, char *argv[])
         w.resize(1280, 720);
 
     w.show();
+    QSystemTrayIcon *m_sysTrayIcon = new QSystemTrayIcon(&w);
+    m_sysTrayIcon->setIcon(QIcon(":/toolsimage.ico"));
+    m_sysTrayIcon->show();
+    QMenu *menuTray = new QMenu(&w);
+    QAction *actQuit = new QAction(qApp->tr("exit"), menuTray);
+    menuTray->addAction(actQuit);
+    m_sysTrayIcon->setContextMenu(menuTray);
+    m_sysTrayIcon->setToolTip(qApp->tr("qitools "));
+    //    m_sysTrayIcon->showMessage(tr("tips"), tr("VERSION_STRING"), QSystemTrayIcon::Information, 5000);
+
+//    connect(m_sysTrayIcon, &QSystemTrayIcon::activated, this, [=](){ });
+    QObject::connect(actQuit, &QAction::triggered, qApp, &QApplication::quit);
 
     int ret = a.exec();
     return ret;

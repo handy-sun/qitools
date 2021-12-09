@@ -52,10 +52,13 @@ void PluginManager::loadPlugins(const QString &dirPath)
         m_pluginsDir = _dir;
     }
 
-    const auto entryList = m_pluginsDir.entryList(QDir::Files);
-    for (const QString &fileName : entryList)
+    const auto entryList = m_pluginsDir.entryList(QDir::Files, QDir::Size);
+    qDebug() << entryList;
+//    for (const QString &fileName : entryList)
+    for (auto iter = entryList.constBegin(); iter != entryList.constEnd(); ++iter)
     {
-        if (!fileName.contains(DYNAMIC_SUFFIX))
+        QString fileName = *iter;
+        if (!fileName.endsWith(DYNAMIC_SUFFIX))
             continue;
 
         QPluginLoader loader(m_pluginsDir.absoluteFilePath(fileName));

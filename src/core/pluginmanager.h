@@ -22,12 +22,12 @@ public:
     void loadPlugins(const QString &dirPath);
 
     QList<PlugInterface *> pluginList() const { return m_pluginList; }
-    QHash<QString, QWidget *> stringWidgetHash() const { return m_strWidgetHash; }
+    QMap<QString, QWidget *> stringWidgetHash() const { return m_strWidgetHash; }
 
 private:
     QDir m_pluginsDir;
     QList<PlugInterface *> m_pluginList;
-    QHash<QString, QWidget *> m_strWidgetHash;
+    QMap<QString, QWidget *> m_strWidgetHash;
 
 };
 

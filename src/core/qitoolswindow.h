@@ -27,8 +27,7 @@ protected:
 
 private:
     Internal::QiToolsWindow_Ui  *ui;
-    QSystemTrayIcon             *m_sysTrayIcon;
-    QHash<QString, QWidget *>   m_stackedHash;
+    QMap<QString, QWidget *>   m_stackedHash;
 
 private Q_SLOTS:
     void onListWidgetPressed(int r);
@@ -37,6 +36,5 @@ private Q_SLOTS:
 
 }
 
-//QString readStyleSheetFile(const QString &rcFile);
 
 #endif // QITOOLSWINDOW_H
