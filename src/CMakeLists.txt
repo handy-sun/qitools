@@ -1,19 +1,17 @@
-﻿target_include_directories(${PROJECT_NAME} PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
+﻿cmake_minimum_required(VERSION 3.2)
 
-target_sources(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/qitoolswindow.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/qitoolswindow.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/qitoolswindow.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/stable.h
-)
+project(qitools VERSION 0.10.0 LANGUAGES CXX C)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_MODULE_PATH "{CMAKE_SOURCE_DIR}/cmake")
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+set(CMAKE_DEBUG_POSTFIX "_d")
+
+add_subdirectory(codegen)
+add_subdirectory(colortool)
+add_subdirectory(simpledownload)
 add_subdirectory(audio)
-add_subdirectory(codecconvert)
-add_subdirectory(color)
-add_subdirectory(glsltool)
 add_subdirectory(imageconvert)
-add_subdirectory(property)
-add_subdirectory(vsc_vsix)
+add_subdirectory(glsltool)
+add_subdirectory(codecconvert)
+add_subdirectory(core)
