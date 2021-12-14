@@ -5,6 +5,7 @@
 #include <QList>
 #include <QDir>
 #include <QWidget>
+#include <QMap>
 
 namespace Core {
 

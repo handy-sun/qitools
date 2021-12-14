@@ -2,6 +2,7 @@
 #define QITOOLSWINDOW_H
 
 #include <QMainWindow>
+#include "pluginmanager.h"
 
 QT_BEGIN_NAMESPACE
 class QSystemTrayIcon;
@@ -27,7 +28,7 @@ protected:
 
 private:
     Internal::QiToolsWindow_Ui  *ui;
-    QMap<QString, QWidget *>   m_stackedHash;
+    decltype(PluginManager::instance()->stringWidgetHash()) m_stackedHash;
 
 private Q_SLOTS:
     void onListWidgetPressed(int r);
