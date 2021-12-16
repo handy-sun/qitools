@@ -4,7 +4,7 @@ set(PROJECT_AUTHOR "sooncheer")
 project("qitools" VERSION 0.10.0 LANGUAGES CXX C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_MODULE_PATH "{CMAKE_SOURCE_DIR}/Cmake")
+set(CMAKE_MODULE_PATH "{CMAKE_SOURCE_DIR}/../../CMake")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../../bin)
 set(CMAKE_DEBUG_POSTFIX "_d")
 
@@ -29,8 +29,8 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 else()
     include(pch_gcc4)
 endif()
-include(cotire)
-include(get_depends)
+#include(cotire)
+#include(get_depends)
 
 string(TOLOWER ${CMAKE_CXX_COMPILER_ID} compiler_id)
 set(app_name "${PROJECT_NAME}_${compiler_id}")
@@ -49,21 +49,31 @@ elseif(UNIX)
     endif()
 endif()
 
-qt5_add_resources(qrc_file resource/qitools.qrc)
+qt5_add_resources(qrc_file ../../resource/qitools.qrc)
 
 if(WIN32)
-    set(win_rc "${CMAKE_SOURCE_DIR}/resource/icon.rc")
+    set(win_rc "${CMAKE_SOURCE_DIR}/../resource/icon.rc")
 endif()
 #string(REPLACE " " "\ " win_rc2 ${win_rc})
 
-add_definitions(-DDYNAMIC_SUFFIX=\\\"${SUFFIX}\\\" -DVERSION_STRING=\\\"${VERSION}\\\") 
+set(SRC
+    main.cpp 
+    pluginmanager.cpp 
+    qitoolswindow.cpp 
+    pluginmanager.h 
+    pluginterface.h 
+    qitoolswindow.h 
+    stable.h
+)
+
+add_definitions(-DDYNAMIC_SUFFIX="${SUFFIX}" -DVERSION_STRING="${VERSION}")
 # PS: 如果路径内有空格，则添加.rc文件编译无法通过
-add_executable(${PROJECT_NAME} WIN32 ${qrc_file} ${win_rc})
+add_executable(${PROJECT_NAME} WIN32 ${SRC} ${qrc_file} ${win_rc})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${app_name})
 #${CMAKE_THREAD_LIBS_INIT}
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core Qt5::Gui)
-cotire(${PROJECT_NAME})
+#cotire(${PROJECT_NAME})
 
 # set(out_list )
 # set(_reg_exp "\\.cpp|\\.h")
