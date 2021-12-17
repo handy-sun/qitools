@@ -7,11 +7,11 @@
 #set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set(CMAKE_DEBUG_POSTFIX "_d")
 
-#add_subdirectory(codegen)
+add_subdirectory(codegen)
 #add_subdirectory(colortool)
 #add_subdirectory(simpledownload)
 #add_subdirectory(audio)
 #add_subdirectory(imageconvert)
 #add_subdirectory(glsltool)
-#add_subdirectory(codecconvert)
+add_subdirectory(codecconvert)
 add_subdirectory(core)

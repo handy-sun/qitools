@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     QAction *actQuit = new QAction(qApp->tr("exit"), menuTray);
     menuTray->addAction(actQuit);
     m_sysTrayIcon->setContextMenu(menuTray);
-    m_sysTrayIcon->setToolTip(qApp->tr("qitools "));
+    m_sysTrayIcon->setToolTip(qApp->tr("qitools ") + VERSION_STRING);
     //    m_sysTrayIcon->showMessage(tr("tips"), tr("VERSION_STRING"), QSystemTrayIcon::Information, 5000);
 
 //    connect(m_sysTrayIcon, &QSystemTrayIcon::activated, this, [=](){ });

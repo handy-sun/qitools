@@ -4,7 +4,7 @@ set(PROJECT_AUTHOR "sooncheer")
 project("qitools" VERSION 0.10.0 LANGUAGES CXX C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_MODULE_PATH "{CMAKE_SOURCE_DIR}/../../CMake")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../CMake")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../../bin)
 set(CMAKE_DEBUG_POSTFIX "_d")
 
@@ -27,9 +27,11 @@ endif()
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 else()
+#    include(${CMAKE_SOURCE_DIR}/../CMake/pch_gcc4.cmake)
     include(pch_gcc4)
 endif()
-#include(cotire)
+
+#include(cotire.cmake)
 #include(get_depends)
 
 string(TOLOWER ${CMAKE_CXX_COMPILER_ID} compiler_id)
@@ -66,7 +68,12 @@ set(SRC
     stable.h
 )
 
-add_definitions(-DDYNAMIC_SUFFIX="${SUFFIX}" -DVERSION_STRING="${VERSION}")
+add_definitions(
+    -DQT_MESSAGELOGCONTEXT
+    -DQT_DEPRECATED_WARNINGS
+    -DDYNAMIC_SUFFIX="${SUFFIX}"
+    -DVERSION_STRING="${PROJECT_VERSION}"
+)
 # PS: 如果路径内有空格，则添加.rc文件编译无法通过
 add_executable(${PROJECT_NAME} WIN32 ${SRC} ${qrc_file} ${win_rc})
 
