@@ -631,7 +631,9 @@ void TestStream::load(const QString &fileName)
     if (head.startsWith("ID3") || fileName.endsWith(".mp3"))
     {
         quint32 rate, totalCount, channels;
-        QTime t(QTime::currentTime());
+//        QTime t(QTime::currentTime());
+        QElapsedTimer t;
+        t.start();
         qint16 *shBuf = DecodeToBuffer(fileName, &rate, &totalCount, &channels);
 
         _baContent.resize(totalCount * channels * 2);

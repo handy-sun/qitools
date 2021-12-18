@@ -1,6 +1,7 @@
 ﻿#include "imagetoolwidget.h"
 #include "ui_imagetoolwidget.h"
-#include "stable.h"
+#include <QImageWriter>
+#include <QFileDialog>
 
 using namespace ImageConvert;
 

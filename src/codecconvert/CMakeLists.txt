@@ -1,4 +1,4 @@
-﻿project("codecconvert" VERSION 0.1.0 LANGUAGES CXX C)
+﻿project("codecconvert" VERSION 1.0.0 LANGUAGES CXX C)
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../../bin/plugins)
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
@@ -18,7 +18,6 @@ target_sources(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/codecconvertwidget.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/codecconvertwidget.ui
 )
-
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 

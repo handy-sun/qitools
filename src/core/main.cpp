@@ -46,10 +46,10 @@ int main(int argc, char *argv[])
     m_sysTrayIcon->setIcon(QIcon(":/toolsimage.ico"));
     m_sysTrayIcon->show();
     QMenu *menuTray = new QMenu(&w);
-    QAction *actQuit = new QAction(qApp->tr("exit"), menuTray);
+    QAction *actQuit = new QAction(QObject::tr("exit"), menuTray);
     menuTray->addAction(actQuit);
     m_sysTrayIcon->setContextMenu(menuTray);
-    m_sysTrayIcon->setToolTip(qApp->tr("qitools ") + VERSION_STRING);
+    m_sysTrayIcon->setToolTip(QString("qitools v") + VERSION_STRING);
     //    m_sysTrayIcon->showMessage(tr("tips"), tr("VERSION_STRING"), QSystemTrayIcon::Information, 5000);
 
 //    connect(m_sysTrayIcon, &QSystemTrayIcon::activated, this, [=](){ });

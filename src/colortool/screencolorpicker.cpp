@@ -90,7 +90,7 @@ void ScreenColorPicker::drawPickedRect(QPainter *painter, const QRect &magnifier
     painter->setPen(Qt::white);
     painter->setFont(QFont("Microsoft YaHei", 8));
     painter->drawText(magnifier.adjusted(greyHeight, magnifier.height(), 0, greyHeight - blockOffset), Qt::AlignCenter,
-                     QString().sprintf("(%03d,%03d,%03d)", pickColor.red(), pickColor.green(), pickColor.blue()));
+                      QString("(%03d,%03d,%03d)").arg(pickColor.red()).arg(pickColor.green()).arg(pickColor.blue()));
 
     painter->restore();
 }

@@ -18,24 +18,24 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt5 CONFIG REQUIRED Core Gui Widgets)
+find_package(Qt5 CONFIG REQUIRED Core Gui Widgets LinguistTools)
 
 if(CMAKE_CXX_COMPILER MATCHES ".*mingw")
     set(CMAKE_CXX_FLAGS "-mwindows")
 endif()
 
+#message("``` ${CMAKE_CXX_COMPILER_ID}")
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-else()
-#    include(${CMAKE_SOURCE_DIR}/../CMake/pch_gcc4.cmake)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     include(pch_gcc4)
 endif()
 
-#include(cotire.cmake)
+#include(cotire)
 #include(get_depends)
 
 string(TOLOWER ${CMAKE_CXX_COMPILER_ID} compiler_id)
-set(app_name "${PROJECT_NAME}_${compiler_id}")
+set(app_name "${PROJECT_NAME}-${compiler_id}")
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
     set(app_name "${app_name}-d")
@@ -52,10 +52,7 @@ elseif(UNIX)
 endif()
 
 qt5_add_resources(qrc_file ../../resource/qitools.qrc)
-
-if(WIN32)
-    set(win_rc "${CMAKE_SOURCE_DIR}/../resource/icon.rc")
-endif()
+#qt5_add_translation(ts_files ${CMAKE_CURRENT_SOURCE_DIR}/core-zh_CN.ts)
 #string(REPLACE " " "\ " win_rc2 ${win_rc})
 
 set(SRC
@@ -74,25 +71,31 @@ add_definitions(
     -DDYNAMIC_SUFFIX="${SUFFIX}"
     -DVERSION_STRING="${PROJECT_VERSION}"
 )
-# PS: 如果路径内有空格，则添加.rc文件编译无法通过
-add_executable(${PROJECT_NAME} WIN32 ${SRC} ${qrc_file} ${win_rc})
 
+if(WIN32)
+    set(win_rc "${CMAKE_SOURCE_DIR}/../resource/icon.rc") # PS: 如果路径内有空格，则添加.rc文件编译无法通过
+    add_executable(${PROJECT_NAME} WIN32 ${SRC} ${qrc_file} ${win_rc} ${ts_files})
+else()
+    add_executable(${PROJECT_NAME} ${SRC} ${qrc_file} ${win_rc} ${ts_files})
+endif()
+
+#add_custom_target(ts DEPENDS ${ts_files})
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${app_name})
-#${CMAKE_THREAD_LIBS_INIT}
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core Qt5::Gui)
+
 #cotire(${PROJECT_NAME})
 
-# set(out_list )
-# set(_reg_exp "\\.cpp|\\.h")
+#set(out_list )
+#set(_reg_exp "\\.cpp|\\.h")
 
-# get_link_dependencies(${PROJECT_NAME} _deps)
-# foreach(_dep IN LISTS _deps)
-#     get_target_property(_srcs ${_dep} SOURCES)
-#     foreach(_src IN LISTS _srcs)
-#         if(_src MATCHES ${_reg_exp})
-#             list(APPEND out_list "${_src}")
-#         endif()
-#     endforeach()
-# endforeach()
+#get_link_dependencies(${PROJECT_NAME} _deps)
+#foreach(_dep IN LISTS _deps)
+#    get_target_property(_srcs ${_dep} SOURCES)
+#    foreach(_src IN LISTS _srcs)
+#        if(_src MATCHES ${_reg_exp})
+#            list(APPEND out_list "${_src}")
+#        endif()
+#    endforeach()
+#endforeach()
 
 #ADD_PCH_RULE(src/stable.h out_list)
