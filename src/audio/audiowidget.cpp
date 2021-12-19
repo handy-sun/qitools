@@ -14,6 +14,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QTextCodec>
+#include <QElapsedTimer>
 
 static Q_DECL_CONSTEXPR const int TotalHeadSize = sizeof(CombinedHeader) + sizeof(DATAHeader);
 

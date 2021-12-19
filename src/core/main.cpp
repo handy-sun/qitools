@@ -3,6 +3,44 @@
 
 using namespace Core;
 
+static QString s_logFile;
+
+void addNewSignInLog(const QString &configLogFile)
+{
+    QFile file(configLogFile);
+    s_logFile = configLogFile;
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Append))
+    {
+        qDebug() << file.fileName() << "is Not Exist.";
+        return;
+    }
+
+    QTextStream textStream(&file);
+    QString currentTime = QDateTime::currentDateTime().toString("yyyyMMdd hh:mm:ss.zzz");
+    textStream << QString("-------------------- %1 --------------------\r\n").arg(currentTime);
+    file.flush();
+    file.close();
+}
+
+void msgOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    Q_UNUSED(type)
+    static QMutex mutex;
+    mutex.lock();
+    QFile file(s_logFile);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Append))
+        return;
+
+    QString formatMsg = qFormatLogMessage(type, context, msg);
+
+    QTextStream textStream(&file);
+    //textStream.setCodec(QTextCodec::codecForName("UTF-8"));
+    textStream << formatMsg << "\r\n";
+    file.flush();
+    file.close();
+    mutex.unlock();
+}
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -13,7 +51,16 @@ int main(int argc, char *argv[])
 
     QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
 //    qSetMessagePattern("%{message} [%{file}:%{line} - %{qthreadptr} | %{time MM.dd hh:mm:ss.zzz}]");
-    qSetMessagePattern("%{message} [%{function}()=>%{line} - %{threadid} | %{time MM/dd hh:mm:ss.zzz}]");
+    if (ini.value("Preference/logoutOn").toBool())
+    {
+        addNewSignInLog(qApp->applicationDirPath() + "/qitools.log");
+        qSetMessagePattern("[%{time MM/dd hh:mm:ss.zzz}][%{type}]%{message} ");
+        qInstallMessageHandler(msgOutput);
+    }
+    else
+    {
+        qSetMessagePattern("%{message} [%{file}:%{line} - %{threadid} | %{time MM/dd hh:mm:ss.zzz}]");
+    }
     auto _ba = ini.value("Preference/geometry").toByteArray();
     int styleMode = ini.value("Preference/styleMode").toInt();
     qApp->setStyleSheet(0 == styleMode ? "file:///:/QiTools.css" : "file:///./QiTools.css");

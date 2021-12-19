@@ -53,7 +53,7 @@ void PluginManager::loadPlugins(const QString &dirPath)
     }
 
     const auto entryList = m_pluginsDir.entryList(QDir::Files, QDir::Size);
-    qDebug() << entryList;
+//    qDebug() << entryList;
 //    for (const QString &fileName : entryList)
     for (auto iter = entryList.constBegin(); iter != entryList.constEnd(); ++iter)
     {
