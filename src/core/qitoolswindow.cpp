@@ -101,6 +101,12 @@ void QiToolsWindow::closeEvent(QCloseEvent *event)
     QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
     ini.setValue("Preference/index", QVariant(ui->stackedWidget->currentIndex()));
     ini.setValue("Preference/geometry", saveGeometry());
+    if (!ini.contains("Preference/styleMode"))
+        ini.setValue("Preference/styleMode", QVariant(0));
+    if (!ini.contains("Preference/closeAppWithWindow"))
+        ini.setValue("Preference/closeAppWithWindow", QVariant(0));
+    if (ini.value("Preference/closeAppWithWindow").toInt() == 1)
+        qApp->quit();
 }
 
 void QiToolsWindow::onListWidgetPressed(int r)
