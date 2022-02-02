@@ -9,8 +9,9 @@ contains(QT_ARCH, i386): ARCHITECTURE = x86
 else: contains(QT_ARCH, x86_64): ARCHITECTURE = amd64
 else: ARCHITECTURE = $QT_ARCH
 
-TARGET_NAME = qitools-$${ARCHITECTURE}-$${QMAKE_CC}
+TARGET_NAME = qitools-$${ARCHITECTURE}-$$basename(QMAKE_CC)
 
+message($$TARGET_NAME)
 CONFIG(debug, debug | release): TARGET_NAME = $${TARGET_NAME}-d
 
 TARGET = $$TARGET_NAME
@@ -31,10 +32,10 @@ win32 {
     CONFIG += precompiled_header
     PRECOMPILED_HEADER = $$PWD/stable.h
     SUFFIX = .dll
-} else: unix {
-    SUFFIX = .so
 } else: mac {
     SUFFIX = .dylib
+} else: unix {
+    SUFFIX = .so
 }
 
 DEFINES += DYNAMIC_SUFFIX=\\\"$${SUFFIX}\\\"
@@ -54,7 +55,7 @@ RESOURCES += $$PWD/../../resource/qitools.qrc
 
 RC_ICONS = $$PWD/../../resource/toolsimage.ico
 
-VERSION = 0.10.2
+VERSION = 0.10.3
 DEFINES += VERSION_STRING=\\\"$${VERSION}\\\"
 
 TRANSLATIONS = core-zh_CN.ts
