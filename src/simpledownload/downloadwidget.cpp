@@ -4,6 +4,7 @@
 
 #include <QSslSocket>
 #include <QDesktopServices>
+#include <QDateTime>
 #include <QMessageBox>
 #include <QFileDialog>
 

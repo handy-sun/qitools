@@ -7,7 +7,7 @@ DESTDIR = $$PWD/../../bin
 
 contains(QT_ARCH, i386): ARCHITECTURE = x86
 else: contains(QT_ARCH, x86_64): ARCHITECTURE = amd64
-else: ARCHITECTURE = $QT_ARCH
+else: ARCHITECTURE = $${QT_ARCH}
 
 TARGET_NAME = qitools-$${ARCHITECTURE}-$$basename(QMAKE_CC)
 
@@ -55,7 +55,7 @@ RESOURCES += $$PWD/../../resource/qitools.qrc
 
 RC_ICONS = $$PWD/../../resource/toolsimage.ico
 
-VERSION = 0.10.3
+VERSION = 0.10.4
 DEFINES += VERSION_STRING=\\\"$${VERSION}\\\"
 
 TRANSLATIONS = core-zh_CN.ts
