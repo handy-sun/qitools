@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    qDebug() << qApp->libraryPaths();
     QiToolsWindow w;
     w.setWindowTitle("qitools");
     w.setWindowIcon(QIcon(":/toolsimage.svg"));

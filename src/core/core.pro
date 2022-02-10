@@ -55,7 +55,7 @@ RESOURCES += $$PWD/../../resource/qitools.qrc
 
 RC_ICONS = $$PWD/../../resource/toolsimage.ico
 
-VERSION = 0.10.4
+VERSION = 0.10.5
 DEFINES += VERSION_STRING=\\\"$${VERSION}\\\"
 
 TRANSLATIONS = core-zh_CN.ts
