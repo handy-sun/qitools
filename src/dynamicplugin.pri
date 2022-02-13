@@ -1,9 +1,11 @@
+include(../qitools.pri)
+
 TEMPLATE      = lib
 QT           *= core gui
 QT           += widgets
 CONFIG       += plugin \
                 skip_target_version_ext
-DESTDIR       = $$PWD/../bin/plugins
+DESTDIR       = $${PLUGIN_PATH}
 INCLUDEPATH  += $$PWD/core
 
 VERSION = 1.0.0

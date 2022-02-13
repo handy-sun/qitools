@@ -30,7 +30,11 @@ public:
         listWidget = new QListWidget(centralW);
         listWidget->setMaximumWidth(167);
         QFont font;
+#ifdef Q_OS_MAC
+        font.setPointSize(15);
+#else
         font.setPointSize(11);
+#endif
         listWidget->setFont(font);
         stackedWidget = new QStackedWidget(centralW);
         stackedWidget->setObjectName("stackedWidget");

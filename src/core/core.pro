@@ -1,20 +1,15 @@
+include(../../qitools.pri)
 TEMPLATE = app
 
 QT *= core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-DESTDIR = $$PWD/../../bin
 
-contains(QT_ARCH, i386): ARCHITECTURE = x86
-else: contains(QT_ARCH, x86_64): ARCHITECTURE = amd64
-else: ARCHITECTURE = $${QT_ARCH}
+DESTDIR = $$OUT_PATH
 
-TARGET_NAME = qitools-$${ARCHITECTURE}-$$basename(QMAKE_CC)
+TARGET = $$APP_TARGET
 
-message($$TARGET_NAME)
-CONFIG(debug, debug | release): TARGET_NAME = $${TARGET_NAME}-d
-
-TARGET = $$TARGET_NAME
+RES_PATH = $$OUT_PATH/../resource
 
 CONFIG += c++11 \
     no_keywords \
@@ -32,7 +27,7 @@ win32 {
     CONFIG += precompiled_header
     PRECOMPILED_HEADER = $$PWD/stable.h
     SUFFIX = .dll
-} else: mac {
+} else: osx {
     SUFFIX = .dylib
 } else: unix {
     SUFFIX = .so
@@ -51,11 +46,13 @@ HEADERS += \
     $$PWD/qitoolswindow.h \
     $$PWD/stable.h
 
-RESOURCES += $$PWD/../../resource/qitools.qrc
+RESOURCES += $$RES_PATH/qitools.qrc
 
-RC_ICONS = $$PWD/../../resource/toolsimage.ico
+RC_ICONS = $$RES_PATH/toolsimage.ico
 
-VERSION = 0.10.5
+ICON = $$RES_PATH/toolsimage.icns
+
+VERSION = 0.11.0
 DEFINES += VERSION_STRING=\\\"$${VERSION}\\\"
 
 TRANSLATIONS = core-zh_CN.ts
