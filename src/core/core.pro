@@ -4,7 +4,6 @@ TEMPLATE = app
 QT *= core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-
 DESTDIR = $$OUT_PATH
 
 TARGET = $$APP_TARGET
@@ -52,7 +51,7 @@ RC_ICONS = $$RES_PATH/toolsimage.ico
 
 ICON = $$RES_PATH/toolsimage.icns
 
-VERSION = 0.11.0
+VERSION = 0.11.1
 DEFINES += VERSION_STRING=\\\"$${VERSION}\\\"
 
 TRANSLATIONS = core-zh_CN.ts

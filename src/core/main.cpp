@@ -91,16 +91,19 @@ int main(int argc, char *argv[])
 
     w.show();
     QSystemTrayIcon *m_sysTrayIcon = new QSystemTrayIcon(&w);
-    m_sysTrayIcon->setIcon(QIcon(":/toolsimage.ico"));
+    m_sysTrayIcon->setIcon(QIcon(":/toolsimage.ico")); // svg 做托盘图标无法显示
     m_sysTrayIcon->show();
     QMenu *menuTray = new QMenu(&w);
+    QAction *actShow = new QAction(QObject::tr("show window"), menuTray);
     QAction *actQuit = new QAction(QObject::tr("exit"), menuTray);
+    menuTray->addAction(actShow);
     menuTray->addAction(actQuit);
     m_sysTrayIcon->setContextMenu(menuTray);
     m_sysTrayIcon->setToolTip(QString("qitools v") + VERSION_STRING);
     //    m_sysTrayIcon->showMessage(tr("tips"), tr("VERSION_STRING"), QSystemTrayIcon::Information, 5000);
 
 //    connect(m_sysTrayIcon, &QSystemTrayIcon::activated, this, [=](){ });
+    QObject::connect(actShow, &QAction::triggered, &w, &QiToolsWindow::show);
     QObject::connect(actQuit, &QAction::triggered, qApp, &QApplication::quit);
 
     int ret = a.exec();

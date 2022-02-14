@@ -51,4 +51,6 @@ CMakeLists.txt.user*
 *.mp3
 *.wav
 *.flac
+
 .DS_Store
+*.iconset

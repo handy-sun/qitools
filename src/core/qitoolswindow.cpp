@@ -2,16 +2,17 @@
 #include "pluginmanager.h"
 #include "pluginterface.h"
 
-#include <QFile>
-#include <QKeyEvent>
-#include <QDebug>
-#include <QListWidget>
-#include <QSettings>
-#include <QStackedWidget>
-#include <QBoxLayout>
-#include <QApplication>
-#include <QMessageBox>
-#include <QMenu>
+//#include <QFile>
+//#include <QKeyEvent>
+//#include <QDebug>
+//#include <QListWidget>
+//#include <QSettings>
+//#include <QStackedWidget>
+//#include <QBoxLayout>
+//#include <QApplication>
+//#include <QMessageBox>
+//#include <QMenu>
+#include "stable.h"
 
 using namespace Core;
 
@@ -44,6 +45,12 @@ public:
         horizontalLayout->setStretch(0, 2);
         horizontalLayout->setStretch(1, 7);
         qitoolsWindow->setCentralWidget(centralW);
+        QMenuBar *menuBar = new QMenuBar(qitoolsWindow);
+        QMenu *menu = new QMenu(QObject::tr("settings"), menuBar);
+        QAction *actOptions = new QAction(QObject::tr("options"), menu);
+        menu->addAction(actOptions);
+        menuBar->addMenu(menu);
+        qitoolsWindow->setMenuBar(menuBar);
     }
 };
 
@@ -101,15 +108,18 @@ void QiToolsWindow::closeEvent(QCloseEvent *event)
 //        event->ignore();
 //        return;
 //    }
-    event->accept();
     QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
+    if (!ini.contains("Preference/closeAppWithWindow"))
+    {
+        ini.setValue("Preference/closeAppWithWindow", QVariant(0));
+    }
+
     ini.setValue("Preference/index", QVariant(ui->stackedWidget->currentIndex()));
     ini.setValue("Preference/geometry", saveGeometry());
     if (!ini.contains("Preference/styleMode"))
         ini.setValue("Preference/styleMode", QVariant(0));
-    if (!ini.contains("Preference/closeAppWithWindow"))
-        ini.setValue("Preference/closeAppWithWindow", QVariant(0));
-    if (ini.value("Preference/closeAppWithWindow").toInt() == 1)
+
+    if (ini.value("Preference/closeAppWithWindow").toInt() != 0)
         qApp->quit();
 }
 
