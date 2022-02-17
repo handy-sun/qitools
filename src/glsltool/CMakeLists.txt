@@ -1,6 +1,6 @@
 ﻿project("glsltool" VERSION 0.1.0 LANGUAGES CXX C)
 
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../../bin/plugins)
+set(LIBRARY_OUTPUT_PATH "${PLUGIN_PATH}")
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
     set(LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_PATH}/debug)
 endif()

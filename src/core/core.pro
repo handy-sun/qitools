@@ -51,7 +51,7 @@ RC_ICONS = $$RES_PATH/toolsimage.ico
 
 ICON = $$RES_PATH/toolsimage.icns
 
-VERSION = 0.11.1
+VERSION = 0.12.0
 DEFINES += VERSION_STRING=\\\"$${VERSION}\\\"
 
 TRANSLATIONS = core-zh_CN.ts
