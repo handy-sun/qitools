@@ -21,6 +21,7 @@ class Internal::QiToolsWindow_Ui
 public:
     QListWidget *listWidget = nullptr;
     QStackedWidget *stackedWidget = nullptr;
+    QToolButton *tbtnSetting = nullptr;
 
     void setupUi(QMainWindow *qitoolsWindow)
     {
@@ -28,6 +29,9 @@ public:
         QHBoxLayout *horizontalLayout = new QHBoxLayout(centralW);
         horizontalLayout->setSpacing(6);
         horizontalLayout->setContentsMargins(6, 6, 6, 6);
+        QVBoxLayout *leftVerticalLayout = new QVBoxLayout(centralW);
+        leftVerticalLayout->setSpacing(3);
+        leftVerticalLayout->setContentsMargins(3, 0, 6, 6);
         listWidget = new QListWidget(centralW);
         listWidget->setMaximumWidth(167);
         QFont font;
@@ -37,20 +41,21 @@ public:
         font.setPointSize(11);
 #endif
         listWidget->setFont(font);
+        tbtnSetting = new QToolButton(centralW);
+        tbtnSetting->setMinimumSize(16, 16);
+        tbtnSetting->setIcon(QIcon(qitoolsWindow->style()->standardIcon(QStyle::SP_FileDialogListView)));
+        tbtnSetting->setToolTip(QObject::tr("settings"));
         stackedWidget = new QStackedWidget(centralW);
         stackedWidget->setObjectName("stackedWidget");
         //stackedWidget->setMinimumSize(QSize(633, 506));
-        horizontalLayout->addWidget(listWidget);
+//        horizontalLayout->addWidget(listWidget);
+        leftVerticalLayout->addWidget(listWidget);
+        leftVerticalLayout->addWidget(tbtnSetting);
+        horizontalLayout->addLayout(leftVerticalLayout);
         horizontalLayout->addWidget(stackedWidget);
         horizontalLayout->setStretch(0, 2);
         horizontalLayout->setStretch(1, 7);
         qitoolsWindow->setCentralWidget(centralW);
-        QMenuBar *menuBar = new QMenuBar(qitoolsWindow);
-        QMenu *menu = new QMenu(QObject::tr("settings"), menuBar);
-        QAction *actOptions = new QAction(QObject::tr("options"), menu);
-        menu->addAction(actOptions);
-        menuBar->addMenu(menu);
-        qitoolsWindow->setMenuBar(menuBar);
     }
 };
 
