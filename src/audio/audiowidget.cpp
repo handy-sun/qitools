@@ -580,7 +580,7 @@ void TestStream::load(const QString &fileName)
 #ifdef USE_QAUDIODECODER // QAudioDecoder 依赖系统自带的音频解码器，很多格式不支持，且效率一般
     QEventLoop loop;
     QSharedPointer<QAudioDecoder> decoder(new QAudioDecoder);    
-    connect(decoder.data(), &QAudioDecoder::bufferReady, [this, decoder]()
+    connect(decoder.data(), &QAudioDecoder::bufferReady, [this, decoder, &_baContent]()
     {
         if (decoder->bufferAvailable())
         {
@@ -588,7 +588,7 @@ void TestStream::load(const QString &fileName)
             _baContent.append(buffer.constData<char>(), buffer.byteCount());
         }
     });
-    connect(decoder.data(), &QAudioDecoder::finished, [this, decoder]()
+    connect(decoder.data(), &QAudioDecoder::finished, [this, decoder, &_baContent]()
     {
         QAudioFormat fmt = decoder->audioFormat();
         QByteArray header(TotalHeadSize, 0);
@@ -609,22 +609,23 @@ void TestStream::load(const QString &fileName)
     decoder->start();
     loop.exec();
 
-    double tmp;
+    double tmp = static_cast<double>(_baContent.size()) / 1024.0;
     int el = tt.elapsed();
     QTime musicLen = QTime(0, 0, 0).addMSecs(decoder->duration());
-    QString meas = DownVscVsixWidget::getSuitableDecMeasure(_baContent.size(), &tmp);
-    qInfo(">>> decoder finished, source_size: %.3f%s, duration: %s elapsed: %dms",
-          tmp, meas.toStdString().c_str(), musicLen.toString("mm:ss.zzz").toStdString().c_str(), el);
+//    QString meas = DownVscVsixWidget::getSuitableDecMeasure(_baContent.size(), &tmp);
+    qInfo(">>> decoder finished, source_size: %.2f K, duration: %s elapsed: %dms",
+          tmp, musicLen.toString("mm:ss.zzz").toStdString().c_str(), el);
 
     if (decoder->error() == QAudioDecoder::NoError && _baContent.size() > TotalHeadSize)
     {
         file.close();
-        Q_EMIT sig_duration(decoder->duration() / 1000); // 解析成功
+//        Q_EMIT sig_duration(decoder->duration() / 1000); // 解析成功
         return;
     }
     else
     {
         qDebug() << "error message" << decoder->errorString() << _baContent.size();
+        return;
     }
 #endif
     quint32 secDuration = 0;
