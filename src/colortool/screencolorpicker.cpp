@@ -61,7 +61,7 @@ QRect ScreenColorPicker::getUnitedScreenRect()
     auto scrList = QApplication::screens();
     for (const QScreen *scr : scrList)
     {
-         paPath.addRect(scr->geometry());
+        paPath.addRect(scr->geometry());
     }
     geometry = paPath.boundingRect().toRect();
 #else
@@ -90,7 +90,7 @@ void ScreenColorPicker::drawPickedRect(QPainter *painter, const QRect &magnifier
     painter->setPen(Qt::white);
     painter->setFont(QFont("Microsoft YaHei", 8));
     painter->drawText(magnifier.adjusted(greyHeight, magnifier.height(), 0, greyHeight - blockOffset), Qt::AlignCenter,
-                      QString("(%03d,%03d,%03d)").arg(pickColor.red()).arg(pickColor.green()).arg(pickColor.blue()));
+                      QString("(%1,%2,%3)").arg(pickColor.red(), 3).arg(pickColor.green(), 3).arg(pickColor.blue(), 3));
 
     painter->restore();
 }
