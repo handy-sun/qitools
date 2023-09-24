@@ -11,4 +11,5 @@ HEADERS += \
 SOURCES += \
     $$PWD/codecconvertwidget.cpp
 
+LIBS += -L$$PWD -luchardet
 TRANSLATIONS = codecconvert-zh_CN.ts

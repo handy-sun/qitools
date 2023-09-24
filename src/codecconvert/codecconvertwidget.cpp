@@ -1,10 +1,11 @@
-﻿#include "codecconvertwidget.h"
+#include "codecconvertwidget.h"
 #include "ui_codecconvertwidget.h"
 #include <QFileDialog>
 #include <QTextStream>
 #include <QDebug>
 #include <QTextCodec>
 #include <QTimer>
+#include <uchardet.h>
 
 using namespace CodecConvert;
 
@@ -39,15 +40,17 @@ CodecConvertWidget::~CodecConvertWidget()
 
 QString CodecConvertWidget::getCodeString(const QByteArray &ba)
 {
-    QTextCodec::ConverterState state;
-    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-
-    codec->toUnicode(ba.constData(), ba.size(), &state);
-
-    if (state.invalidChars == 0 || state.invalidChars == 6)
-        return "Unicode";
-
-    return "GBK";
+    auto uchardetHandle = uchardet_new();
+    int retVal = uchardet_handle_data(uchardetHandle, ba.constData(), static_cast<size_t>(ba.size()));
+    uchardet_data_end(uchardetHandle);
+    QString charset = uchardet_get_charset(uchardetHandle);
+    qDebug() << "ret:" << retVal << "charset:" << charset;
+    if (charset.startsWith("UTF-8") && ba.startsWith("\xEF\xBB\xBF"))
+    {
+        charset.append(" with BOM");
+    }
+    uchardet_delete(uchardetHandle);
+    return charset;
 }
 
 void CodecConvertWidget::on_pushButtonOpen_clicked()

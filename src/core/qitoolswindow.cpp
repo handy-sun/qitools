@@ -1,17 +1,7 @@
-﻿#include "qitoolswindow.h"
+#include "qitoolswindow.h"
 #include "pluginmanager.h"
 #include "pluginterface.h"
 
-//#include <QFile>
-//#include <QKeyEvent>
-//#include <QDebug>
-//#include <QListWidget>
-//#include <QSettings>
-//#include <QStackedWidget>
-//#include <QBoxLayout>
-//#include <QApplication>
-//#include <QMessageBox>
-//#include <QMenu>
 #include "stable.h"
 
 using namespace Core;

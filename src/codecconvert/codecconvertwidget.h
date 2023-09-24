@@ -1,4 +1,4 @@
-﻿#ifndef CODECCONVERTWIDGET_H
+#ifndef CODECCONVERTWIDGET_H
 #define CODECCONVERTWIDGET_H
 
 #include <QWidget>
