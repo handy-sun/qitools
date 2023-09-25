@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.2.0)
+cmake_minimum_required(VERSION 3.5)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-#set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../CMake")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../CMake")
 #set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../../bin)
 #set(CMAKE_DEBUG_POSTFIX "_d")
 
@@ -66,7 +66,7 @@ add_definitions(
 )
 
 if(WIN32)
-    set(win_rc "${CMAKE_SOURCE_DIR}/../resource/icon.rc") # PS: 如果路径内有空格，则添加.rc文件编译无法通过
+    set(win_rc "${CMAKE_CURRENT_SOURCE_DIR}/../../resource/icon.rc") # PS: 如果路径内有空格，则添加.rc文件编译无法通过
     add_executable(${PROJECT_NAME} WIN32 ${SRC} ${qrc_file} ${win_rc} ${ts_files})
 elseif(UNIX)
     if(APPLE)

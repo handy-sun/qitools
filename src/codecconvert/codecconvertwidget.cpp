@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QTextCodec>
 #include <QTimer>
-#include <uchardet.h>
+#include "uchardet.h"
 
 using namespace CodecConvert;
 
