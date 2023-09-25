@@ -1,0 +1,4 @@
+[submodule "src/codecconvert/uchardet"]
+	url  = https://gitee.com/sooncheer/uchardet
+	path = src/codecconvert/uchardet
+
