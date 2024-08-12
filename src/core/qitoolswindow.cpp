@@ -55,7 +55,6 @@ QiToolsWindow::QiToolsWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    new PluginManager;
     PluginManager::instance()->loadPlugins(qApp->applicationDirPath()  + "/plugins");
     const auto plList = PluginManager::instance()->pluginList();
     qDebug() << DYNAMIC_SUFFIX << plList.size();

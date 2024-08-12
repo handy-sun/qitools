@@ -1,4 +1,4 @@
-﻿#include "pluginmanager.h"
+#include "pluginmanager.h"
 #include "pluginterface.h"
 
 #include <QtPlugin>
@@ -7,23 +7,20 @@
 
 using namespace Core;
 
-static PluginManager *m_instance = nullptr;
 
-// static
 PluginManager *PluginManager::instance()
 {
-    return m_instance;
+    static PluginManager inst;
+    return &inst;
 }
+
 
 PluginManager::PluginManager()
 {
-    if (!m_instance)
-        m_instance = this;
 }
 
 PluginManager::~PluginManager()
 {
-
 }
 
 void PluginManager::loadPlugins(const QString &dirPath)

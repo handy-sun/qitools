@@ -1,4 +1,4 @@
-﻿#ifndef QITOOLSWINDOW_H
+#ifndef QITOOLSWINDOW_H
 #define QITOOLSWINDOW_H
 
 #include <QMainWindow>

@@ -1,4 +1,4 @@
-﻿#ifndef PLUGINMANAGER_H
+#ifndef PLUGINMANAGER_H
 #define PLUGINMANAGER_H
 
 #include <QObject>
@@ -11,19 +11,19 @@ namespace Core {
 
 class PlugInterface;
 
-class PluginManager : public QObject
+class PluginManager
 {
-    Q_OBJECT
-
 public:
     static PluginManager *instance();
 
-    PluginManager();
-    ~PluginManager() override;
     void loadPlugins(const QString &dirPath);
 
     QList<PlugInterface *> pluginList() const { return m_pluginList; }
     QMap<QString, QWidget *> stringWidgetHash() const { return m_strWidgetHash; }
+
+protected:
+    PluginManager();
+    virtual ~PluginManager();
 
 private:
     QDir m_pluginsDir;

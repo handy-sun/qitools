@@ -1,4 +1,4 @@
-﻿#include "stable.h"
+#include "stable.h"
 #include "qitoolswindow.h"
 
 using namespace Core;
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 #if QT_VERSION > 0x050900
     a.setApplicationVersion(VERSION_STRING);
 #endif
-    setvbuf(stdout, nullptr, _IONBF, 1024);
+//    setvbuf(stdout, nullptr, _IONBF, 1024);
 
     QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
 //    qSetMessagePattern("%{message} [%{file}:%{line} - %{qthreadptr} | %{time MM.dd hh:mm:ss.zzz}]");

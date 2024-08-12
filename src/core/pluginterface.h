@@ -1,4 +1,4 @@
-﻿#ifndef PLUGINTERFACE_H
+#ifndef PLUGINTERFACE_H
 #define PLUGINTERFACE_H
 
 #include <QObject>
@@ -8,14 +8,12 @@ namespace Core {
 class PlugInterface
 {
 public:
-    virtual ~PlugInterface() {}
+    virtual ~PlugInterface() = default;
 
     virtual QString pluginName() const = 0;
 //    virtual QWidget *pluginUI() const = 0;
 
 };
-
-//PlugInterface::~PlugInterface(){}
 
 }
 
