@@ -579,7 +579,7 @@ void TestStream::load(const QString &fileName)
     QByteArray _baContent;
 #ifdef USE_QAUDIODECODER // QAudioDecoder 依赖系统自带的音频解码器，很多格式不支持，且效率一般
     QEventLoop loop;
-    QSharedPointer<QAudioDecoder> decoder(new QAudioDecoder);    
+    QSharedPointer<QAudioDecoder> decoder(new QAudioDecoder);
     connect(decoder.data(), &QAudioDecoder::bufferReady, [this, decoder, &_baContent]()
     {
         if (decoder->bufferAvailable())

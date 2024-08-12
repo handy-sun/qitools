@@ -22,7 +22,7 @@ ScreenColorPicker::ScreenColorPicker(QWidget *parent)
 
 //    setAttribute(Qt::WA_TranslucentBackground, true);
     setCursor(QCursor(QPixmap(":/colortool/colorpicker.png"), 0, 19));
-    setMouseTracking(true);   
+    setMouseTracking(true);
     setGeometry(getUnitedScreenRect());
 }
 

@@ -123,7 +123,7 @@ void ColorConvert::initTableWidget()
     m_table->setColumnCount(horizontalLabels.size());
     m_table->setRowCount(verticalContents.size());
 
-    m_table->setColumnWidth(0, 150);    
+    m_table->setColumnWidth(0, 150);
     m_table->horizontalHeader()->setStretchLastSection(true);
     m_table->horizontalHeader()->setObjectName("hHeader");
     // 设置所有列不可拖动
@@ -162,7 +162,7 @@ void ColorConvert::initTableWidget()
 }
 
 void ColorConvert::convertFromRgb()
-{    
+{
     QString rgb = m_table->item(0, 1)->text().trimmed();
     uchar clrVal[4] = { 0, 0, 0, 255 };
     int _count;
