@@ -19,9 +19,11 @@ public:
         QHBoxLayout *horizontalLayout = new QHBoxLayout(centralW);
         horizontalLayout->setSpacing(6);
         horizontalLayout->setContentsMargins(6, 6, 6, 6);
-        QVBoxLayout *leftVerticalLayout = new QVBoxLayout(centralW);
+        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+        QVBoxLayout *leftVerticalLayout = new QVBoxLayout();
         leftVerticalLayout->setSpacing(3);
         leftVerticalLayout->setContentsMargins(3, 0, 6, 6);
+        leftVerticalLayout->setObjectName(QString::fromUtf8("leftVerticalLayout"));
         listWidget = new QListWidget(centralW);
         listWidget->setMaximumWidth(167);
         QFont font;

@@ -1,4 +1,4 @@
-﻿#ifndef COLORCONVERT_H
+#ifndef COLORCONVERT_H
 #define COLORCONVERT_H
 
 #include <QWidget>
@@ -33,7 +33,7 @@ private:
     ScreenColorPicker   *m_scrPicker;
     QColor              m_color;
     QPixmap             m_pmDecoration;
-    //decltype(connect(0, 0, 0, 0)) m_connection;
+
     static QColorDialog *s_clrDlg;
 
     void initTableWidget();
@@ -41,7 +41,8 @@ private:
     void convertFromHex();
     void convertFromDec();
     void convertFromGL();
-    void setColorValue(const QVector<int> &usedRows);
+
+    void updateTblExceptRow(int except);
 
 public Q_SLOTS:
     void slot_PickFinished(bool isUseful, const QColor &color);

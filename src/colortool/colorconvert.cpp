@@ -1,4 +1,4 @@
-﻿#include "colorconvert.h"
+#include "colorconvert.h"
 #include "ui_colorconvert.h"
 #include "screencolorpicker.h"
 #include <QLabel>
@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <typeinfo>
 #include <QColorDialog>
+#include <QRandomGenerator>
 
 
 static bool toColor(const QStringList &strlist, uchar arr[])
@@ -92,11 +93,14 @@ ColorConvert::ColorConvert(QWidget *parent)
     initTableWidget();
     connect(m_scrPicker, &ScreenColorPicker::pickFinished, this, &ColorConvert::slot_PickFinished);
     connect(m_table, &QTableWidget::cellChanged, this, &ColorConvert::onTableCellChanged);
-    m_table->item(0, 1)->setText("rgba(102, 204, 253, 0.76)");
 
     s_clrDlg = new QColorDialog(this);
     s_clrDlg->resize(522, 411); // to avoid QWindowsWindow::setGeometry() warning;
     s_clrDlg->setOption(QColorDialog::ShowAlphaChannel);
+
+    QTimer::singleShot(10, this, [this](){
+        m_table->item(3, 1)->setText(QString("%1").arg(QRandomGenerator::global()->generate()));
+    });
 }
 
 ColorConvert::~ColorConvert()
@@ -109,10 +113,10 @@ void ColorConvert::initTableWidget()
     QTableWidgetItem *item;
     QFont fontCol0("Microsoft Yahei", 14);
     QStringList horizontalLabels, verticalContents;
-    horizontalLabels << QStringLiteral("颜色属性") << QStringLiteral("值");
+    horizontalLabels << QStringLiteral("option") << QStringLiteral("value");
 
-    verticalContents << QStringLiteral("RGB") << QStringLiteral("色块")
-                     << QStringLiteral("十六进制") << QStringLiteral("十进制(uint)")
+    verticalContents << QStringLiteral("css/qss") << QStringLiteral("Color")
+                     << QStringLiteral("Hex(rgba)") << QStringLiteral("Dec")
                      << QStringLiteral("OpenGL") << QStringLiteral("CMYK")
                      << QStringLiteral("HSV");
 
@@ -180,7 +184,7 @@ void ColorConvert::convertFromRgb()
                 if (toColor(rgb.split(","), clrVal))
                 {
                     m_color = QColor(clrVal[0], clrVal[1], clrVal[2], clrVal[3]);
-                    setColorValue({ 1, 2, 3, 4, 5, 6 });
+                    updateTblExceptRow(0);
                 }
             }
             break;
@@ -190,9 +194,31 @@ void ColorConvert::convertFromRgb()
 
 void ColorConvert::convertFromHex()
 {
-    QString hex = m_table->item(2, 1)->text().trimmed();
-    m_color = QColor(hex);
-    setColorValue({ 0, 1, 3, 4, 5, 6 });
+    QString input = m_table->item(2, 1)->text().trimmed();
+    if (input.length() < 7 || !input.startsWith("#"))
+        return;
+
+    QString argbHex = "";
+    if (input.length() == 7)
+    {
+        m_color = QColor(input);
+        updateTblExceptRow(2);
+    }
+    else if (input.length() == 9)
+    {
+        bool ok;
+        int alpha = input.right(2).toInt(&ok, 16);
+        if (!ok)
+        {
+            qWarning() << "convert to alpha failed";
+            return;
+        }
+
+        m_color = QColor(input.left(7));
+        m_color.setAlpha(alpha);
+        qDebug() << "color:" << m_color;
+        updateTblExceptRow(2);
+    }
 }
 
 void ColorConvert::convertFromDec()
@@ -203,7 +229,7 @@ void ColorConvert::convertFromDec()
     if (ok)
     {
         m_color = QColor(_hex);
-        setColorValue({ 0, 1, 2, 4, 5, 6 });
+        updateTblExceptRow(3);
     }
 }
 
@@ -231,7 +257,7 @@ void ColorConvert::convertFromGL()
                 if (toColorF(glClr.remove("f").split(","), clrF))
                 {
                     m_color = QColor(clrF[0], clrF[1], clrF[2], clrF[3]);
-                    setColorValue({ 0, 1, 2, 3, 5, 6 });
+                    updateTblExceptRow(4);
                 }
             }
             break;
@@ -239,17 +265,23 @@ void ColorConvert::convertFromGL()
     }
 }
 
-void ColorConvert::setColorValue(const QVector<int> &usedRows)
+void ColorConvert::updateTblExceptRow(int except)
 {
     if (!m_color.isValid())
-        return;
-
-    for (int row : usedRows)
     {
+        qCritical() << "Selected color is invalid";
+        return;
+    }
+
+    for (int row = 0; row < m_table->rowCount(); ++row)
+    {
+        if (except == row)
+            continue;
+
         switch (row)
         {
         case 0:
-            if (m_color.alphaF() < 1.0f)
+            if (0xff > m_color.alpha())
             {
                 m_table->item(row, 1)->setText(QString("rgba(%1, %2, %3, %4)").
                                              arg(m_color.red()).
@@ -270,8 +302,15 @@ void ColorConvert::setColorValue(const QVector<int> &usedRows)
             m_table->item(row, 1)->setData(Qt::DecorationRole, m_pmDecoration);
             break;
         case 2:
-            m_table->item(row, 1)->setText(m_color.name(m_color.alphaF() < 1.0f ? QColor::HexArgb : QColor::HexRgb));
+        {
+            QString hex = m_color.name(QColor::HexRgb);
+            if (0xff > m_color.alpha())
+            {
+                hex += QString("%1").arg(m_color.alpha(), 0, 16);
+            }
+            m_table->item(row, 1)->setText(hex);
             break;
+        }
         case 3:
             m_table->item(row, 1)->setText(QString::number(m_color.rgba(), 10));
             break;
@@ -351,7 +390,7 @@ void ColorConvert::onTableCellChanged(int row, int)
         convertFromRgb();
         break;
     case 1:
-        setColorValue({ 0, 2, 3, 4, 5, 6 });
+        updateTblExceptRow(1);
         break;
     case 2:
         convertFromHex();
@@ -370,12 +409,12 @@ void ColorConvert::onTableCellChanged(int row, int)
 
 void ColorConvert::on_toolButtonPal_clicked()
 {
+    s_clrDlg->setCurrentColor(m_color);
     s_clrDlg->exec();
     QColor color = s_clrDlg->selectedColor();
-//        QColor color = QColorDialog::getColor(Qt::white, nullptr, QString(), QColorDialog::ShowAlphaChannel);
     if (color.isValid())
     {
         m_color = color;
-        setColorValue({ 0, 1, 3, 4, 5, 6 });
+        updateTblExceptRow(2);
     }
 }

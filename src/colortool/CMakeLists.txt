@@ -1,4 +1,4 @@
-﻿project("colortool" VERSION 1.0.0 LANGUAGES CXX C)
+project("colortool" VERSION 1.1.0 LANGUAGES CXX C)
 
 set(LIBRARY_OUTPUT_PATH "${PLUGIN_PATH}")
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
