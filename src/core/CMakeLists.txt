@@ -76,6 +76,11 @@ elseif(UNIX)
         add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SRC} ${qrc_file} ${my_os_icns} ${ts_files})
     else()
         add_executable(${PROJECT_NAME} ${SRC} ${qrc_file} ${ts_files})
+        if(RPATH)
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--rpath='\$ORIGIN/../lib'")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-dynamic-linker='\$ORIGIN/../lib/ld-linux-x86-64.so.2'")
+            message("``` CMAKE_EXE_LINKER_FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
+        endif()
     endif()
 endif()
 
@@ -87,6 +92,11 @@ add_custom_target(cptask
     COMMENT "Check translation files..."
 )
 add_custom_target(ts DEPENDS ${ts_files})
+
+install(
+    FILES ${EXECUTABLE_OUTPUT_PATH}/${app_name}
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
 
 #cotire(${PROJECT_NAME})
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")

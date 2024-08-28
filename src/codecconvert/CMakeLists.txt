@@ -11,6 +11,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt5 CONFIG REQUIRED Core Gui Widgets)
 
+set(DISABLE_WARNING "-Wno-missing-field-initializers -Wno-unused-const-variable -Wno-tautological-overlap-compare -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DISABLE_WARNING}")
+
 set(BUILD_BINARY OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS ON)
 set(BUILD_STATIC ON)
