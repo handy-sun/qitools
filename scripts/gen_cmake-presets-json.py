@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import os
@@ -12,7 +12,7 @@ def get_compiler_paths():
 
     clang_path = subprocess.getoutput("which clang").strip()
     clangpp_path = subprocess.getoutput("which clang++").strip()
-    
+
     return {
         "gcc": gcc_path,
         "gpp": gpp_path,
@@ -23,7 +23,7 @@ def get_compiler_paths():
 
 def gen_linux_cmake_presets():
     system = platform.system()
-    if not system == "Linux":
+    if not system == 'Linux' and not system == 'Darwin':
         return {}
 
     uname_tup = platform.uname()
@@ -104,7 +104,7 @@ def gen_linux_cmake_presets():
 
 if __name__ == "__main__":
     presets_fmt = gen_linux_cmake_presets()
-    os.path.pardir
+    ## os.path.pardir
     script_dir = os.path.abspath(os.path.dirname(__file__))
     # this script parent's dir(abs)
     parent_dir = os.path.dirname(script_dir)

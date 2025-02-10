@@ -51,9 +51,10 @@ public:
     }
 };
 
-QiToolsWindow::QiToolsWindow(QWidget *parent)
+QiToolsWindow::QiToolsWindow(const QString &iniPath, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Internal::QiToolsWindow_Ui)
+    , m_configIniPath(iniPath)
 {
     ui->setupUi(this);
 
@@ -69,7 +70,7 @@ QiToolsWindow::QiToolsWindow(QWidget *parent)
 
     connect(ui->listWidget, &QListWidget::currentRowChanged, this, &QiToolsWindow::onListWidgetPressed);
 
-    QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
+    QSettings ini(m_configIniPath, QSettings::IniFormat);
     int index = ini.value("Preference/index").toInt();
     if (index >= 0 && index < ui->stackedWidget->count())
         ui->listWidget->setCurrentRow(index);
@@ -97,14 +98,14 @@ void QiToolsWindow::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void QiToolsWindow::closeEvent(QCloseEvent *event)
+void QiToolsWindow::closeEvent(QCloseEvent *)
 {
 //    if (QMessageBox::No == QMessageBox::warning(this, "warning", "exit?"))
 //    {
 //        event->ignore();
 //        return;
 //    }
-    QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
+    QSettings ini(m_configIniPath, QSettings::IniFormat);
     if (!ini.contains("Preference/closeAppWithWindow"))
     {
         ini.setValue("Preference/closeAppWithWindow", QVariant(0));

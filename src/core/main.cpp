@@ -41,6 +41,37 @@ void msgOutput(QtMsgType type, const QMessageLogContext &context, const QString 
     mutex.unlock();
 }
 
+QString ensureCfgDir(const QString &cfgDirName)
+{
+    // QDir dotConfigDir(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation));
+    QString dotConfPath = QDir::homePath() + "/.config";
+    qDebug() << dotConfPath;
+    QDir dotConfigDir = dotConfPath;
+    if (dotConfigDir.exists(cfgDirName))
+    {
+        if (dotConfigDir.cd(cfgDirName))
+        {
+            qDebug() << "exists qitoolsConfigDir:" << dotConfigDir.path();
+            return dotConfigDir.path();
+        }
+        else
+        {
+            qWarning() << dotConfigDir.path() << "cannot cd:" << cfgDirName;
+            return QString();
+        }
+    }
+    else if (dotConfigDir.mkpath(cfgDirName))
+    {
+        qDebug() << "dotConfigDir:" << dotConfigDir.path();
+        if (dotConfigDir.cd(cfgDirName))
+        {
+            qDebug() << "mkpath qitoolsConfigDir:" << dotConfigDir.path();
+            return dotConfigDir.path();
+        }
+    }
+    return QString();
+}
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -49,11 +80,19 @@ int main(int argc, char *argv[])
 #endif
 //    setvbuf(stdout, nullptr, _IONBF, 1024);
 
-    QSettings ini(qApp->applicationDirPath() + "/QiTools.ini", QSettings::IniFormat);
+    QString qiToolsConfDir = ensureCfgDir("qitools");
+    if (qiToolsConfDir.isEmpty())
+    {
+        qWarning() << "Access config directory failed!";
+        return 1;
+    }
+
+    QString qiToolsConfIni = qiToolsConfDir + "/qitools.ini";
+    QSettings ini(qiToolsConfIni, QSettings::IniFormat);
 //    qSetMessagePattern("%{message} [%{file}:%{line} - %{qthreadptr} | %{time MM.dd hh:mm:ss.zzz}]");
     if (ini.value("Preference/logoutOn").toBool())
     {
-        addNewSignInLog(qApp->applicationDirPath() + "/qitools.log");
+        addNewSignInLog(qiToolsConfDir + "/qitools.log");
         qSetMessagePattern("[%{time MM/dd hh:mm:ss.zzz}][%{type}]%{message} ");
         qInstallMessageHandler(msgOutput);
     }
@@ -81,7 +120,7 @@ int main(int argc, char *argv[])
     }
 
     qDebug() << qApp->libraryPaths();
-    QiToolsWindow w;
+    QiToolsWindow w(qiToolsConfIni);
     w.setWindowTitle("qitools");
     w.setWindowIcon(QIcon(":/toolsimage.svg"));
     if (!_ba.isEmpty())

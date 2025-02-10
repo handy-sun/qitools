@@ -19,7 +19,7 @@ class QiToolsWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit QiToolsWindow(QWidget *parent = nullptr);
+    explicit QiToolsWindow(const QString &iniPath, QWidget *parent = nullptr);
     ~QiToolsWindow() override;
 
 protected:
@@ -29,6 +29,7 @@ protected:
 private:
     Internal::QiToolsWindow_Ui  *ui;
     decltype(PluginManager::instance()->stringWidgetHash()) m_stackedHash;
+    QString m_configIniPath;
 
 private Q_SLOTS:
     void onListWidgetPressed(int r);
