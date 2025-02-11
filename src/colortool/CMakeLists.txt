@@ -16,10 +16,7 @@ add_library(${PROJECT_NAME} SHARED "")
 qt5_add_resources(qrc_file ${CMAKE_CURRENT_SOURCE_DIR}/colortool.qrc)
 
 target_sources(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/colorconvert.h
     ${CMAKE_CURRENT_SOURCE_DIR}/colorconvert.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/colorconvert.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/screencolorpicker.h
     ${CMAKE_CURRENT_SOURCE_DIR}/screencolorpicker.cpp
     ${qrc_file}
 )

@@ -1,11 +1,12 @@
 #include "codecconvertwidget.h"
+#include "ced/util/encodings/encodings.h"
 #include "ui_codecconvertwidget.h"
 #include <QFileDialog>
 #include <QTextStream>
 #include <QDebug>
 #include <QTextCodec>
 #include <QTimer>
-#include "uchardet.h"
+#include <compact_enc_det/compact_enc_det.h>
 
 using namespace CodecConvert;
 
@@ -40,17 +41,32 @@ CodecConvertWidget::~CodecConvertWidget()
 
 QString CodecConvertWidget::getCodeString(const QByteArray &ba)
 {
-    auto uchardetHandle = uchardet_new();
-    int retVal = uchardet_handle_data(uchardetHandle, ba.constData(), static_cast<size_t>(ba.size()));
-    uchardet_data_end(uchardetHandle);
-    QString charset = uchardet_get_charset(uchardetHandle);
-    qDebug() << "ret:" << retVal << "charset:" << charset;
-    if (charset.startsWith("UTF-8") && ba.startsWith("\xEF\xBB\xBF"))
+    bool is_reliable;
+    int bytes_consumed;
+
+    Encoding encoding = CompactEncDet::DetectEncoding(
+        ba.constData(), static_cast<size_t>(ba.size()),
+        nullptr, nullptr, nullptr,
+        UNKNOWN_ENCODING,
+        UNKNOWN_LANGUAGE,
+        CompactEncDet::WEB_CORPUS,
+        false,
+        &bytes_consumed,
+        &is_reliable);
+
+    // auto uchardetHandle = uchardet_new();
+    // int retVal = uchardet_handle_data(uchardetHandle, ba.constData(), static_cast<size_t>(ba.size()));
+    // uchardet_data_end(uchardetHandle);
+    // QString charset = uchardet_get_charset(uchardetHandle);
+    // qDebug() << "ret:" << retVal << "charset:" << charset;
+    // uchardet_delete(uchardetHandle);
+    QString encName = EncodingName(encoding);
+    qDebug() << "encoding:" << encName << "(" << encoding << "), is_reliable:" << is_reliable << "bytes_consumeda=" <<  bytes_consumed;
+    if (encoding == UTF8 && ba.startsWith("\xEF\xBB\xBF"))
     {
-        charset.append(" with BOM");
+        encName.append("_BOM");
     }
-    uchardet_delete(uchardetHandle);
-    return charset;
+    return encName;
 }
 
 void CodecConvertWidget::on_pushButtonOpen_clicked()

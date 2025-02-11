@@ -2,7 +2,7 @@ TEMPLATE  = subdirs
 CONFIG   += ordered
 
 SUBDIRS  += \
-    codegen \
+    cppcodegen \
     colortool \
     simpledownload \
     audio \

@@ -17,9 +17,7 @@ qt5_add_translation(ts_files ${CMAKE_CURRENT_SOURCE_DIR}/glsltool-zh_CN.ts)
 #set(ts_files ${${ts_files}} PARENT_SCOPE)
 
 target_sources(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/glslcodeconvert.h
     ${CMAKE_CURRENT_SOURCE_DIR}/glslcodeconvert.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/glslcodeconvert.ui
     ${ts_files}
 )
 

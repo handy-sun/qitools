@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../CMake")
 #set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../../bin)
-#set(CMAKE_DEBUG_POSTFIX "_d")
 
 # 本次使用C++标准版本
 if(NOT CMAKE_CXX_STANDARD)
@@ -49,13 +48,9 @@ qt5_add_resources(qrc_file ../../resource/qitools.qrc)
 #string(REPLACE " " "\ " win_rc2 ${win_rc})
 
 set(SRC
-    main.cpp 
-    pluginmanager.cpp 
-    qitoolswindow.cpp 
-    pluginmanager.h 
-    pluginterface.h 
-    qitoolswindow.h 
-    stable.h
+    main.cpp
+    pluginmanager.cpp
+    qitoolswindow.cpp
 )
 
 add_definitions(
@@ -66,7 +61,8 @@ add_definitions(
 )
 
 if(WIN32)
-    set(win_rc "${CMAKE_CURRENT_SOURCE_DIR}/../../resource/icon.rc") # PS: 如果路径内有空格，则添加.rc文件编译无法通过
+    # WARNING: 如果路径内有空格，则添加.rc文件编译无法通过
+    set(win_rc "${CMAKE_CURRENT_SOURCE_DIR}/../../resource/icon.rc")
     add_executable(${PROJECT_NAME} WIN32 ${SRC} ${qrc_file} ${win_rc} ${ts_files})
 elseif(UNIX)
     if(APPLE)
@@ -93,6 +89,9 @@ add_custom_target(cptask
     COMMENT "Check translation files..."
 )
 add_custom_target(ts DEPENDS ${ts_files})
+
+set(CMAKE_INSTALL_BINDIR "bin")
+set(CMAKE_INSTALL_LIBDIR "lib")
 
 install(
     FILES ${EXECUTABLE_OUTPUT_PATH}/${app_name}

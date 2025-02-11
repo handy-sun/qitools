@@ -1,6 +1,6 @@
 include(../dynamicplugin.pri)
 
-TARGET = codegen
+TARGET = cppcodegen
 
 SOURCES += \
     $$PWD/propertygenerator.cpp \
@@ -13,4 +13,4 @@ HEADERS += \
 FORMS += \
     $$PWD/propertygenerator.ui
 
-TRANSLATIONS = codegen-zh_CN.ts
+TRANSLATIONS = cppcodegen-zh_CN.ts

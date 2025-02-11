@@ -1,12 +1,11 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 set(PROJECT_AUTHOR "sooncheer")
-project("qitools" VERSION 0.14.0 LANGUAGES CXX C)
+project("qitools" VERSION 0.15.0 LANGUAGES CXX C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../CMake")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../bin)
-#set(CMAKE_DEBUG_POSTFIX "_d")
 
 string(TOLOWER ${CMAKE_CXX_COMPILER_ID} compiler_id)
 set(app_name "${PROJECT_NAME}-${compiler_id}")
@@ -22,7 +21,7 @@ else()
 endif()
 
 add_subdirectory(codecconvert)
-add_subdirectory(codegen)
+add_subdirectory(cppcodegen)
 add_subdirectory(colortool)
 add_subdirectory(simpledownload)
 add_subdirectory(audio)

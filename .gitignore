@@ -31,6 +31,8 @@ Makefile*
 bin
 build
 *build-*
+install
+*install-*
 QiTools_*_gcc
 QiTools_*_gcc*
 # Qt unit tests
@@ -46,13 +48,15 @@ target_wrapper.*
 # QtCreator CMake
 CMakeLists.txt.user*
 
-# music
 *.ini
+# music
 *.mp3
 *.wav
 *.flac
 
+# MacOS
 .DS_Store
 *.iconset
 
+# cmake --preset / --list-presets
 CMakePresets.json

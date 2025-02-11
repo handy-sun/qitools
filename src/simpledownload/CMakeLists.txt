@@ -14,10 +14,7 @@ find_package(Qt5 CONFIG REQUIRED Core Gui Network Widgets)
 add_library(${PROJECT_NAME} SHARED "")
 
 target_sources(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/downloadwidget.h
     ${CMAKE_CURRENT_SOURCE_DIR}/downloadwidget.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/downloadwidget.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/networkcontrol.h
     ${CMAKE_CURRENT_SOURCE_DIR}/networkcontrol.cpp
 )
 

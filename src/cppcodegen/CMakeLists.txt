@@ -1,4 +1,4 @@
-﻿project("codegen" VERSION 0.1.0 LANGUAGES CXX C)
+﻿project("cppcodegen" VERSION 0.1.0 LANGUAGES CXX C)
 
 set(LIBRARY_OUTPUT_PATH "${PLUGIN_PATH}")
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
@@ -14,10 +14,7 @@ find_package(Qt5 CONFIG REQUIRED Core Gui Widgets)
 add_library(${PROJECT_NAME} SHARED "")
 
 target_sources(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/propertygenerator.h
     ${CMAKE_CURRENT_SOURCE_DIR}/propertygenerator.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/propertygenerator.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/propertymanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/propertymanager.cpp
 )
 

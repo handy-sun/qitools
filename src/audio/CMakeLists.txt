@@ -14,14 +14,9 @@ find_package(Qt5 CONFIG REQUIRED Core Gui Widgets Multimedia)
 add_library(${PROJECT_NAME} SHARED "")
 
 target_sources(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/audiodataplay.h
     ${CMAKE_CURRENT_SOURCE_DIR}/audiodataplay.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/audiowidget.h
     ${CMAKE_CURRENT_SOURCE_DIR}/audiowidget.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/audiowidget.ui
-    ${CMAKE_CURRENT_SOURCE_DIR}/wavfile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/wavfile.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/struct_id3v2.h
 )
 add_subdirectory(minimp3)
 

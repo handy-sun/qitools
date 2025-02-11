@@ -21,7 +21,7 @@ def get_compiler_paths():
     }
 
 
-def gen_linux_cmake_presets():
+def gen_unix_cmake_presets():
     system = platform.system()
     if not system == 'Linux' and not system == 'Darwin':
         return {}
@@ -103,7 +103,7 @@ def gen_linux_cmake_presets():
 
 
 if __name__ == "__main__":
-    presets_fmt = gen_linux_cmake_presets()
+    presets_fmt = gen_unix_cmake_presets()
     ## os.path.pardir
     script_dir = os.path.abspath(os.path.dirname(__file__))
     # this script parent's dir(abs)
