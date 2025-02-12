@@ -1,4 +1,4 @@
-﻿#ifndef SCREENCOLORPICKER_H
+#ifndef SCREENCOLORPICKER_H
 #define SCREENCOLORPICKER_H
 
 #include <QDialog>

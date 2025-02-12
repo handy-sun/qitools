@@ -11,6 +11,7 @@ CONFIG(debug, debug | release): TARGET_NAME = $${TARGET_NAME}-d
 
 OUT_PATH = $$PWD/bin
 APP_TARGET = "$$TARGET_NAME"
+
 osx {
 
     # check if IDE_BUILD_TREE is actually an existing Qt Creator.app,
@@ -24,3 +25,8 @@ osx {
     PLUGIN_PATH = $$OUT_PATH/plugins
 }
 
+## msvc compile error if a file enconding is utf-8 without BOM
+win32-msvc*: {
+    QMAKE_CFLAGS *= /utf-8
+    QMAKE_CXXFLAGS *= /utf-8
+}

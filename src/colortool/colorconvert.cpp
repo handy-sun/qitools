@@ -113,12 +113,12 @@ void ColorConvert::initTableWidget()
     QTableWidgetItem *item;
     QFont fontCol0("Microsoft Yahei", 14);
     QStringList horizontalLabels, verticalContents;
-    horizontalLabels << QStringLiteral("option") << QStringLiteral("value");
+    horizontalLabels << tr("option") << tr("value");
 
-    verticalContents << QStringLiteral("css/qss") << QStringLiteral("Color")
-                     << QStringLiteral("Hex(rgba)") << QStringLiteral("Dec")
-                     << QStringLiteral("OpenGL") << QStringLiteral("CMYK")
-                     << QStringLiteral("HSV");
+    verticalContents << tr("css/qss") << tr("Color")
+                     << tr("Hex(rgba)") << tr("Dec")
+                     << tr("OpenGL") << tr("CMYK")
+                     << tr("HSV");
 
     m_table->setColumnCount(horizontalLabels.size());
     m_table->setRowCount(verticalContents.size());

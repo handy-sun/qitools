@@ -1,4 +1,4 @@
-﻿#include "screencolorpicker.h"
+#include "screencolorpicker.h"
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMouseEvent>

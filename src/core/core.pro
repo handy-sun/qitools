@@ -14,6 +14,8 @@ CONFIG += c++11 \
     no_keywords \
     skip_target_version_ext
 
+CONFIG += sdk_no_version_check
+
 DEFINES += \
     QT_DEPRECATED_WARNINGS \
 #    USE_QAUDIODECODER
@@ -51,7 +53,7 @@ RC_ICONS = $$RES_PATH/toolsimage.ico
 
 ICON = $$RES_PATH/toolsimage.icns
 
-VERSION = 0.13.0
+VERSION = 0.15.0
 DEFINES += VERSION_STRING=\\\"$${VERSION}\\\"
 
 TRANSLATIONS = core-zh_CN.ts

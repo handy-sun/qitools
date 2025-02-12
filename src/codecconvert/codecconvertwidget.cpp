@@ -1,11 +1,11 @@
 #include "codecconvertwidget.h"
-#include "ced/util/encodings/encodings.h"
 #include "ui_codecconvertwidget.h"
 #include <QFileDialog>
 #include <QTextStream>
 #include <QDebug>
 #include <QTextCodec>
 #include <QTimer>
+#include <util/encodings/encodings.h>
 #include <compact_enc_det/compact_enc_det.h>
 
 using namespace CodecConvert;
@@ -45,7 +45,7 @@ QString CodecConvertWidget::getCodeString(const QByteArray &ba)
     int bytes_consumed;
 
     Encoding encoding = CompactEncDet::DetectEncoding(
-        ba.constData(), static_cast<size_t>(ba.size()),
+        ba.constData(), ba.size(),
         nullptr, nullptr, nullptr,
         UNKNOWN_ENCODING,
         UNKNOWN_LANGUAGE,
@@ -54,24 +54,22 @@ QString CodecConvertWidget::getCodeString(const QByteArray &ba)
         &bytes_consumed,
         &is_reliable);
 
-    // auto uchardetHandle = uchardet_new();
-    // int retVal = uchardet_handle_data(uchardetHandle, ba.constData(), static_cast<size_t>(ba.size()));
-    // uchardet_data_end(uchardetHandle);
-    // QString charset = uchardet_get_charset(uchardetHandle);
-    // qDebug() << "ret:" << retVal << "charset:" << charset;
-    // uchardet_delete(uchardetHandle);
-    QString encName = EncodingName(encoding);
-    qDebug() << "encoding:" << encName << "(" << encoding << "), is_reliable:" << is_reliable << "bytes_consumeda=" <<  bytes_consumed;
-    if (encoding == UTF8 && ba.startsWith("\xEF\xBB\xBF"))
+    const char *encName = EncodingName(encoding);
+    qDebug("encoding:%-20s(%2d), reliable:%s, consumeda=%d", encName, encoding, (is_reliable ? " true" : "false"),  bytes_consumed);
+    if (encoding == UTF8)
     {
-        encName.append("_BOM");
+        if (ba.startsWith("\xEF\xBB\xBF"))
+        {
+            return "UTF-8 with BOM";
+        }
+        return "UTF-8";
     }
     return encName;
 }
 
 void CodecConvertWidget::on_pushButtonOpen_clicked()
 {
-    QStringList _fileList = QFileDialog::getOpenFileNames(this, QStringLiteral("打开文件"), "", "All(*.*)");
+    QStringList _fileList = QFileDialog::getOpenFileNames(this, "Open file", "", "All(*.*)");
 
     if (_fileList.isEmpty())
         return;
@@ -90,7 +88,7 @@ void CodecConvertWidget::on_pushButtonOpen_clicked()
 
 void CodecConvertWidget::on_pushButtonConvert_clicked()
 {
-    //    QApplication::setOverrideCursor(Qt::WaitCursor);
+    // QApplication::setOverrideCursor(Qt::WaitCursor);
     int count = 0;
     for (const auto &targetFilePath : m_fileList)
     {
@@ -99,7 +97,7 @@ void CodecConvertWidget::on_pushButtonConvert_clicked()
             continue;
 
         QTextStream rwStream(&file);
-        rwStream.setGenerateByteOrderMark(false);  // 不带bom的utf8 读
+        rwStream.setGenerateByteOrderMark(false);  // without BOM
         QString _content = rwStream.readAll();
         file.close();
 
@@ -119,13 +117,13 @@ void CodecConvertWidget::on_pushButtonConvert_clicked()
         file.close();
         ++count;
     }
-    //    QApplication::restoreOverrideCursor();
-    ui->labelSavedMsg->setText(QStringLiteral("成功保存了 %1 个文件").arg(count));
+    // QApplication::restoreOverrideCursor();
+    ui->labelSavedMsg->setText(tr("Saved %1 file(s) succeeded").arg(count));
     QTimer::singleShot(10000, ui->labelSavedMsg, &QLabel::clear);
 }
 
 void CodecConvertWidget::on_PushButtonSetDir_clicked()
 {
-    auto savedPath = QFileDialog::getExistingDirectory(this, QStringLiteral("选择保存路径"));
+    auto savedPath = QFileDialog::getExistingDirectory(this, tr("Choose the save path"));
     ui->lineEditDir->setText(savedPath);
 }
