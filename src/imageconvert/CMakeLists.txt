@@ -13,9 +13,8 @@ find_package(Qt5 CONFIG REQUIRED Core Gui Widgets)
 
 add_library(${PROJECT_NAME} SHARED "")
 
-target_sources(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/imagetoolwidget.cpp
-)
+file(GLOB SOURCES *.h *.cpp)
+target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 

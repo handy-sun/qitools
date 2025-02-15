@@ -1,23 +1,13 @@
 project("codecconvert" VERSION 3.0.0 LANGUAGES CXX C)
 
-set(LIBRARY_OUTPUT_PATH "${PLUGIN_PATH}")
-if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    set(LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_PATH}/debug)
-endif()
-
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../CMake")
+include(qitools_common)
 
 find_package(Qt5 CONFIG REQUIRED Core Gui Widgets)
 
-if(NOT MSVC)
-    set(DISABLE_WARNING "-Wno-missing-field-initializers -Wno-unused-const-variable -Wno-tautological-overlap-compare -Wno-deprecated-declarations")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DISABLE_WARNING}")
-endif()
 
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
-cmake_policy(SET CMP0048 OLD)
+# cmake_policy(SET CMP0048 OLD)
 
 ## -------- add ced -------- {{{
 set(CED_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/ced")
@@ -32,10 +22,8 @@ include_directories(${PROJECT_NAME} PUBLIC ${CED_ROOT})
 
 add_library(${PROJECT_NAME} SHARED "")
 
-target_sources(${PROJECT_NAME} PRIVATE
-    ${CED_SOURCES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/codecconvertwidget.cpp
-)
+file(GLOB SOURCES *.h *.cpp)
+target_sources(${PROJECT_NAME} PRIVATE ${SOURCES} ${CED_SOURCES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 

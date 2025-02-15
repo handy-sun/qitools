@@ -1,22 +1,14 @@
 ﻿project("cppcodegen" VERSION 0.1.0 LANGUAGES CXX C)
 
-set(LIBRARY_OUTPUT_PATH "${PLUGIN_PATH}")
-if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    set(LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_PATH}/debug)
-endif()
-
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../CMake")
+include(qitools_common)
 
 find_package(Qt5 CONFIG REQUIRED Core Gui Widgets)
 
 add_library(${PROJECT_NAME} SHARED "")
 
-target_sources(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/propertygenerator.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/propertymanager.cpp
-)
+file(GLOB SOURCES *.h *.cpp)
+target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 

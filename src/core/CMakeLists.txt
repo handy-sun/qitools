@@ -1,34 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../CMake")
-#set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../../bin)
-
-# 本次使用C++标准版本
-if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 11)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
-
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
+include(qitools_common)
 
 find_package(Qt5 CONFIG REQUIRED Core Gui Widgets LinguistTools)
 
-if(CMAKE_CXX_COMPILER MATCHES ".*mingw")
-    set(CMAKE_CXX_FLAGS "-mwindows")
-endif()
+# if(CMAKE_CXX_COMPILER MATCHES ".*mingw")
+#     set(CMAKE_CXX_FLAGS "-mwindows")
+# endif()
 
 #message("``` ${CMAKE_CXX_COMPILER_ID}")
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    include(pch_gcc4)
-    include(get_depends)
-endif()
-
-#include(cotire)
 
 #string(TOLOWER ${CMAKE_CXX_COMPILER_ID} compiler_id)
 #set(app_name "${PROJECT_NAME}-${compiler_id}")
@@ -47,18 +30,14 @@ qt5_add_resources(qrc_file ../../resource/qitools.qrc)
 #qt5_add_translation(ts_files ${CMAKE_CURRENT_SOURCE_DIR}/core-zh_CN.ts)
 #string(REPLACE " " "\ " win_rc2 ${win_rc})
 
-set(SRC
-    main.cpp
-    pluginmanager.cpp
-    qitoolswindow.cpp
-)
-
 add_definitions(
     -DQT_MESSAGELOGCONTEXT
     -DQT_DEPRECATED_WARNINGS
     -DDYNAMIC_SUFFIX="${SUFFIX}"
     -DVERSION_STRING="${PROJECT_VERSION}"
 )
+
+file(GLOB SRC *.h *.cpp)
 
 if(WIN32)
     # WARNING: 如果路径内有空格，则添加.rc文件编译无法通过
@@ -67,19 +46,30 @@ if(WIN32)
 elseif(UNIX)
     if(APPLE)
         set(MACOSX_BUNDLE_ICON_FILE "toolsimage.icns")
-        set(my_os_icns "${EXECUTABLE_OUTPUT_PATH}/../resource/toolsimage.icns")
-        set_source_files_properties(${my_os_icns} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SRC} ${qrc_file} ${my_os_icns} ${ts_files})
-    else()
-        option(RPATH "Use '-Wl,--rpath' to link .so" OFF)
+        set(macos_icns "${EXECUTABLE_OUTPUT_PATH}/../resource/toolsimage.icns")
 
+        if(QITOOLS_MAC_BUNDLE)
+            set_source_files_properties(${macos_icns} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+            add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SRC} ${qrc_file} ${macos_icns} ${ts_files})
+        endif()
+    else()
+        option(QITOOLS_LINUX_RPATH "Use '-Wl,--rpath' to link .so" OFF)
         add_executable(${PROJECT_NAME} ${SRC} ${qrc_file} ${ts_files})
-        if(RPATH)
+
+        if(QITOOLS_LINUX_RPATH)
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--rpath='\$ORIGIN/../lib'")
             message("``` CMAKE_EXE_LINKER_FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
         endif()
     endif()
 endif()
+
+# 设置输出目录相同，无论是 Debug 还是 Release 等
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${EXECUTABLE_OUTPUT_PATH}"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${EXECUTABLE_OUTPUT_PATH}"
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${EXECUTABLE_OUTPUT_PATH}"
+    RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${EXECUTABLE_OUTPUT_PATH}"
+)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${app_name})
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core Qt5::Gui)
@@ -88,7 +78,7 @@ add_custom_target(cptask
     COMMAND test -d "${PLUGIN_PATH}/../translations" || cp -r "${EXECUTABLE_OUTPUT_PATH}/translations" "${PLUGIN_PATH}/../"
     COMMENT "Check translation files..."
 )
-add_custom_target(ts DEPENDS ${ts_files})
+# add_custom_target(ts DEPENDS ${ts_files})
 
 set(CMAKE_INSTALL_BINDIR "bin")
 set(CMAKE_INSTALL_LIBDIR "lib")

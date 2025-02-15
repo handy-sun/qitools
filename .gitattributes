@@ -1,2 +1,3 @@
 *.pro linguist-detectable=false
 *.pri linguist-detectable=false
+*.css linguist-detectable=false
