@@ -50,8 +50,15 @@ elseif(UNIX)
 
         if(QITOOLS_MAC_BUNDLE)
             set_source_files_properties(${macos_icns} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-            add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SRC} ${qrc_file} ${macos_icns} ${ts_files})
+            # set_target_properties(${PROJECT_NAME} PROPERTIES
+            #     MACOSX_BUNDLE TRUE
+            #     MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
+            # )
+            # message("MACOSX_BUNDLE_BUNDLE_NAME:${MACOSX_BUNDLE_BUNDLE_NAME}")
+        # else()
+            # add_executable(${PROJECT_NAME} ${SRC})
         endif()
+        add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SRC} ${qrc_file} ${macos_icns} ${ts_files})
     else()
         option(QITOOLS_LINUX_RPATH "Use '-Wl,--rpath' to link .so" OFF)
         add_executable(${PROJECT_NAME} ${SRC} ${qrc_file} ${ts_files})
@@ -63,7 +70,7 @@ elseif(UNIX)
     endif()
 endif()
 
-# 设置输出目录相同，无论是 Debug 还是 Release 等
+## 设置输出目录相同，无论是 Debug 还是 Release 等
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${EXECUTABLE_OUTPUT_PATH}"
     RUNTIME_OUTPUT_DIRECTORY_RELEASE "${EXECUTABLE_OUTPUT_PATH}"
