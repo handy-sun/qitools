@@ -20,12 +20,10 @@ jobs:
           # ── Win7+ (MSVC 2022) ──
           - os: windows-2022
             qt_version: 5.15.2
-            cmake_generator: Visual Studio 17 2022
             artifact: qitools-win-x64
           # ── WinXP (MSVC 2017 toolset, Qt 5.6) ──
           - os: windows-2022
             qt_version: 5.6.3
-            cmake_generator: Visual Studio 17 2022
             cmake_toolset: v141_xp
             artifact: qitools-win-xp
           # ── Linux ──
@@ -40,12 +38,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install v141_xp component
+        if: matrix.cmake_toolset == 'v141_xp'
+        shell: powershell
+        run: |
+          $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe" modify --installPath $vsPath --add Microsoft.VisualStudio.Component.VC.v141.xp --quiet --norestart --nocache --wait
+
       - name: Setup MSVC
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
-          toolset: ${{ matrix.cmake_toolset }}
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -59,8 +63,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev libfontconfig1-dev libfreetype6-dev libxcb1-dev libxcb-keysyms1-dev libxcb-xfixes0-dev
 
       - name: CMake configure
-        run: cmake -S src -B build -G "${{ matrix.cmake_generator || 'Unix Makefiles' }}" -T ${{ matrix.cmake_toolset || '' }} -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${{ env.Qt5_DIR }}
         shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cmake -S src -B build -G "Visual Studio 17 2022" -A x64 ${CMAKE_TOOLSET:+-T $CMAKE_TOOLSET} -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          else
+            cmake -S src -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          fi
+        env:
+          CMAKE_TOOLSET: ${{ matrix.cmake_toolset }}
 
       - name: CMake build
         run: cmake --build build --config Release -j4
