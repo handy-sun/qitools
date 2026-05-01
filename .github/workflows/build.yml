@@ -31,8 +31,8 @@ jobs:
           - os: ubuntu-22.04
             qt_version: 5.15.2
             artifact: qitools-linux
-          # ── macOS (x86_64) ──
-          - os: macos-13
+          # ── macOS (ARM) ──
+          - os: macos-latest
             qt_version: 5.15.2
             artifact: qitools-macos
     continue-on-error: ${{ matrix.experimental || false }}
@@ -61,7 +61,7 @@ jobs:
           version: ${{ matrix.qt_version }}
           target: desktop
           cache: true
-          aqtversion: ${{ matrix.qt_version == '5.6.3' && '==2.1.1' || '' }}
+          aqtversion: ${{ matrix.qt_version == '5.6.3' && '==2.1.0' || '' }}
 
       - name: Install Linux deps
         if: runner.os == 'Linux'
@@ -105,7 +105,7 @@ jobs:
 
       - name: Package (Linux)
         if: runner.os == 'Linux'
-        run: cd bin && tar czf ../${{ matrix.artifact }}.tar.gz qitools-gcc plugins/ translations/
+        run: cd bin && tar czf ../${{ matrix.artifact }}.tar.gz qitools-gnu qitools-gnu.app/Contents/MacOS/plugins/ translations/
 
       - name: Package (macOS)
         if: runner.os == 'macOS'
