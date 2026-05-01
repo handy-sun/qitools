@@ -365,7 +365,7 @@ void AudioWidget::on_btnOpenFile_clicked()
         {
             if (frameCount == 0)
             {
-                qstrcpy(sptr_frame->header.frameID, "0000");
+                memcpy(sptr_frame->header.frameID, "0000", 4);
                 sptr_frame->frameLength = totalTagSize - sptr_frame->beginPos;
                 file.seek(totalTagSize);
             }
@@ -632,7 +632,7 @@ void TestStream::load(const QString &fileName)
     QByteArray header(TotalHeadSize, 0);
     if (head.startsWith("ID3") || fileName.endsWith(".mp3"))
     {
-        quint32 rate, totalCount, channels;
+        quint32 rate = 0, totalCount = 0, channels = 0;
 //        QTime t(QTime::currentTime());
         QElapsedTimer t;
         t.start();

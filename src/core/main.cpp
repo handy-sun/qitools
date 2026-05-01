@@ -24,9 +24,8 @@ void addNewSignInLog(const QString &configLogFile)
 
 void msgOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    Q_UNUSED(type)
     static QMutex mutex;
-    mutex.lock();
+    QMutexLocker locker(&mutex);
     QFile file(s_logFile);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Append))
         return;
@@ -38,7 +37,6 @@ void msgOutput(QtMsgType type, const QMessageLogContext &context, const QString 
     textStream << formatMsg << "\r\n";
     file.flush();
     file.close();
-    mutex.unlock();
 }
 
 QString ensureCfgDir(const QString &cfgDirName)

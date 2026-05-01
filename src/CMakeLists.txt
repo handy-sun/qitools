@@ -10,7 +10,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../bin)
 string(TOLOWER ${CMAKE_CXX_COMPILER_ID} compiler_id)
 set(app_name "${PROJECT_NAME}-${compiler_id}")
 
-if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+if("${CMAKE_BUILD_TYPE}" MATCHES "Debug")
     set(app_name "${app_name}-d")
 endif()
 

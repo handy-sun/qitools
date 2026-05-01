@@ -191,6 +191,7 @@ void AudioDataPlay::resetAudio()
         delete m_audioOutput;
         m_audioOutput = nullptr;
     }
+    m_timerPull.stop();
     m_baBuf.clear();
 }
 
@@ -208,8 +209,11 @@ void AudioDataPlay::slot_setVolume(qreal vol)
 
 void AudioDataPlay::onTimerPull()
 {
-    if (m_audioOutput->state() == QAudio::StoppedState)
+    if (!m_audioOutput || m_audioOutput->state() == QAudio::StoppedState)
+    {
+        m_timerPull.stop();
         return;
+    }
 
     QByteArray buffer(32768, 0);
     int chunks = m_audioOutput->bytesFree() / m_audioOutput->periodSize();

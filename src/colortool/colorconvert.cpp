@@ -94,7 +94,7 @@ ColorConvert::ColorConvert(QWidget *parent)
     connect(m_scrPicker, &ScreenColorPicker::pickFinished, this, &ColorConvert::slot_PickFinished);
     connect(m_table, &QTableWidget::cellChanged, this, &ColorConvert::onTableCellChanged);
 
-    s_clrDlg = new QColorDialog(this);
+    s_clrDlg = new QColorDialog;
     s_clrDlg->resize(522, 411); // to avoid QWindowsWindow::setGeometry() warning;
     s_clrDlg->setOption(QColorDialog::ShowAlphaChannel);
 
@@ -105,6 +105,8 @@ ColorConvert::ColorConvert(QWidget *parent)
 
 ColorConvert::~ColorConvert()
 {
+    delete s_clrDlg;
+    s_clrDlg = nullptr;
     delete ui;
 }
 
@@ -409,6 +411,8 @@ void ColorConvert::onTableCellChanged(int row, int)
 
 void ColorConvert::on_toolButtonPal_clicked()
 {
+    if (!s_clrDlg)
+        return;
     s_clrDlg->setCurrentColor(m_color);
     s_clrDlg->exec();
     QColor color = s_clrDlg->selectedColor();
