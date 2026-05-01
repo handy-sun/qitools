@@ -31,8 +31,8 @@ jobs:
           - os: ubuntu-22.04
             qt_version: 5.15.2
             artifact: qitools-linux
-          # ── macOS (arm64) ──
-          - os: macos-14
+          # ── macOS (x86_64) ──
+          - os: macos-13
             qt_version: 5.15.2
             artifact: qitools-macos
     continue-on-error: ${{ matrix.experimental || false }}
@@ -70,10 +70,14 @@ jobs:
       - name: CMake configure
         shell: bash
         run: |
+          CMAKE_EXTRA=""
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            CMAKE_EXTRA="-DCMAKE_CXX_FLAGS=-include\ limits"
+          fi
           if [ "$RUNNER_OS" = "Windows" ]; then
-            cmake -S src -B build -G "Visual Studio 17 2022" -A x64 ${CMAKE_TOOLSET:+-T $CMAKE_TOOLSET} -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+            cmake -S src -B build -G "Visual Studio 17 2022" -A x64 ${CMAKE_TOOLSET:+-T $CMAKE_TOOLSET} -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" $CMAKE_EXTRA
           else
-            cmake -S src -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+            cmake -S src -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" $CMAKE_EXTRA
           fi
         env:
           CMAKE_TOOLSET: ${{ matrix.cmake_toolset }}
@@ -97,7 +101,7 @@ jobs:
       - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: bash
-        run: cd bin && 7z a ../${{ matrix.artifact }}.zip qitools-msvc.exe plugins/ translations/ *.dll platforms/ styles/ imageformats/
+        run: cd bin && 7z a ../${{ matrix.artifact }}.zip qitools-msvc.exe plugins/ translations/ *.dll
 
       - name: Package (Linux)
         if: runner.os == 'Linux'
