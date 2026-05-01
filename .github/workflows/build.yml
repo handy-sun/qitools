@@ -41,8 +41,8 @@ jobs:
           - os: ubuntu-24.04-arm
             artifact: qitools-linux-arm64
             qt_from_apt: true
-          # ── macOS (ARM) ──
-          - os: macos-latest
+          # ── macOS (x86_64, Qt 5.15 has no arm64 prebuild) ──
+          - os: macos-13
             qt_version: 5.15.2
             artifact: qitools-macos
     continue-on-error: ${{ matrix.experimental || false }}
@@ -66,7 +66,7 @@ jobs:
           arch: ${{ matrix.arch || 'x64' }}
 
       - name: Install Qt (prebuilt)
-        if: ${{ !matrix.qt_from_apt }}
+        if: ${{ !matrix.qt_from_apt && !(runner.os == 'Windows' && matrix.arch == 'x86') }}
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ matrix.qt_version }}
@@ -74,13 +74,20 @@ jobs:
           cache: true
           aqtversion: ${{ matrix.qt_version == '5.6.3' && '==2.1.0' || '' }}
 
+      - name: Install Qt x86 (aqt)
+        if: ${{ runner.os == 'Windows' && matrix.arch == 'x86' && !matrix.qt_from_apt }}
+        shell: bash
+        run: |
+          pip install aqtinstall
+          aqt install-qt windows desktop ${{ matrix.qt_version }} win32_msvc2019
+          echo "QT_ROOT_DIR=$(pwd)/${{ matrix.qt_version }}/msvc2019" >> "$GITHUB_ENV"
       - name: Install Qt (apt)
         if: matrix.qt_from_apt
-        run: sudo apt-get update && sudo apt-get install -y qtbase5-dev qttools5-dev
+        run: sudo apt-get update && sudo apt-get install -y qtbase5-dev qttools5-dev qtmultimedia5-dev
 
       - name: Install Linux deps
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev libfontconfig1-dev libfreetype6-dev libxcb1-dev libxcb-keysyms1-dev libxcb-xfixes0-dev
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev libfontconfig1-dev libfreetype6-dev libxcb1-dev libxcb-keysyms1-dev libxcb-xfixes0-dev qtmultimedia5-dev
 
       - name: CMake configure (Windows)
         if: runner.os == 'Windows'
