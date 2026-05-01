@@ -20,17 +20,27 @@ jobs:
           # ── Win7+ (MSVC 2022) ──
           - os: windows-2022
             qt_version: 5.15.2
+            arch: x64
             artifact: qitools-win-x64
+          - os: windows-2022
+            qt_version: 5.15.2
+            arch: x86
+            artifact: qitools-win-x86
           # ── WinXP (MSVC 2017 toolset, Qt 5.6) ──
           - os: windows-2022
             qt_version: 5.6.3
             cmake_toolset: v141_xp
+            arch: x86
             artifact: qitools-win-xp
             experimental: true
           # ── Linux ──
           - os: ubuntu-22.04
             qt_version: 5.15.2
             artifact: qitools-linux
+          # ── Linux ARM64 ──
+          - os: ubuntu-24.04-arm
+            artifact: qitools-linux-arm64
+            qt_from_apt: true
           # ── macOS (ARM) ──
           - os: macos-latest
             qt_version: 5.15.2
@@ -53,15 +63,20 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: x64
+          arch: ${{ matrix.arch || 'x64' }}
 
-      - name: Install Qt
+      - name: Install Qt (prebuilt)
+        if: ${{ !matrix.qt_from_apt }}
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ matrix.qt_version }}
           target: desktop
           cache: true
           aqtversion: ${{ matrix.qt_version == '5.6.3' && '==2.1.0' || '' }}
+
+      - name: Install Qt (apt)
+        if: matrix.qt_from_apt
+        run: sudo apt-get update && sudo apt-get install -y qtbase5-dev qttools5-dev
 
       - name: Install Linux deps
         if: runner.os == 'Linux'
@@ -70,13 +85,13 @@ jobs:
       - name: CMake configure (Windows)
         if: runner.os == 'Windows'
         shell: bash
-        run: cmake -S src -B build -G "Visual Studio 17 2022" -A x64 ${CMAKE_TOOLSET:+-T $CMAKE_TOOLSET} -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+        run: cmake -S src -B build -G "Visual Studio 17 2022" -A ${{ matrix.arch == 'x86' && 'Win32' || 'x64' }} ${CMAKE_TOOLSET:+-T $CMAKE_TOOLSET} -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
         env:
           CMAKE_TOOLSET: ${{ matrix.cmake_toolset }}
 
       - name: CMake configure (Linux)
         if: runner.os == 'Linux'
-        run: cmake -S src -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" -DCMAKE_CXX_FLAGS="-include limits"
+        run: cmake -S src -B build -DCMAKE_BUILD_TYPE=Release ${{ !matrix.qt_from_apt && '-DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"' || '' }} -DCMAKE_CXX_FLAGS="-include limits"
 
       - name: CMake configure (macOS)
         if: runner.os == 'macOS'
@@ -101,7 +116,7 @@ jobs:
       - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: bash
-        run: cd bin && 7z a ../${{ matrix.artifact }}.zip qitools-msvc.exe plugins/ translations/ *.dll
+        run: cd bin && 7z a ../${{ matrix.artifact }}.zip qitools-msvc.exe qitools-msvc-d.exe plugins/ translations/ *.dll 2>/dev/null || true
 
       - name: Package (Linux)
         if: runner.os == 'Linux'
@@ -131,6 +146,8 @@ jobs:
           draft: true
           files: |
             qitools-win-x64/*
+            qitools-win-x86/*
             qitools-win-xp/*
             qitools-linux/*
+            qitools-linux-arm64/*
             qitools-macos/*
