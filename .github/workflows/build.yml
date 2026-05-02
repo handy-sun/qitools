@@ -42,7 +42,7 @@ jobs:
             artifact: qitools-linux-arm64
             qt_from_apt: true
           # ── macOS (x86_64, Qt 5.15 has no arm64 prebuild) ──
-          - os: macos-13
+          - os: macos-26-intel
             qt_version: 5.15.2
             artifact: qitools-macos
     continue-on-error: ${{ matrix.experimental || false }}
@@ -72,7 +72,7 @@ jobs:
           version: ${{ matrix.qt_version }}
           target: desktop
           cache: true
-          aqtversion: ${{ matrix.qt_version == '5.6.3' && '==2.1.0' || '' }}
+          aqtversion: ${{ matrix.qt_version == '5.6.3' && '==2.0.0' || '' }}
 
       - name: Install Qt x86 (aqt)
         if: ${{ runner.os == 'Windows' && matrix.arch == 'x86' && !matrix.qt_from_apt }}
