@@ -1,4 +1,5 @@
 ﻿#include "networkcontrol.h"
+#include <memory>
 #include <QNetworkReply>
 #include <QFileInfo>
 #include <QEventLoop>
@@ -24,13 +25,13 @@ NetworkControl::~NetworkControl()
 
 bool NetworkControl::canWriteInFile(const QString &fileName)
 {
-    QScopedPointer<QFile> _file(new QFile(fileName));
+    std::unique_ptr<QFile> _file(new QFile(fileName));
     if (!_file->open(QIODevice::WriteOnly))
     {
         Q_EMIT sig_eventMessge(QString("Unable to save the file %1: %2.").arg(QDir::toNativeSeparators(fileName), _file->errorString()));
         return false;
     }
-    m_writtenFile = _file.take();
+    m_writtenFile = _file.release();
     return true;
 }
 

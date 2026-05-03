@@ -1,4 +1,5 @@
-﻿#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+﻿#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 #include <QAudioSink>
 #include <QMediaDevices>
 #else
@@ -114,11 +115,15 @@ void AudioDataPlay::startPlay()
 #else
         m_audioOutput = new QAudioOutput(m_outputDeviceInfo, m_format, this);
 #endif
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         connect(m_audioOutput, &QAudioSink::stateChanged, this, &AudioDataPlay::onStateChanged);
-        connect(m_audioOutput, &QAudioSink::notify, this, [=]() {
+#else
+        connect(m_audioOutput, &QAudioOutput::stateChanged, this, &AudioDataPlay::onStateChanged);
+        connect(m_audioOutput, &QAudioOutput::notify, this, [=]() {
             Q_EMIT sig_playedUSecs(m_format.durationForBytes(m_bufferDevice.pos()));
         });
         m_audioOutput->setNotifyInterval(200);
+#endif
         startAudio();
     }
 }
@@ -241,18 +246,31 @@ void AudioDataPlay::onTimerPull()
     }
 
     QByteArray buffer(32768, 0);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    // Qt6: QAudioSink has no periodSize(), use a fixed chunk size
+    static constexpr int ChunkSize = 4096;
+    int chunks = m_audioOutput->bytesFree() / ChunkSize;
+    while (chunks)
+    {
+        const qint64 len = m_bufferDevice.read(buffer.data(), ChunkSize);
+        if (len)
+            m_filledIODevice->write(buffer.data(), len);
+        if (len != ChunkSize)
+            break;
+        --chunks;
+    }
+#else
     int chunks = m_audioOutput->bytesFree() / m_audioOutput->periodSize();
     while (chunks)
     {
         const qint64 len = m_bufferDevice.read(buffer.data(), m_audioOutput->periodSize());
         if (len)
             m_filledIODevice->write(buffer.data(), len);
-
         if (len != m_audioOutput->periodSize())
             break;
-
         --chunks;
     }
+#endif
 }
 
 void AudioDataPlay::onStateChanged(QAudio::State state)

@@ -21,7 +21,7 @@ DownloadWidget::DownloadWidget(QWidget *parent)
     , m_measureLevel(-1)
 {
     ui->setupUi(this);
-    ui->widgetDown->layout()->setMargin(3);
+    ui->widgetDown->layout()->setContentsMargins(3, 3, 3, 3);
     ui->textEditWebUrl->setText("https://marketplace.visualstudio.com/items?itemName=GitHub.codespaces");
     ui->lineEditVersion->setText("1.1.0");
 //    m_dowoloadDir = QDir(qApp->applicationDirPath());

@@ -308,7 +308,7 @@ void ColorConvert::updateTblExceptRow(int except)
             QString hex = m_color.name(QColor::HexRgb);
             if (0xff > m_color.alpha())
             {
-                hex += QString("%1").arg(m_color.alpha(), 0, 16);
+                hex += QString::number(m_color.alpha(), 16);
             }
             m_table->item(row, 1)->setText(hex);
             break;
@@ -318,10 +318,10 @@ void ColorConvert::updateTblExceptRow(int except)
             break;
         case 4:
             m_table->item(row, 1)->setText(QString("glColor4f(%1f, %2f, %3f, %4f)").
-                                         arg(m_color.redF(), 0, 'f', 2, 0).
-                                         arg(m_color.greenF(), 0, 'f', 2, 0).
-                                         arg(m_color.blueF(), 0, 'f', 2, 0).
-                                         arg(m_color.alphaF(), 0, 'f', 2, 0));
+                                         arg(QString::number(m_color.redF(), 'f', 2)).
+                                         arg(QString::number(m_color.greenF(), 'f', 2)).
+                                         arg(QString::number(m_color.blueF(), 'f', 2)).
+                                         arg(QString::number(m_color.alphaF(), 'f', 2)));
             break;
         case 5:
             m_table->item(row, 1)->setText(QString("(%1, %2, %3, %4)").
