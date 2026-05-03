@@ -26,13 +26,13 @@ jobs:
             qt_version: 5.15.2
             arch: x86
             artifact: qitools-win-x86
-          # ── WinXP (MSVC 2017 toolset, Qt 5.6) ──
-          - os: windows-2022
-            qt_version: 5.6.3
-            cmake_toolset: v141_xp
-            arch: x86
-            artifact: qitools-win-xp
-            experimental: true
+          # ── WinXP (MSVC 2017 toolset, Qt 5.6) — disabled ──
+          # - os: windows-2022
+          #   qt_version: 5.6.3
+          #   cmake_toolset: v141_xp
+          #   arch: x86
+          #   artifact: qitools-win-xp
+          #   experimental: true
           # ── Linux ──
           - os: ubuntu-22.04
             qt_version: 5.15.2
@@ -43,8 +43,8 @@ jobs:
             qt_from_apt: true
           # ── macOS (x86_64, Qt 5.15 has no arm64 prebuild) ──
           - os: macos-26-intel
-            qt_version: 5.15.2
             artifact: qitools-macos
+            qt_from_brew: true
     continue-on-error: ${{ matrix.experimental || false }}
 
     steps:
@@ -66,7 +66,7 @@ jobs:
           arch: ${{ matrix.arch || 'x64' }}
 
       - name: Install Qt (prebuilt)
-        if: ${{ !matrix.qt_from_apt && !(runner.os == 'Windows' && matrix.arch == 'x86') }}
+        if: ${{ !matrix.qt_from_apt && !matrix.qt_from_brew && !(runner.os == 'Windows' && matrix.arch == 'x86') }}
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ matrix.qt_version }}
@@ -81,6 +81,14 @@ jobs:
           pip install aqtinstall
           aqt install-qt windows desktop ${{ matrix.qt_version }} win32_msvc2019
           echo "QT_ROOT_DIR=$(pwd)/${{ matrix.qt_version }}/msvc2019" >> "$GITHUB_ENV"
+          echo "$(pwd)/${{ matrix.qt_version }}/msvc2019/bin" >> "$GITHUB_PATH"
+      - name: Install Qt (brew)
+        if: matrix.qt_from_brew
+        run: |
+          brew install qt@5
+          echo "QT_ROOT_DIR=$(brew --prefix qt@5)" >> "$GITHUB_ENV"
+          echo "$(brew --prefix qt@5)/bin" >> "$GITHUB_PATH"
+
       - name: Install Qt (apt)
         if: matrix.qt_from_apt
         run: sudo apt-get update && sudo apt-get install -y qtbase5-dev qttools5-dev qtmultimedia5-dev
@@ -154,7 +162,7 @@ jobs:
           files: |
             qitools-win-x64/*
             qitools-win-x86/*
-            qitools-win-xp/*
+            # qitools-win-xp/*
             qitools-linux/*
             qitools-linux-arm64/*
             qitools-macos/*
