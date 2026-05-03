@@ -1,6 +1,5 @@
 #include "screencolorpicker.h"
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QScreen>
@@ -33,7 +32,7 @@ bool ScreenColorPicker::grabDesktopPixmap()
     m_mousePos = QCursor::pos() - unitedGeometry.topLeft();
 
     m_pmScreen = QApplication::primaryScreen()->grabWindow(
-        QApplication::desktop()->winId(),
+        0,
         unitedGeometry.x(),
         unitedGeometry.y(),
         unitedGeometry.width(),
@@ -43,10 +42,9 @@ bool ScreenColorPicker::grabDesktopPixmap()
     if (m_pmScreen.isNull())
         return false;
 
-    int screenNumber = QApplication::desktop()->screenNumber();
-    if (screenNumber >= 0)
+    QScreen *screen = QApplication::screenAt(QCursor::pos());
+    if (screen)
     {
-        QScreen *screen = QApplication::screens().at(screenNumber);
         m_pmScreen.setDevicePixelRatio(screen->devicePixelRatio());
     }
     update();

@@ -13,7 +13,11 @@
 #include <QPainter>
 #include <QDir>
 #include <QFileDialog>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QStringDecoder>
+#else
 #include <QTextCodec>
+#endif
 #include <QElapsedTimer>
 
 static Q_DECL_CONSTEXPR const int TotalHeadSize = sizeof(CombinedHeader) + sizeof(DATAHeader);
@@ -187,11 +191,22 @@ void AudioWidget::slot_readyData(const QByteArray &header, const QByteArray &aud
 
     QAudioFormat _format;
     _format.setSampleRate(static_cast<int>(ch.wave.sampleRate));
-    _format.setSampleSize(ch.wave.bitsPerSample);
     _format.setChannelCount(ch.wave.numChannels);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (ch.wave.bitsPerSample == 8)
+        _format.setSampleFormat(QAudioFormat::UInt8);
+    else if (ch.wave.bitsPerSample == 16)
+        _format.setSampleFormat(QAudioFormat::Int16);
+    else if (ch.wave.bitsPerSample == 32)
+        _format.setSampleFormat(QAudioFormat::Int32);
+    else
+        _format.setSampleFormat(QAudioFormat::Int16);
+#else
+    _format.setSampleSize(ch.wave.bitsPerSample);
     _format.setCodec("audio/pcm");
     _format.setByteOrder(QAudioFormat::LittleEndian);
     _format.setSampleType(ch.wave.bitsPerSample == 8 ? QAudioFormat::UnSignedInt : QAudioFormat::SignedInt);
+#endif
 
     m_audioPlayer->resetAudio();
     m_audioPlayer->setAudioFormat(_format);
@@ -350,7 +365,12 @@ void AudioWidget::on_btnOpenFile_clicked()
             if (content.mid(0, 3) == QByteArray::fromHex("01FFFE"))
             {
                 content.remove(0, 3);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                QStringDecoder dec("UTF-16LE");
+                title = dec(content);
+#else
                 title = QTextCodec::codecForName("UTF-16LE")->toUnicode(content);
+#endif
             }
         }
         else if (baFrameID == "TPE1")// 作者
@@ -358,7 +378,12 @@ void AudioWidget::on_btnOpenFile_clicked()
             if (content.mid(0, 3) == QByteArray::fromHex("01FFFE"))
             {
                 content.remove(0, 3);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                QStringDecoder dec2("UTF-16LE");
+                author = dec2(content);
+#else
                 author = QTextCodec::codecForName("UTF-16LE")->toUnicode(content);
+#endif
             }
         }
         else if (baFrameID == QByteArray::fromHex("00000000")) // padding(空白预留) 部分，简单标记下

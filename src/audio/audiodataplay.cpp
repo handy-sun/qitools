@@ -1,29 +1,47 @@
-﻿#include <QAudioOutput>
+﻿#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QAudioSink>
+#include <QMediaDevices>
+#else
+#include <QAudioOutput>
+#endif
 #include <QCoreApplication>
 #include <QDebug>
 #include "audiodataplay.h"
 
 using namespace Audio;
 
+static QAudioFormat defaultFormat()
+{
+    QAudioFormat fmt;
+    fmt.setSampleRate(44100);
+    fmt.setChannelCount(1);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    fmt.setSampleFormat(QAudioFormat::Int16);
+#else
+    fmt.setSampleSize(16);
+    fmt.setCodec("audio/pcm");
+    fmt.setByteOrder(QAudioFormat::LittleEndian);
+    fmt.setSampleType(QAudioFormat::SignedInt);
+#endif
+    return fmt;
+}
+
 AudioDataPlay::AudioDataPlay(AudioDataPlay::PlayMode mode, QObject *parent)
     : QObject(parent)
     , m_playMode(mode)
     , m_state(QAudio::StoppedState)
     , m_format(QAudioFormat())
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    , m_outputDeviceInfo(QMediaDevices::defaultAudioOutput())
+#else
     , m_outputDeviceInfo(QAudioDeviceInfo::defaultOutputDevice())
+#endif
     , m_audioOutput(nullptr)
     , m_filledIODevice(nullptr)
     , m_playPosition(0)
     , m_linearVolume(1.0)
 {
-    QAudioFormat _format;
-    _format.setSampleRate(44100);
-    _format.setSampleSize(16);
-    _format.setChannelCount(1);
-    _format.setCodec("audio/pcm");
-    _format.setByteOrder(QAudioFormat::LittleEndian);
-    _format.setSampleType(QAudioFormat::SignedInt);
-    setAudioFormat(_format);
+    setAudioFormat(defaultFormat());
     connect(&m_timerPull, &QTimer::timeout, this, &AudioDataPlay::onTimerPull);
 }
 
@@ -51,7 +69,12 @@ void AudioDataPlay::setAudioFormat(const QAudioFormat &format)
     else
     {
         qWarning() << "Default format not supported - trying to use nearest";
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        // Qt6: no nearestFormat(), just use the requested format as-is
+        m_format = format;
+#else
         m_format = m_outputDeviceInfo.nearestFormat(format);
+#endif
     }
 }
 
@@ -59,7 +82,6 @@ void AudioDataPlay::appendAudioData(const QByteArray &ba)
 {
     if (m_playMode == PlayMode::PullMode)
     {
-        //qDebug() << m_bufferDevice.pos() << m_baBuf.size() - m_bufferDevice.pos();
         if (m_baBuf.size() > m_format.bytesForDuration(20 * 1.0e6))
         {
             m_baBuf.remove(0, m_bufferDevice.pos());
@@ -76,8 +98,6 @@ void AudioDataPlay::startPlay()
         if (QAudio::SuspendedState == m_state)
         {
 #ifdef Q_OS_WIN
-            // The Windows backend seems to internally go back into ActiveState while still returning SuspendedState,
-            // so to ensure that it doesn't ignore the resume() call, we first re-suspend
             m_audioOutput->suspend();
 #endif
             m_audioOutput->resume();
@@ -89,9 +109,13 @@ void AudioDataPlay::startPlay()
     }
     else
     {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        m_audioOutput = new QAudioSink(m_outputDeviceInfo, m_format, this);
+#else
         m_audioOutput = new QAudioOutput(m_outputDeviceInfo, m_format, this);
-        connect(m_audioOutput, &QAudioOutput::stateChanged, this, &AudioDataPlay::onStateChanged);
-        connect(m_audioOutput, &QAudioOutput::notify, this, [=]() {
+#endif
+        connect(m_audioOutput, &QAudioSink::stateChanged, this, &AudioDataPlay::onStateChanged);
+        connect(m_audioOutput, &QAudioSink::notify, this, [=]() {
             Q_EMIT sig_playedUSecs(m_format.durationForBytes(m_bufferDevice.pos()));
         });
         m_audioOutput->setNotifyInterval(200);
@@ -197,11 +221,12 @@ void AudioDataPlay::resetAudio()
 
 void AudioDataPlay::slot_setVolume(qreal vol)
 {
-#if QT_VERSION >= 0x050800
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    // Qt6: QAudio::convertVolume removed, use linear volume directly
+    m_linearVolume = vol;
+#else
     qreal linearVolume = QAudio::convertVolume(vol, QAudio::LogarithmicVolumeScale, QAudio::LinearVolumeScale);
     m_linearVolume = linearVolume;
-#else
-    m_linearVolume = vol;
 #endif
     if (m_audioOutput)
         m_audioOutput->setVolume(m_linearVolume);
@@ -234,7 +259,6 @@ void AudioDataPlay::onStateChanged(QAudio::State state)
 {
     if (QAudio::IdleState == state)
     {
-//        qDebug() << "onStateChanged: stop" << m_bufferDevice.pos() << m_baBuf.size();
         if (!m_baBuf.isEmpty() && m_bufferDevice.pos() == m_baBuf.size())
             stopPlay();
     }
@@ -242,7 +266,6 @@ void AudioDataPlay::onStateChanged(QAudio::State state)
     {
         if (QAudio::StoppedState == state)
         {
-            // Check error
             if (QAudio::NoError != m_audioOutput->error())
             {
                 resetAudio();

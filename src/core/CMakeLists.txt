@@ -5,7 +5,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../CMake")
 include(qitools_common)
 
-find_package(Qt5 CONFIG REQUIRED Core Gui Widgets LinguistTools)
+include(qt_compatibility)
+find_package(${QT_LIBS_PREFIX} CONFIG REQUIRED Core Gui Widgets LinguistTools)
 
 # if(CMAKE_CXX_COMPILER MATCHES ".*mingw")
 #     set(CMAKE_CXX_FLAGS "-mwindows")
@@ -26,7 +27,7 @@ elseif(UNIX)
     endif()
 endif()
 
-qt5_add_resources(qrc_file ../../resource/qitools.qrc)
+qt_add_resources(qrc_file ../../resource/qitools.qrc)
 #qt5_add_translation(ts_files ${CMAKE_CURRENT_SOURCE_DIR}/core-zh_CN.ts)
 #string(REPLACE " " "\ " win_rc2 ${win_rc})
 
@@ -79,7 +80,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${app_name})
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core Qt5::Gui)
+target_link_libraries(${PROJECT_NAME} ${QT_LIBS_PREFIX}::Widgets ${QT_LIBS_PREFIX}::Core ${QT_LIBS_PREFIX}::Gui)
 #定义生成命令
 add_custom_target(cptask
     COMMAND test -d "${PLUGIN_PATH}/../translations" || cp -r "${EXECUTABLE_OUTPUT_PATH}/translations" "${PLUGIN_PATH}/../"

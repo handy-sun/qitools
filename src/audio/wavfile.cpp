@@ -84,17 +84,31 @@ bool WavFile::readHeader()
                 return false;
 
             // Establish format
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+            // Qt6: byte order is inferred from sample format
             if (memcmp(&header.riff.descriptor.id, "RIFF", 4) == 0)
                 m_fileFormat.setByteOrder(QAudioFormat::LittleEndian);
             else
                 m_fileFormat.setByteOrder(QAudioFormat::BigEndian);
+#endif
 
             int bps = qFromLittleEndian<quint16>(header.wave.bitsPerSample);
             m_fileFormat.setChannelCount(qFromLittleEndian<quint16>(header.wave.numChannels));
-            m_fileFormat.setCodec("audio/pcm");
             m_fileFormat.setSampleRate(qFromLittleEndian<quint32>(header.wave.sampleRate));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            int bpsVal = qFromLittleEndian<quint16>(header.wave.bitsPerSample);
+            if (bpsVal == 8)
+                m_fileFormat.setSampleFormat(QAudioFormat::UInt8);
+            else if (bpsVal == 16)
+                m_fileFormat.setSampleFormat(QAudioFormat::Int16);
+            else if (bpsVal == 32)
+                m_fileFormat.setSampleFormat(QAudioFormat::Int32);
+            else
+                m_fileFormat.setSampleFormat(QAudioFormat::Int16);
+#else
             m_fileFormat.setSampleSize(qFromLittleEndian<quint16>(header.wave.bitsPerSample));
             m_fileFormat.setSampleType(bps == 8 ? QAudioFormat::UnSignedInt : QAudioFormat::SignedInt);
+#endif
         }
         else
         {

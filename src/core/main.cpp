@@ -73,9 +73,7 @@ QString ensureCfgDir(const QString &cfgDirName)
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-#if QT_VERSION > 0x050900
     a.setApplicationVersion(VERSION_STRING);
-#endif
 //    setvbuf(stdout, nullptr, _IONBF, 1024);
 
     QString qiToolsConfDir = ensureCfgDir("qitools");

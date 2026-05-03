@@ -3,7 +3,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QDebug>
-#include <QTextCodec>
+#include <QStringConverter>
 #include <QTimer>
 #include <util/encodings/encodings.h>
 #include <compact_enc_det/compact_enc_det.h>
@@ -111,7 +111,8 @@ void CodecConvertWidget::on_pushButtonConvert_clicked()
             continue;
 
         rwStream.setDevice(&file);
-        rwStream.setCodec(ui->comboBoxCodec->currentText().toStdString().c_str());
+        auto enc = QStringConverter::encodingForName(ui->comboBoxCodec->currentText().toUtf8().constData());
+        rwStream.setEncoding(enc.value_or(QStringConverter::Utf8));
         rwStream.setGenerateByteOrderMark(ui->checkBoxWithBom->isChecked());
         rwStream << _content;
         file.close();

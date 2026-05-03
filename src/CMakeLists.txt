@@ -20,8 +20,17 @@ endif()
 
 
 if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
+
+# Prefer Qt6, fall back to Qt5
+find_package(Qt6 COMPONENTS Core QUIET)
+if(NOT Qt6_FOUND)
+    find_package(Qt5 5.15 CONFIG REQUIRED Core)
+    message(STATUS "Using Qt5: ${Qt5_VERSION}")
+else()
+    message(STATUS "Using Qt6: ${Qt6_VERSION}")
 endif()
 
 option(QITOOLS_MAC_BUNDLE "Auto deploy to qitools.app package dir" ON)

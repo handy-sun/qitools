@@ -2,15 +2,19 @@
 #define AUDIODATAPLAY_H
 
 #include <QObject>
-#include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QBuffer>
 #include <QByteArray>
 #include <QTimer>
 
-QT_BEGIN_NAMESPACE
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QAudioDevice>
+#include <QMediaDevices>
+class QAudioSink;
+#else
+#include <QAudioDeviceInfo>
 class QAudioOutput;
-QT_END_NAMESPACE
+#endif
 
 namespace Audio {
 
@@ -31,9 +35,9 @@ public:
     bool isAudioValid() const { return m_audioOutput != nullptr; }
     int bytesReadyRead() const;
 
-    void setAudioFormat(const QAudioFormat &format);// 设置音频格式(有缺省格式)，需在设置数据前设置格式
-    void setAudioData(const QByteArray &ba) { m_baBuf = ba; } // PushMode时设置完整的数据
-    void appendAudioData(const QByteArray &ba); // PullMode时定期填充新的数据
+    void setAudioFormat(const QAudioFormat &format);
+    void setAudioData(const QByteArray &ba) { m_baBuf = ba; }
+    void appendAudioData(const QByteArray &ba);
 
     void startPlay();
     void stopPlay();
@@ -41,15 +45,20 @@ public:
     void suspendPlay();
 
     void resetAudio();
-    void seekTime(int t = -1); // 定位播放时间
+    void seekTime(int t = -1);
 
 private:
     PlayMode            m_playMode;
     QAudio::State       m_state;
     QAudioFormat        m_format;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QAudioDevice        m_outputDeviceInfo;
+    QAudioSink         *m_audioOutput;
+#else
     QAudioDeviceInfo    m_outputDeviceInfo;
     QAudioOutput       *m_audioOutput;
+#endif
     QBuffer             m_bufferDevice;
     QByteArray          m_baBuf;
     QIODevice          *m_filledIODevice;
