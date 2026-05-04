@@ -22,10 +22,6 @@ jobs:
             qt_version: 6.7.2
             arch: x64
             artifact: qitools-win-x64
-          - os: windows-2022
-            qt_version: 6.7.2
-            arch: x86
-            artifact: qitools-win-x86
           ## ── Linux (Qt 6 from apt) ──
           - os: ubuntu-24.04
             artifact: qitools-linux
@@ -57,6 +53,7 @@ jobs:
           version: ${{ matrix.qt_version }}
           target: desktop
           cache: true
+          modules: qtmultimedia
 
       - name: Install Qt (brew)
         if: matrix.qt_from_brew
@@ -135,7 +132,6 @@ jobs:
           draft: true
           files: |
             qitools-win-x64/*
-            qitools-win-x86/*
             qitools-linux/*
             qitools-linux-arm64/*
             qitools-macos/*
