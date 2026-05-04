@@ -1,0 +1,141 @@
+name: Build Qt6
+
+on:
+  push:
+    branches: [qt6]
+    tags: [v*]
+  pull_request:
+    branches: [qt6]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          ## ── Win (MSVC 2022, Qt 6.7) ──
+          - os: windows-2022
+            qt_version: 6.7.2
+            arch: x64
+            artifact: qitools-win-x64
+          - os: windows-2022
+            qt_version: 6.7.2
+            arch: x86
+            artifact: qitools-win-x86
+          ## ── Linux (Qt 6 from apt) ──
+          - os: ubuntu-24.04
+            artifact: qitools-linux
+            qt_from_apt: true
+          ## ── Linux ARM64 (Qt 6 from apt) ──
+          - os: ubuntu-24.04-arm
+            artifact: qitools-linux-arm64
+            qt_from_apt: true
+          ## ── macOS x86_64 (Qt 6 from brew) ──
+          - os: macos-26-intel
+            artifact: qitools-macos
+            qt_from_brew: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch || 'x64' }}
+
+      - name: Install Qt (prebuilt)
+        if: ${{ !matrix.qt_from_apt && !matrix.qt_from_brew }}
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ matrix.qt_version }}
+          target: desktop
+          cache: true
+
+      - name: Install Qt (brew)
+        if: matrix.qt_from_brew
+        run: |
+          brew install qt
+          echo "QT_ROOT_DIR=$(brew --prefix qt)" >> "$GITHUB_ENV"
+          echo "$(brew --prefix qt)/bin" >> "$GITHUB_PATH"
+
+      - name: Install Qt (apt)
+        if: matrix.qt_from_apt
+        run: sudo apt-get update && sudo apt-get install -y qt6-base-dev qt6-tools-dev qt6-l10n-tools qt6-multimedia-dev libqt6svg6-dev
+
+      - name: Install Linux deps
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev libfontconfig1-dev libfreetype6-dev libxcb1-dev libxcb-keysyms1-dev libxcb-xfixes0-dev
+
+      - name: CMake configure (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: cmake -S src -B build -G "Visual Studio 17 2022" -A ${{ matrix.arch == 'x86' && 'Win32' || 'x64' }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+
+      - name: CMake configure (Linux)
+        if: runner.os == 'Linux'
+        run: cmake -S src -B build -DCMAKE_BUILD_TYPE=Release ${{ !matrix.qt_from_apt && '-DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"' || '' }} -DCMAKE_CXX_FLAGS="-include limits"
+
+      - name: CMake configure (macOS)
+        if: runner.os == 'macOS'
+        run: cmake -S src -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+
+      - name: CMake build
+        run: cmake --build build --config Release -j4
+
+      ## ── Deploy & Package ──
+
+      - name: windeployqt
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          cp resource/toolsimage.ico bin/
+          windeployqt --no-translations --plugindir bin/plugins bin/qitools-msvc.exe
+
+      - name: macdeployqt
+        if: runner.os == 'macOS'
+        run: macdeployqt bin/qitools-clang.app -dmg
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: cd bin && 7z a ../${{ matrix.artifact }}.zip qitools-msvc.exe qitools-msvc-d.exe plugins/ translations/ *.dll 2>/dev/null || true
+
+      - name: Package (Linux)
+        if: runner.os == 'Linux'
+        run: cd bin && tar czf ../${{ matrix.artifact }}.tar.gz qitools-gnu qitools-gnu.app/Contents/MacOS/plugins/ translations/
+
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        run: cp bin/qitools-clang.dmg ${{ matrix.artifact }}.dmg
+
+      - name: Upload artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.*
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            qitools-win-x64/*
+            qitools-win-x86/*
+            qitools-linux/*
+            qitools-linux-arm64/*
+            qitools-macos/*
