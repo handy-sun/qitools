@@ -122,7 +122,7 @@ jobs:
         shell: bash
         run: |
           cp resource/toolsimage.ico bin/
-          windeployqt --no-translations --plugindir bin/plugins bin/qitools-msvc.exe
+          cd bin && windeployqt --no-translations qitools-msvc.exe
 
       - name: macdeployqt
         if: runner.os == 'macOS'
@@ -131,7 +131,15 @@ jobs:
       - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: bash
-        run: cd bin && 7z a ../${{ matrix.artifact }}.zip qitools-msvc.exe qitools-msvc-d.exe plugins/ translations/ *.dll 2>/dev/null || true
+        run: |
+          cd bin
+          # Remove debug exe if exists
+          rm -f qitools-msvc-d.exe
+          # Create distribution folder
+          mkdir -p ../dist/${{ matrix.artifact }}
+          cp -r qitools-msvc.exe plugins/ translations/ *.dll ../dist/${{ matrix.artifact }}/
+          # Copy Qt plugins (platforms, styles, etc.)
+          cp -r platforms/ styles/ ../dist/${{ matrix.artifact }}/ 2>/dev/null || true
 
       - name: Package (Linux)
         if: runner.os == 'Linux'
@@ -141,12 +149,26 @@ jobs:
         if: runner.os == 'macOS'
         run: cp bin/qitools-clang.dmg ${{ matrix.artifact }}.dmg
 
-      - name: Upload artifact
-        if: success()
+      - name: Upload artifact (Windows)
+        if: runner.os == 'Windows' && success()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: ${{ matrix.artifact }}.*
+          path: dist/${{ matrix.artifact }}
+
+      - name: Upload artifact (Linux)
+        if: runner.os == 'Linux' && success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.tar.gz
+
+      - name: Upload artifact (macOS)
+        if: runner.os == 'macOS' && success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.dmg
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -163,6 +185,6 @@ jobs:
             qitools-win-x64/*
             qitools-win-x86/*
             # qitools-win-xp/*
-            qitools-linux/*
-            qitools-linux-arm64/*
-            qitools-macos/*
+            qitools-linux/qitools-linux.tar.gz
+            qitools-linux-arm64/qitools-linux-arm64.tar.gz
+            qitools-macos/qitools-macos.dmg
