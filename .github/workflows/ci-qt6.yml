@@ -93,7 +93,7 @@ jobs:
         shell: bash
         run: |
           cp resource/toolsimage.ico bin/
-          cd bin && windeployqt --no-translations qitools-msvc.exe
+          cd bin && windeployqt --no-translations --compiler-runtime qitools-msvc.exe
 
       - name: macdeployqt
         if: runner.os == 'macOS'

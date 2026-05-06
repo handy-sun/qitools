@@ -41,6 +41,19 @@ else()
     set(PLUGIN_PATH "${EXECUTABLE_OUTPUT_PATH}/plugins")
 endif()
 
+# Prevent Visual Studio from creating Release/Debug subdirectories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${EXECUTABLE_OUTPUT_PATH}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PLUGIN_PATH}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PLUGIN_PATH}")
+
+# For multi-config generators (Visual Studio), set per-config directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${EXECUTABLE_OUTPUT_PATH}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${PLUGIN_PATH}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${PLUGIN_PATH}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${EXECUTABLE_OUTPUT_PATH}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${PLUGIN_PATH}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${PLUGIN_PATH}")
+
 add_subdirectory(codecconvert)
 add_subdirectory(cppcodegen)
 add_subdirectory(colortool)
