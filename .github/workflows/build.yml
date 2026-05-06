@@ -151,13 +151,11 @@ jobs:
       - name: Package (Linux)
         if: runner.os == 'Linux' && runner.arch != 'ARM64'
         run: |
-          # Create AppDir structure
-          mkdir -p AppDir/usr/bin AppDir/usr/lib AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
+          mkdir -p AppDir/usr/bin/plugins AppDir/usr/share/translations AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
           cp bin/qitools-gnu AppDir/usr/bin/
-          cp -r bin/plugins AppDir/usr/lib/
-          cp -r bin/translations AppDir/usr/share/
-          # Create desktop file
-          cat > AppDir/usr/share/applications/qitools.desktop << EOF
+          cp -r bin/plugins/* AppDir/usr/bin/plugins/
+          cp -r bin/translations/* AppDir/usr/share/translations/
+          cat > AppDir/usr/share/applications/qitools.desktop <<'EOF'
           [Desktop Entry]
           Type=Application
           Name=Qitools
@@ -166,10 +164,8 @@ jobs:
           Categories=Utility;
           EOF
           cp resource/toolsimage.svg AppDir/usr/share/icons/hicolor/256x256/apps/qitools.svg 2>/dev/null || true
-          # Run linuxdeployqt
           linuxdeployqt AppDir/usr/bin/qitools-gnu -bundle-non-qt-libs -no-strip
-          # Create tar.gz
-          cd AppDir && tar czf ../${{ matrix.artifact }}.tar.gz .
+          cd AppDir && tar czf ../${{ matrix.artifact }}.tar.gz usr
 
       - name: Package (Linux ARM64)
         if: runner.os == 'Linux' && runner.arch == 'ARM64'
