@@ -76,8 +76,9 @@ jobs:
           wget -q https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -O linuxdeployqt
           chmod +x linuxdeployqt
           ./linuxdeployqt --appimage-extract
-          sudo mv squashfs-root /opt/linuxdeployqt
-          sudo ln -s /opt/linuxdeployqt/AppRun /usr/local/bin/linuxdeployqt
+          # Remove bundled libs (old glibc incompatible with ubuntu-24.04 host)
+          rm -rf squashfs-root/usr/lib
+          sudo ln -s $(pwd)/squashfs-root/usr/bin/linuxdeployqt /usr/local/bin/linuxdeployqt
 
       - name: CMake configure (Windows)
         if: runner.os == 'Windows'
