@@ -68,7 +68,7 @@ jobs:
 
       - name: Install Linux deps
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev libfontconfig1-dev libfreetype6-dev libxcb1-dev libxcb-keysyms1-dev libxcb-xfixes0-dev libpulse-dev libasound2-dev
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev libfontconfig1-dev libfreetype6-dev libxcb1-dev libxcb-keysyms1-dev libxcb-xfixes0-dev libpulse-dev libasound2-dev libfuse2
 
       - name: Install linuxdeployqt
         if: runner.os == 'Linux' && runner.arch != 'ARM64'
@@ -104,7 +104,7 @@ jobs:
 
       - name: macdeployqt
         if: runner.os == 'macOS'
-        run: macdeployqt bin/qitools-clang.app -dmg
+        run: macdeployqt bin/qitools-clang.app -dmg -no-codesign
 
       - name: Package (Windows)
         if: runner.os == 'Windows'

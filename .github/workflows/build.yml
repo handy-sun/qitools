@@ -133,7 +133,7 @@ jobs:
 
       - name: macdeployqt
         if: runner.os == 'macOS'
-        run: macdeployqt bin/qitools-clang.app -dmg
+        run: macdeployqt bin/qitools-clang.app -dmg -no-codesign
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
