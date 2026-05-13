@@ -37,47 +37,33 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # ── Win7+ (MSVC 2022) ──
+          # Win (MSVC 2022, Qt 6.7)
           - os: windows-2022
-            qt_version: 5.15.2
+            qt_version: 6.7.2
             arch: x64
             artifact: qitools-win-x64
-          - os: windows-2022
-            qt_version: 5.15.2
-            arch: x86
-            artifact: qitools-win-x86
-          # ── WinXP (MSVC 2017 toolset, Qt 5.6) — disabled ──
-          # - os: windows-2022
-          #   qt_version: 5.6.3
-          #   cmake_toolset: v141_xp
-          #   arch: x86
-          #   artifact: qitools-win-xp
-          #   experimental: true
-          # ── Linux ──
-          - os: ubuntu-22.04
-            qt_version: 5.15.2
+          # Linux (Qt 6 from apt)
+          - os: ubuntu-24.04
             artifact: qitools-linux
-          # ── Linux ARM64 ──
+            qt_from_apt: true
+          # Linux AppImage (Qt 6 from apt)
+          - os: ubuntu-24.04
+            artifact: qitools-linux-appimage
+            qt_from_apt: true
+            appimage: true
+          # Linux ARM64 (Qt 6 from apt)
           - os: ubuntu-24.04-arm
             artifact: qitools-linux-arm64
             qt_from_apt: true
-          # ── macOS (x86_64, Qt 5.15 has no arm64 prebuild) ──
+          # macOS x86_64 (Qt 6 from brew)
           - os: macos-26-intel
             artifact: qitools-macos
             qt_from_brew: true
-    continue-on-error: ${{ matrix.experimental || false }}
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      - name: Install v141_xp component
-        if: matrix.cmake_toolset == 'v141_xp'
-        shell: powershell
-        run: |
-          $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
-          & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe" modify --installPath $vsPath --add Microsoft.VisualStudio.Component.VC.v141.xp --quiet --norestart --nocache --wait
 
       - name: Setup MSVC
         if: runner.os == 'Windows'
@@ -86,43 +72,42 @@ jobs:
           arch: ${{ matrix.arch || 'x64' }}
 
       - name: Install Qt (prebuilt)
-        if: ${{ !matrix.qt_from_apt && !matrix.qt_from_brew && !(runner.os == 'Windows' && matrix.arch == 'x86') }}
+        if: ${{ !matrix.qt_from_apt && !matrix.qt_from_brew }}
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ matrix.qt_version }}
           target: desktop
           cache: true
-          aqtversion: ${{ matrix.qt_version == '5.6.3' && '==2.0.0' || '' }}
+          modules: qtmultimedia
 
-      - name: Install Qt x86 (aqt)
-        if: ${{ runner.os == 'Windows' && matrix.arch == 'x86' && !matrix.qt_from_apt }}
-        shell: bash
-        run: |
-          pip install aqtinstall
-          aqt install-qt windows desktop ${{ matrix.qt_version }} win32_msvc2019
-          echo "QT_ROOT_DIR=$(pwd)/${{ matrix.qt_version }}/msvc2019" >> "$GITHUB_ENV"
-          echo "$(pwd)/${{ matrix.qt_version }}/msvc2019/bin" >> "$GITHUB_PATH"
       - name: Install Qt (brew)
         if: matrix.qt_from_brew
         run: |
-          brew install qt@5
-          echo "QT_ROOT_DIR=$(brew --prefix qt@5)" >> "$GITHUB_ENV"
-          echo "$(brew --prefix qt@5)/bin" >> "$GITHUB_PATH"
+          brew install qt
+          echo "QT_ROOT_DIR=$(brew --prefix qt)" >> "$GITHUB_ENV"
+          echo "$(brew --prefix qt)/bin" >> "$GITHUB_PATH"
 
       - name: Install Qt (apt)
         if: matrix.qt_from_apt
-        run: sudo apt-get update && sudo apt-get install -y qtbase5-dev qttools5-dev qtmultimedia5-dev qtwayland5
+        run: sudo apt-get update && sudo apt-get install -y qt6-base-dev qt6-tools-dev qt6-l10n-tools qt6-multimedia-dev libqt6svg6-dev qt6-wayland
 
       - name: Install Linux deps
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev libfontconfig1-dev libfreetype6-dev libxcb1-dev libxcb-keysyms1-dev libxcb-xfixes0-dev libxcb-cursor0 qtmultimedia5-dev libpulse-dev libasound2-dev qtwayland5
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev libfontconfig1-dev libfreetype6-dev libxcb1-dev libxcb-keysyms1-dev libxcb-xfixes0-dev libxcb-cursor0 libpulse-dev libasound2-dev
+
+      - name: Install AppImage tooling
+        if: ${{ matrix.appimage }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl desktop-file-utils file libfuse2t64 patchelf
+          curl -L https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -o linuxdeploy-x86_64.AppImage
+          curl -L https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage -o linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
 
       - name: CMake configure (Windows)
         if: runner.os == 'Windows'
         shell: bash
-        run: cmake -S src -B build -G "Visual Studio 17 2022" -A ${{ matrix.arch == 'x86' && 'Win32' || 'x64' }} ${CMAKE_TOOLSET:+-T $CMAKE_TOOLSET} -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" -DQITOOLS_MAC_BUNDLE=OFF
-        env:
-          CMAKE_TOOLSET: ${{ matrix.cmake_toolset }}
+        run: cmake -S src -B build -G "Visual Studio 17 2022" -A ${{ matrix.arch == 'x86' && 'Win32' || 'x64' }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" -DQITOOLS_MAC_BUNDLE=OFF
 
       - name: CMake configure (Linux)
         if: runner.os == 'Linux'
@@ -135,7 +120,7 @@ jobs:
       - name: CMake build
         run: cmake --build build --config Release -j4
 
-      # ── Deploy & Package ──
+      # Deploy & Package
 
       - name: windeployqt
         if: runner.os == 'Windows'
@@ -183,12 +168,12 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           set -euo pipefail
-          if command -v qtpaths >/dev/null 2>&1; then
-            qt_plugin_dir="$(qtpaths --plugin-dir)"
-          elif command -v qmake >/dev/null 2>&1; then
-            qt_plugin_dir="$(qmake -query QT_INSTALL_PLUGINS)"
+          if command -v qtpaths6 >/dev/null 2>&1; then
+            qt_plugin_dir="$(qtpaths6 --plugin-dir)"
+          elif command -v qmake6 >/dev/null 2>&1; then
+            qt_plugin_dir="$(qmake6 -query QT_INSTALL_PLUGINS)"
           else
-            echo "::error::Could not find qtpaths or qmake"
+            echo "::error::Could not find qtpaths6 or qmake6"
             exit 1
           fi
 
@@ -221,16 +206,66 @@ jobs:
           find ../dist/${{ matrix.artifact }}/plugins -type f \( -name "*.lib" -o -name "*.exp" \) -delete
 
       - name: Package (Linux)
-        if: runner.os == 'Linux'
+        if: ${{ runner.os == 'Linux' && !matrix.appimage }}
         run: |
           cd bin
-          package_paths="qitools-gnu plugins translations platforms"
-          for optional_dir in wayland-shell-integration platformthemes xcbglintegrations generic iconengines imageformats; do
+          package_paths="qitools-gnu plugins translations platforms wayland-shell-integration"
+          for optional_dir in platformthemes xcbglintegrations generic iconengines imageformats; do
             if [ -d "$optional_dir" ]; then
               package_paths="$package_paths $optional_dir"
             fi
           done
           tar czf ../${{ matrix.artifact }}.tar.gz $package_paths
+
+      - name: Package (Linux AppImage)
+        if: ${{ matrix.appimage }}
+        env:
+          EXTRA_PLATFORM_PLUGINS: libqwayland-egl.so;libqwayland-generic.so
+          EXTRA_QT_PLUGINS: wayland-shell-integration
+          LDAI_NO_APPSTREAM: '1'
+          LDAI_OUTPUT: qitools-linux-x86_64.AppImage
+          LINUXDEPLOY_OUTPUT_APP_NAME: qitools
+          LINUXDEPLOY_OUTPUT_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'continuous' }}
+          VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'continuous' }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/icons/hicolor/scalable/apps
+
+          cp bin/qitools-gnu AppDir/usr/bin/qitools
+          cp -a bin/plugins AppDir/usr/bin/plugins
+          cp -a bin/translations AppDir/usr/bin/translations
+          cp resource/toolsimage.svg AppDir/usr/share/icons/hicolor/scalable/apps/qitools.svg
+
+          cat > AppDir/usr/share/applications/qitools.desktop <<'EOF'
+          [Desktop Entry]
+          Type=Application
+          Name=QiTools
+          Exec=qitools
+          Icon=qitools
+          Categories=Utility;Development;
+          Terminal=false
+          EOF
+          sed -i 's/^          //' AppDir/usr/share/applications/qitools.desktop
+          desktop-file-validate AppDir/usr/share/applications/qitools.desktop
+
+          export QMAKE="$(command -v qmake6)"
+
+          linuxdeploy_args=(
+            --appimage-extract-and-run
+            --appdir AppDir
+            --executable AppDir/usr/bin/qitools
+            --desktop-file AppDir/usr/share/applications/qitools.desktop
+            --icon-file AppDir/usr/share/icons/hicolor/scalable/apps/qitools.svg
+          )
+          while IFS= read -r plugin; do
+            linuxdeploy_args+=(--library "$plugin")
+          done < <(find AppDir/usr/bin/plugins -type f -name "*.so" | sort)
+
+          ./linuxdeploy-x86_64.AppImage "${linuxdeploy_args[@]}" --plugin qt --output appimage
+          test -s qitools-linux-x86_64.AppImage
 
       - name: Package (macOS)
         if: runner.os == 'macOS'
@@ -256,11 +291,7 @@ jobs:
           require_file dist/${{ matrix.artifact }}/plugins/glsltool.dll
           require_file dist/${{ matrix.artifact }}/plugins/imageconvert.dll
           require_file dist/${{ matrix.artifact }}/plugins/simpledownload.dll
-          if ! find dist/${{ matrix.artifact }} -maxdepth 1 -type f \( -name "Qt5Multimedia.dll" -o -name "Qt6Multimedia.dll" \) | grep .; then
-            echo "::error::Missing Qt Multimedia runtime"
-            find dist/${{ matrix.artifact }} -maxdepth 3 -type f | sort
-            exit 1
-          fi
+          require_file dist/${{ matrix.artifact }}/Qt6Multimedia.dll
           require_file dist/${{ matrix.artifact }}/vcruntime140.dll
           require_file dist/${{ matrix.artifact }}/msvcp140.dll
           require_file dist/${{ matrix.artifact }}/translations/glsltool-zh_CN.qm
@@ -272,18 +303,29 @@ jobs:
           fi
 
       - name: Verify package (Linux)
-        if: runner.os == 'Linux'
+        if: ${{ runner.os == 'Linux' && !matrix.appimage }}
         run: |
           tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx qitools-gnu
           tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx plugins/libaudio.so
           tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx plugins/libsimpledownload.so
           tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx platforms/libqxcb.so
-          if tar tzf ${{ matrix.artifact }}.tar.gz | grep -Eq '^platforms/libqwayland-(egl|generic)\.so$'; then
-            tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx wayland-shell-integration/libxdg-shell.so
-          else
-            echo "::warning::Wayland Qt platform plugin is not available in this Qt build"
-          fi
+          tar tzf ${{ matrix.artifact }}.tar.gz | grep -Eq '^platforms/libqwayland-(egl|generic)\.so$'
+          tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx wayland-shell-integration/libxdg-shell.so
           tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx translations/glsltool-zh_CN.qm
+
+      - name: Verify package (Linux AppImage)
+        if: ${{ matrix.appimage }}
+        run: |
+          set -euo pipefail
+          chmod +x qitools-linux-x86_64.AppImage
+          ./qitools-linux-x86_64.AppImage --appimage-extract >/dev/null
+          test -f squashfs-root/usr/bin/qitools
+          test -f squashfs-root/usr/bin/plugins/libaudio.so
+          test -f squashfs-root/usr/bin/plugins/libsimpledownload.so
+          test -f squashfs-root/usr/bin/translations/glsltool-zh_CN.qm
+          find squashfs-root -path '*/platforms/libqxcb.so' -print -quit | grep -q .
+          find squashfs-root -path '*/platforms/libqwayland-*.so' -print -quit | grep -q .
+          find squashfs-root -path '*/wayland-shell-integration/libxdg-shell.so' -print -quit | grep -q .
 
       - name: Verify package (macOS)
         if: runner.os == 'macOS'
@@ -301,11 +343,18 @@ jobs:
           path: dist/${{ matrix.artifact }}
 
       - name: Upload artifact (Linux)
-        if: runner.os == 'Linux' && success()
+        if: ${{ runner.os == 'Linux' && !matrix.appimage && success() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}.tar.gz
+
+      - name: Upload artifact (Linux AppImage)
+        if: ${{ matrix.appimage && success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: qitools-linux-x86_64.AppImage
 
       - name: Upload artifact (macOS)
         if: runner.os == 'macOS' && success()
@@ -317,7 +366,7 @@ jobs:
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v4
 
@@ -327,8 +376,7 @@ jobs:
           draft: true
           files: |
             qitools-win-x64/*
-            qitools-win-x86/*
-            # qitools-win-xp/*
             qitools-linux/qitools-linux.tar.gz
+            qitools-linux-appimage/qitools-linux-x86_64.AppImage
             qitools-linux-arm64/qitools-linux-arm64.tar.gz
             qitools-macos/qitools-macos.dmg
