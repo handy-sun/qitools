@@ -111,11 +111,11 @@ jobs:
 
       - name: Install Qt (apt)
         if: matrix.qt_from_apt
-        run: sudo apt-get update && sudo apt-get install -y qtbase5-dev qttools5-dev qtmultimedia5-dev
+        run: sudo apt-get update && sudo apt-get install -y qtbase5-dev qttools5-dev qtmultimedia5-dev qtwayland5
 
       - name: Install Linux deps
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev libfontconfig1-dev libfreetype6-dev libxcb1-dev libxcb-keysyms1-dev libxcb-xfixes0-dev qtmultimedia5-dev libpulse-dev libasound2-dev
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libxkbcommon-dev libfontconfig1-dev libfreetype6-dev libxcb1-dev libxcb-keysyms1-dev libxcb-xfixes0-dev libxcb-cursor0 qtmultimedia5-dev libpulse-dev libasound2-dev qtwayland5
 
       - name: CMake configure (Windows)
         if: runner.os == 'Windows'
@@ -179,6 +179,35 @@ jobs:
           cp -r bin/translations/*.qm bin/qitools-clang.app/Contents/MacOS/translations/
           macdeployqt bin/qitools-clang.app -dmg -no-codesign
 
+      - name: Deploy Linux Qt platform plugins
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          if command -v qtpaths >/dev/null 2>&1; then
+            qt_plugin_dir="$(qtpaths --plugin-dir)"
+          elif command -v qmake >/dev/null 2>&1; then
+            qt_plugin_dir="$(qmake -query QT_INSTALL_PLUGINS)"
+          else
+            echo "::error::Could not find qtpaths or qmake"
+            exit 1
+          fi
+
+          copy_qt_plugin_dir() {
+            local dir="$1"
+            if [ -d "$qt_plugin_dir/$dir" ]; then
+              mkdir -p "bin/$dir"
+              cp -a "$qt_plugin_dir/$dir"/. "bin/$dir"/
+            fi
+          }
+
+          copy_qt_plugin_dir platforms
+          copy_qt_plugin_dir platformthemes
+          copy_qt_plugin_dir xcbglintegrations
+          copy_qt_plugin_dir wayland-shell-integration
+          copy_qt_plugin_dir generic
+          copy_qt_plugin_dir iconengines
+          copy_qt_plugin_dir imageformats
+
       - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: bash
@@ -193,7 +222,15 @@ jobs:
 
       - name: Package (Linux)
         if: runner.os == 'Linux'
-        run: cd bin && tar czf ../${{ matrix.artifact }}.tar.gz qitools-gnu plugins/ translations/
+        run: |
+          cd bin
+          package_paths="qitools-gnu plugins translations platforms"
+          for optional_dir in wayland-shell-integration platformthemes xcbglintegrations generic iconengines imageformats; do
+            if [ -d "$optional_dir" ]; then
+              package_paths="$package_paths $optional_dir"
+            fi
+          done
+          tar czf ../${{ matrix.artifact }}.tar.gz $package_paths
 
       - name: Package (macOS)
         if: runner.os == 'macOS'
@@ -240,6 +277,12 @@ jobs:
           tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx qitools-gnu
           tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx plugins/libaudio.so
           tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx plugins/libsimpledownload.so
+          tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx platforms/libqxcb.so
+          if tar tzf ${{ matrix.artifact }}.tar.gz | grep -Eq '^platforms/libqwayland-(egl|generic)\.so$'; then
+            tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx wayland-shell-integration/libxdg-shell.so
+          else
+            echo "::warning::Wayland Qt platform plugin is not available in this Qt build"
+          fi
           tar tzf ${{ matrix.artifact }}.tar.gz | grep -qx translations/glsltool-zh_CN.qm
 
       - name: Verify package (macOS)
