@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QScreen>
 #include <QDebug>
+#include <QtGlobal>
 
 static const int greyHeight = 30;
 static const int blockOffset = 5;
@@ -47,6 +48,7 @@ bool ScreenColorPicker::grabDesktopPixmap()
     {
         m_pmScreen.setDevicePixelRatio(screen->devicePixelRatio());
     }
+    m_imgScreen = m_pmScreen.toImage();
     update();
     return true;
 }
@@ -65,20 +67,45 @@ QRect ScreenColorPicker::getUnitedScreenRect()
 #else
     for (const QScreen *screen : QGuiApplication::screens())
     {
-        QRect scrRect = screen->geometry();
-        scrRect.moveTo(scrRect.x() / screen->devicePixelRatio(),
-                       scrRect.y() / screen->devicePixelRatio());
-        geometry = geometry.united(scrRect);
+        geometry = geometry.united(screen->geometry());
     }
 #endif
     return geometry;
+}
+
+QPoint ScreenColorPicker::screenImagePos() const
+{
+    if (m_imgScreen.isNull())
+        return QPoint();
+
+    const qreal dpr = m_pmScreen.devicePixelRatio();
+    const QPoint imagePos(qRound(m_mousePos.x() * dpr),
+                          qRound(m_mousePos.y() * dpr));
+    return QPoint(qBound(0, imagePos.x(), m_imgScreen.width() - 1),
+                  qBound(0, imagePos.y(), m_imgScreen.height() - 1));
+}
+
+QColor ScreenColorPicker::pickedColor() const
+{
+    if (m_imgScreen.isNull())
+        return QColor();
+
+    return QColor::fromRgba(m_imgScreen.pixel(screenImagePos()));
 }
 
 void ScreenColorPicker::drawPickedRect(QPainter *painter, const QRect &magnifier, const QColor &pickColor) const
 {
     painter->save();
 
-    painter->drawPixmap(magnifier, m_pmScreen.copy(m_mousePos.x() - 10, m_mousePos.y() - 10, 20, 20).scaled(magnifier.width(), magnifier.height()));
+    const QPoint imagePos = screenImagePos();
+    const int radius = qMax(1, qRound(10 * m_pmScreen.devicePixelRatio()));
+    const QRect sampleRect = QRect(imagePos.x() - radius,
+                                   imagePos.y() - radius,
+                                   radius * 2,
+                                   radius * 2).intersected(m_imgScreen.rect());
+    painter->drawPixmap(magnifier,
+                        QPixmap::fromImage(m_imgScreen.copy(sampleRect))
+                            .scaled(magnifier.width(), magnifier.height()));
     painter->drawRect(magnifier);
     painter->fillRect(magnifier.left(), magnifier.bottom(), magnifier.width() + 1, greyHeight, QColor(24, 24, 24));
     painter->fillRect(magnifier.left() + blockOffset, magnifier.bottom() + blockOffset, blockSize, blockSize, pickColor);
@@ -100,7 +127,7 @@ void ScreenColorPicker::paintEvent(QPaintEvent *)
 
     QPainter painter(this);
     QRect magnifier(m_mousePos.x(), m_mousePos.y(), 100, 100);
-    QColor color = m_pmScreen.toImage().pixel(m_mousePos);
+    QColor color = pickedColor();
 
     if (m_mousePos.x() > rect().right() - magnifier.width())
     {
@@ -119,7 +146,7 @@ void ScreenColorPicker::paintEvent(QPaintEvent *)
 
 void ScreenColorPicker::mousePressEvent(QMouseEvent *event)
 {
-    Q_EMIT pickFinished(event->button() == Qt::LeftButton, m_pmScreen.toImage().pixel(m_mousePos));
+    Q_EMIT pickFinished(event->button() == Qt::LeftButton, pickedColor());
     close();
 }
 
