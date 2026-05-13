@@ -4,8 +4,28 @@ on:
   push:
     branches: [master]
     tags: [v*]
+    paths:
+      - '.gitmodules'
+      - '.github/workflows/build.yml'
+      - 'CMake/**'
+      - 'CMakeLists.txt'
+      - 'qitools.pro'
+      - 'qitools.pri'
+      - 'resource/**'
+      - 'scripts/**'
+      - 'src/**'
   pull_request:
     branches: [master]
+    paths:
+      - '.gitmodules'
+      - '.github/workflows/build.yml'
+      - 'CMake/**'
+      - 'CMakeLists.txt'
+      - 'qitools.pro'
+      - 'qitools.pri'
+      - 'resource/**'
+      - 'scripts/**'
+      - 'src/**'
 
 permissions:
   contents: write

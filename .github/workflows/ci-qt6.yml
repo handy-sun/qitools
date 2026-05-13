@@ -4,8 +4,28 @@ on:
   push:
     branches: [qt6]
     tags: [v*]
+    paths:
+      - '.gitmodules'
+      - '.github/workflows/ci-qt6.yml'
+      - 'CMake/**'
+      - 'CMakeLists.txt'
+      - 'qitools.pro'
+      - 'qitools.pri'
+      - 'resource/**'
+      - 'scripts/**'
+      - 'src/**'
   pull_request:
     branches: [qt6]
+    paths:
+      - '.gitmodules'
+      - '.github/workflows/ci-qt6.yml'
+      - 'CMake/**'
+      - 'CMakeLists.txt'
+      - 'qitools.pro'
+      - 'qitools.pri'
+      - 'resource/**'
+      - 'scripts/**'
+      - 'src/**'
 
 permissions:
   contents: write
