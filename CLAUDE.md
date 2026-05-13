@@ -47,7 +47,7 @@ resource/               ← 图标(.ico/.icns/.svg), qrc, css, rc
 bin/                    ← 构建输出 + translations/*.qm
 scripts/                ← 辅助脚本（打包、CMake presets 生成、deployqt）
 src/
-  CMakeLists.txt        ← 版本 0.1.15，定义所有子模块
+  CMakeLists.txt        ← 版本 0.2.0，定义所有子模块
   core/                 ← 主程序（main.cpp, qitoolswindow, pluginmanager, pluginterface）
   codecconvert/         ← 编码转换工具
   cppcodegen/           ← C++ 代码生成器（property generator）

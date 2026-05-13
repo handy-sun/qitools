@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(PROJECT_AUTHOR "sooncheer")
-project("qitools" VERSION 0.1.15 LANGUAGES CXX C)
+project("qitools" VERSION 0.2.0 LANGUAGES CXX C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../CMake")
