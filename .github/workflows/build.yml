@@ -148,6 +148,30 @@ jobs:
             windeployqt --no-translations --no-compiler-runtime --dir . "$plugin"
           done
 
+      - name: Copy MSVC runtime
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $arch = '${{ matrix.arch || 'x64' }}'
+          $redistRoot = $env:VCToolsRedistDir
+          if (-not $redistRoot) {
+            $redistRoot = Join-Path $env:VCINSTALLDIR 'Redist\MSVC'
+          }
+          if (-not (Test-Path $redistRoot)) {
+            throw "Could not find MSVC redist root: $redistRoot"
+          }
+
+          $crtDir = Get-ChildItem -Path $redistRoot -Recurse -Directory |
+            Where-Object { $_.FullName -match "\\$arch\\Microsoft\.VC\d+\.CRT$" } |
+            Sort-Object FullName -Descending |
+            Select-Object -First 1
+
+          if (-not $crtDir) {
+            throw "Could not find MSVC CRT redist directory under $redistRoot"
+          }
+
+          Copy-Item -Path (Join-Path $crtDir.FullName '*.dll') -Destination bin -Force
+
       - name: macdeployqt
         if: runner.os == 'macOS'
         run: |
@@ -200,6 +224,8 @@ jobs:
             find dist/${{ matrix.artifact }} -maxdepth 3 -type f | sort
             exit 1
           fi
+          require_file dist/${{ matrix.artifact }}/vcruntime140.dll
+          require_file dist/${{ matrix.artifact }}/msvcp140.dll
           require_file dist/${{ matrix.artifact }}/translations/glsltool-zh_CN.qm
           import_libs=$(find dist/${{ matrix.artifact }}/plugins -type f \( -name "*.lib" -o -name "*.exp" \))
           if [ -n "$import_libs" ]; then
