@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+## pre-push hook: validate release versions before pushing tags.
+## Usage: git config core.hooksPath .githooks
+set -euo pipefail
+
+ZERO_SHA="0000000000000000000000000000000000000000"
+
+VERSION_FILES=(
+    "src/CMakeLists.txt"
+    "src/core/core.pro"
+)
+
+read_file_at_commit() {
+    local commit="$1"
+    local path="$2"
+
+    git show "${commit}:${path}" 2>/dev/null || {
+        echo "Error: ${path} not found in ${commit}"
+        return 1
+    }
+}
+
+extract_cmake_project_version() {
+    local content="$1"
+
+    printf '%s\n' "${content}" |
+        sed -nE 's/.*project\("qitools"[[:space:]]+VERSION[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' |
+        head -n 1
+}
+
+extract_qmake_version() {
+    local content="$1"
+
+    printf '%s\n' "${content}" |
+        sed -nE 's/^[[:space:]]*VERSION[[:space:]]*=[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+)[[:space:]]*$/\1/p' |
+        tail -n 1
+}
+
+check_version() {
+    local label="$1"
+    local actual="$2"
+    local expected="$3"
+    local errors_ref="$4"
+
+    if [[ -z "${actual}" ]]; then
+        echo "  [FAIL] Could not extract ${label}"
+        printf -v "${errors_ref}" '%s' "$(( ${!errors_ref} + 1 ))"
+    elif [[ "${actual}" != "${expected}" ]]; then
+        echo "  [FAIL] ${label} (${actual}) != tag (${expected})"
+        printf -v "${errors_ref}" '%s' "$(( ${!errors_ref} + 1 ))"
+    else
+        echo "  [OK]   ${label}: ${actual}"
+    fi
+}
+
+check_tag() {
+    local local_ref="$1"
+    local remote_ref="$2"
+    local tag_name="${remote_ref#refs/tags/}"
+    local tag_version="${tag_name#v}"
+    local tag_commit
+    local errors=0
+    local cmake_content
+    local qmake_content
+    local cmake_version
+    local qmake_version
+
+    if [[ ! "${tag_version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo "Warning: tag '${tag_name}' does not follow semver; skipping version checks"
+        return 0
+    fi
+
+    tag_commit="$(git rev-parse --verify "${local_ref}^{commit}")"
+
+    echo ">>> Checking release versions for ${tag_name}"
+
+    for path in "${VERSION_FILES[@]}"; do
+        if ! git cat-file -e "${tag_commit}:${path}" 2>/dev/null; then
+            echo "  [FAIL] ${path} is missing from tagged commit"
+            errors=$((errors + 1))
+        fi
+    done
+
+    if [[ "${errors}" -eq 0 ]]; then
+        cmake_content="$(read_file_at_commit "${tag_commit}" "src/CMakeLists.txt")"
+        qmake_content="$(read_file_at_commit "${tag_commit}" "src/core/core.pro")"
+
+        cmake_version="$(extract_cmake_project_version "${cmake_content}")"
+        qmake_version="$(extract_qmake_version "${qmake_content}")"
+
+        check_version "src/CMakeLists.txt project version" "${cmake_version}" "${tag_version}" errors
+        check_version "src/core/core.pro VERSION" "${qmake_version}" "${tag_version}" errors
+    fi
+
+    if [[ "${errors}" -gt 0 ]]; then
+        echo ""
+        echo "Error: pre-push checks failed for ${tag_name} (${errors} error(s))."
+        echo "Hint: update all release version declarations before pushing the tag."
+        return 1
+    fi
+
+    echo ">>> Release version checks passed for ${tag_name}"
+}
+
+while read -r local_ref local_sha remote_ref _remote_sha; do
+    if [[ "${remote_ref}" != refs/tags/* ]]; then
+        continue
+    fi
+
+    if [[ "${local_sha}" == "${ZERO_SHA}" ]]; then
+        echo ">>> Skipping deletion of ${remote_ref}"
+        continue
+    fi
+
+    check_tag "${local_ref}" "${remote_ref}"
+done
+
+exit 0

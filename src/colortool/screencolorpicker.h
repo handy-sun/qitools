@@ -1,7 +1,12 @@
 #ifndef SCREENCOLORPICKER_H
 #define SCREENCOLORPICKER_H
 
+#include <QColor>
 #include <QDialog>
+#include <QImage>
+#include <QPixmap>
+#include <QPoint>
+#include <QRect>
 
 namespace ColorTool {
 
@@ -19,9 +24,12 @@ protected:
 
 private:
     QPixmap     m_pmScreen;
+    QImage      m_imgScreen;
     QPoint      m_mousePos;
 
     QRect getUnitedScreenRect(); // 多屏时,获得包含各屏幕位置的最小矩形
+    QPoint screenImagePos() const;
+    QColor pickedColor() const;
     void drawPickedRect(QPainter *painter, const QRect &magnifier, const QColor &pickColor) const;
 
 Q_SIGNALS:
