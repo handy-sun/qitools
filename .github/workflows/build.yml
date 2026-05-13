@@ -302,6 +302,15 @@ jobs:
             exit 1
           fi
 
+      - name: Archive package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "dist/${{ matrix.artifact }}" -DestinationPath "dist/${{ matrix.artifact }}.zip" -Force
+          if (-not (Test-Path "dist/${{ matrix.artifact }}.zip")) {
+            throw "Missing archive: dist/${{ matrix.artifact }}.zip"
+          }
+
       - name: Verify package (Linux)
         if: ${{ runner.os == 'Linux' && !matrix.appimage }}
         run: |
@@ -340,7 +349,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: dist/${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}.zip
 
       - name: Upload artifact (Linux)
         if: ${{ runner.os == 'Linux' && !matrix.appimage && success() }}
@@ -375,7 +384,7 @@ jobs:
         with:
           draft: true
           files: |
-            qitools-win-x64/*
+            qitools-win-x64/qitools-win-x64.zip
             qitools-linux/qitools-linux.tar.gz
             qitools-linux-appimage/qitools-linux-x86_64.AppImage
             qitools-linux-arm64/qitools-linux-arm64.tar.gz
