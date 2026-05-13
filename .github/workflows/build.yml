@@ -159,18 +159,34 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          test -f dist/${{ matrix.artifact }}/qitools-msvc.exe
-          test -f dist/${{ matrix.artifact }}/platforms/qwindows.dll
-          test -f dist/${{ matrix.artifact }}/plugins/audio.dll
-          test -f dist/${{ matrix.artifact }}/plugins/codecconvert.dll
-          test -f dist/${{ matrix.artifact }}/plugins/colortool.dll
-          test -f dist/${{ matrix.artifact }}/plugins/cppcodegen.dll
-          test -f dist/${{ matrix.artifact }}/plugins/glsltool.dll
-          test -f dist/${{ matrix.artifact }}/plugins/imageconvert.dll
-          test -f dist/${{ matrix.artifact }}/plugins/simpledownload.dll
-          find dist/${{ matrix.artifact }} -maxdepth 1 -type f \( -name "Qt5Multimedia.dll" -o -name "Qt6Multimedia.dll" \) | grep .
-          test -f dist/${{ matrix.artifact }}/translations/glsltool-zh_CN.qm
-          ! find dist/${{ matrix.artifact }}/plugins -type f \( -name "*.lib" -o -name "*.exp" \) | grep .
+          require_file() {
+            if [ ! -f "$1" ]; then
+              echo "::error::Missing packaged file: $1"
+              find dist/${{ matrix.artifact }} -maxdepth 3 -type f | sort
+              exit 1
+            fi
+          }
+          require_file dist/${{ matrix.artifact }}/qitools-msvc.exe
+          require_file dist/${{ matrix.artifact }}/platforms/qwindows.dll
+          require_file dist/${{ matrix.artifact }}/plugins/audio.dll
+          require_file dist/${{ matrix.artifact }}/plugins/codecconvert.dll
+          require_file dist/${{ matrix.artifact }}/plugins/colortool.dll
+          require_file dist/${{ matrix.artifact }}/plugins/cppcodegen.dll
+          require_file dist/${{ matrix.artifact }}/plugins/glsltool.dll
+          require_file dist/${{ matrix.artifact }}/plugins/imageconvert.dll
+          require_file dist/${{ matrix.artifact }}/plugins/simpledownload.dll
+          if ! find dist/${{ matrix.artifact }} -maxdepth 1 -type f \( -name "Qt5Multimedia.dll" -o -name "Qt6Multimedia.dll" \) | grep .; then
+            echo "::error::Missing Qt Multimedia runtime"
+            find dist/${{ matrix.artifact }} -maxdepth 3 -type f | sort
+            exit 1
+          fi
+          require_file dist/${{ matrix.artifact }}/translations/glsltool-zh_CN.qm
+          import_libs=$(find dist/${{ matrix.artifact }}/plugins -type f \( -name "*.lib" -o -name "*.exp" \))
+          if [ -n "$import_libs" ]; then
+            echo "::error::Import libraries leaked into package:"
+            echo "$import_libs"
+            exit 1
+          fi
 
       - name: Verify package (Linux)
         if: runner.os == 'Linux'
