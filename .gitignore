@@ -60,6 +60,8 @@ CMakeLists.txt.user*
 
 # cmake --preset / --list-presets
 CMakePresets.json
+!**/README.md
+!README.md
 *.md
 .playwright-mcp/
 # CMake build artifacts
