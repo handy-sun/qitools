@@ -1,0 +1,24 @@
+[project]
+name = "qitools-cli"
+version = "0.1.0"
+description = "CLI tools for common development tasks - ported from qitools GUI"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "charset-normalizer>=3.4.7",
+    "click>=8.4.1",
+    "mutagen>=1.47.0",
+    "pillow>=12.2.0",
+    "requests>=2.34.2",
+    "rich>=15.0.0",
+]
+
+[project.scripts]
+qitools = "qitools_cli.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.14",
+]
