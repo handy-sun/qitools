@@ -54,6 +54,7 @@ def set_audio_metadata(
     # Create ID3 tag if it doesn't exist
     if audio.tags is None:
         audio.add_tags()
+        audio.save()  # Save after adding tags
 
     if title:
         audio.tags.add(TIT2(encoding=3, text=[title]))

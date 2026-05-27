@@ -17,7 +17,18 @@ def convert_image(input_file: str, output_file: str, output_format: str) -> None
     if output_format.lower() in ('jpg', 'jpeg') and img.mode == 'RGBA':
         img = img.convert('RGB')
 
-    img.save(output_file, format=output_format.upper())
+    # Map jpg to JPEG for Pillow
+    format_mapping = {
+        'jpg': 'JPEG',
+        'jpeg': 'JPEG',
+        'png': 'PNG',
+        'bmp': 'BMP',
+        'pgm': 'PGM',
+        'pbm': 'PBM'
+    }
+    pillow_format = format_mapping.get(output_format.lower(), output_format.upper())
+
+    img.save(output_file, format=pillow_format)
 
 
 def resize_image(
@@ -53,10 +64,10 @@ def resize_image(
             ratio = height / img.height
             new_size = (int(img.width * ratio), height)
     else:
-        new_size = (
-            width if width else img.width,
-            height if height else img.height
-        )
+        # When not keeping aspect ratio, use provided dimensions or original
+        new_width = width if width else img.width
+        new_height = height if height else img.height
+        new_size = (new_width, new_height)
 
     img = img.resize(new_size, Image.Resampling.LANCZOS)
     img.save(output_file)
