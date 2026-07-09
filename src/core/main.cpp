@@ -5,6 +5,56 @@ using namespace Core;
 
 static QString s_logFile;
 
+namespace {
+
+constexpr qreal kBaseDpi = 96.0;
+
+qreal screenScaleFactor(const QScreen *screen)
+{
+    if (!screen)
+        return 1.0;
+
+    const qreal dpi = screen->logicalDotsPerInch();
+    if (dpi <= 0.0)
+        return 1.0;
+
+    return qBound<qreal>(1.0, dpi / kBaseDpi, 2.0);
+}
+
+QSize scaledSize(const QSize &baseSize, const QScreen *screen)
+{
+    const qreal scale = screenScaleFactor(screen);
+    return QSize(qRound(baseSize.width() * scale), qRound(baseSize.height() * scale));
+}
+
+QSize defaultWindowSize(const QScreen *screen)
+{
+    QSize size = scaledSize(QSize(1280, 720), screen);
+    if (!screen)
+        return size;
+
+    const QSize available = screen->availableGeometry().size();
+    const QSize maxSize(qRound(available.width() * 0.9), qRound(available.height() * 0.9));
+    const QSize minSize = QSize(960, 540).boundedTo(maxSize);
+    size.setWidth(qMin(size.width(), maxSize.width()));
+    size.setHeight(qMin(size.height(), maxSize.height()));
+    return size.expandedTo(minSize).boundedTo(maxSize);
+}
+
+void configureHighDpiScaling()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+#endif
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
+}
+
+} // namespace
+
 void addNewSignInLog(const QString &configLogFile)
 {
     QFile file(configLogFile);
@@ -72,6 +122,8 @@ QString ensureCfgDir(const QString &cfgDirName)
 
 int main(int argc, char *argv[])
 {
+    configureHighDpiScaling();
+
     QApplication a(argc, argv);
     a.setApplicationVersion(VERSION_STRING);
 //    setvbuf(stdout, nullptr, _IONBF, 1024);
@@ -119,10 +171,8 @@ int main(int argc, char *argv[])
     QiToolsWindow w(qiToolsConfIni);
     w.setWindowTitle("qitools");
     w.setWindowIcon(QIcon(":/toolsimage.svg"));
-    if (!_ba.isEmpty())
-        w.restoreGeometry(_ba);
-    else
-        w.resize(1280, 720);
+    if (_ba.isEmpty() || !w.restoreGeometry(_ba))
+        w.resize(defaultWindowSize(QGuiApplication::primaryScreen()));
 
     w.show();
     QSystemTrayIcon *m_sysTrayIcon = new QSystemTrayIcon(&w);

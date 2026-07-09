@@ -6,6 +6,32 @@
 
 using namespace Core;
 
+namespace {
+
+constexpr qreal kBaseDpi = 96.0;
+
+qreal screenScaleFactor(const QWidget *widget)
+{
+    const QScreen *screen = nullptr;
+    if (widget && widget->windowHandle())
+        screen = widget->windowHandle()->screen();
+    if (!screen)
+        screen = QGuiApplication::primaryScreen();
+
+    const qreal dpi = screen ? screen->logicalDotsPerInch() : kBaseDpi;
+    if (dpi <= 0.0)
+        return 1.0;
+
+    return qBound<qreal>(1.0, dpi / kBaseDpi, 2.0);
+}
+
+int scaled(int value, const QWidget *widget)
+{
+    return qRound(value * screenScaleFactor(widget));
+}
+
+} // namespace
+
 class Internal::QiToolsWindow_Ui
 {
 public:
@@ -17,15 +43,17 @@ public:
     {
         QWidget *centralW = new QWidget(qitoolsWindow);
         QHBoxLayout *horizontalLayout = new QHBoxLayout(centralW);
-        horizontalLayout->setSpacing(6);
-        horizontalLayout->setContentsMargins(6, 6, 6, 6);
+        horizontalLayout->setSpacing(scaled(6, qitoolsWindow));
+        horizontalLayout->setContentsMargins(scaled(6, qitoolsWindow), scaled(6, qitoolsWindow),
+                                             scaled(6, qitoolsWindow), scaled(6, qitoolsWindow));
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         QVBoxLayout *leftVerticalLayout = new QVBoxLayout();
-        leftVerticalLayout->setSpacing(3);
-        leftVerticalLayout->setContentsMargins(3, 0, 6, 6);
+        leftVerticalLayout->setSpacing(scaled(3, qitoolsWindow));
+        leftVerticalLayout->setContentsMargins(scaled(3, qitoolsWindow), 0,
+                                               scaled(6, qitoolsWindow), scaled(6, qitoolsWindow));
         leftVerticalLayout->setObjectName(QString::fromUtf8("leftVerticalLayout"));
         listWidget = new QListWidget(centralW);
-        listWidget->setMaximumWidth(167);
+        listWidget->setMaximumWidth(scaled(167, qitoolsWindow));
         QFont font;
 #ifdef Q_OS_MAC
         font.setPointSize(15);
@@ -34,7 +62,9 @@ public:
 #endif
         listWidget->setFont(font);
         tbtnSetting = new QToolButton(centralW);
-        tbtnSetting->setMinimumSize(16, 16);
+        const int buttonSize = scaled(24, qitoolsWindow);
+        tbtnSetting->setMinimumSize(buttonSize, buttonSize);
+        tbtnSetting->setIconSize(QSize(scaled(16, qitoolsWindow), scaled(16, qitoolsWindow)));
         tbtnSetting->setIcon(QIcon(qitoolsWindow->style()->standardIcon(QStyle::SP_FileDialogListView)));
         tbtnSetting->setToolTip(QObject::tr("settings"));
         stackedWidget = new QStackedWidget(centralW);
@@ -128,4 +158,3 @@ void QiToolsWindow::onListWidgetPressed(int r)
     auto _str = ui->listWidget->item(r)->text();
     ui->stackedWidget->setCurrentWidget(m_stackedHash.value(_str));
 }
-
