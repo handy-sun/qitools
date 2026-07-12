@@ -2,8 +2,10 @@
 #define CODECCONVERTWIDGET_H
 
 #include <QWidget>
-#include <QStringList>
+#include <QSet>
 #include "../core/pluginterface.h"
+
+class QTableWidgetItem;
 
 namespace Ui {
 class CodecConvertWidget;
@@ -24,12 +26,20 @@ public:
 
 private:
     Ui::CodecConvertWidget *ui;
-    QStringList             m_fileList;
+    QSet<QString>           m_filePaths;
 
     QString getCodeString(const QByteArray &ba);
+    QStringList sourceFileNameFilters() const;
+    QStringList checkedFiles() const;
+    void appendFiles(const QStringList &filePaths);
+    void updateSelectionState();
 
 private Q_SLOTS:
-    void on_pushButtonOpen_clicked();
+    void on_pushButtonAddFiles_clicked();
+    void on_pushButtonAddDirectories_clicked();
+    void on_pushButtonRemove_clicked();
+    void on_checkBoxSelectAll_clicked(bool checked);
+    void on_tableWidgetFiles_itemChanged(QTableWidgetItem *item);
     void on_pushButtonConvert_clicked();
     void on_PushButtonSetDir_clicked();
 

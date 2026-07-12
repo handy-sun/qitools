@@ -16,10 +16,14 @@ FORMS += \
     $$PWD/codecconvertwidget.ui
 
 HEADERS += \
-    $$PWD/codecconvertwidget.h
+    $$PWD/codecconvertwidget.h \
+    $$PWD/multidirectorydialog.h \
+    $$PWD/sourcefilefilter.h
 
 SOURCES += \
     $$PWD/codecconvertwidget.cpp \
+    $$PWD/multidirectorydialog.cpp \
+    $$PWD/sourcefilefilter.cpp \
     $${CED_SOURCES}
 
 TRANSLATIONS = codecconvert-zh_CN.ts
