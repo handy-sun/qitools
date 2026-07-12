@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 set(PROJECT_AUTHOR "sooncheer")
 project("qitools" VERSION 0.2.0 LANGUAGES CXX C)
 
+include(CTest)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../CMake")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../bin)
@@ -62,3 +64,7 @@ add_subdirectory(audio)
 add_subdirectory(imageconvert)
 add_subdirectory(glsltool)
 add_subdirectory(core)
+
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
