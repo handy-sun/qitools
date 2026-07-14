@@ -54,13 +54,6 @@ public:
         leftVerticalLayout->setObjectName(QString::fromUtf8("leftVerticalLayout"));
         listWidget = new QListWidget(centralW);
         listWidget->setMaximumWidth(scaled(167, qitoolsWindow));
-        QFont font;
-#ifdef Q_OS_MAC
-        font.setPointSize(15);
-#else
-        font.setPointSize(11);
-#endif
-        listWidget->setFont(font);
         tbtnSetting = new QToolButton(centralW);
         const int buttonSize = scaled(24, qitoolsWindow);
         tbtnSetting->setMinimumSize(buttonSize, buttonSize);

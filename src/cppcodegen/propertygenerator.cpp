@@ -1,6 +1,7 @@
 ﻿#include "propertygenerator.h"
 #include "ui_propertygenerator.h"
 #include "propertymanager.h"
+#include <QFontDatabase>
 #include <QMessageBox>
 
 using namespace CodeGen;
@@ -11,6 +12,14 @@ PropertyGenerator::PropertyGenerator(QWidget *parent)
     , m_manager(new PropertyManager)
 {
     ui->setupUi(this);
+
+    const QFont codeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    ui->lineEditType->setFont(codeFont);
+    ui->lineEditVariation->setFont(codeFont);
+    ui->lineEditPrefix->setFont(codeFont);
+    ui->textEditGenProperty->setFont(codeFont);
+    ui->textEditGenCode->setFont(codeFont);
+
     ui->lineEditPrefix->setText("m_");
     ui->lineEditType->setText("int");
     ui->lineEditVariation->setText("number");
@@ -66,4 +75,3 @@ void PropertyGenerator::on_pushBtnGenProperty_clicked()
 
     ui->textEditGenProperty->setText(qProperty);
 }
-

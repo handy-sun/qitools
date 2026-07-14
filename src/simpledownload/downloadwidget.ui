@@ -10,23 +10,12 @@
     <height>600</height>
    </rect>
   </property>
-  <property name="font">
-   <font>
-    <pointsize>11</pointsize>
-   </font>
-  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_4">
    <item row="0" column="0">
     <widget class="QPushButton" name="pushButtonShowTab">
-     <property name="font">
-      <font>
-       <family>Century Gothic</family>
-       <pointsize>11</pointsize>
-      </font>
-     </property>
      <property name="cursor">
       <cursorShape>PointingHandCursor</cursorShape>
      </property>
@@ -61,9 +50,6 @@
         </property>
         <property name="font">
          <font>
-          <family>Century Gothic</family>
-          <pointsize>10</pointsize>
-          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
@@ -83,11 +69,6 @@
           <height>16777215</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>下载Url</string>
         </property>
@@ -101,12 +82,6 @@
           <height>27</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <family>Microsoft YaHei</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="inputMask">
          <string/>
         </property>
@@ -114,11 +89,6 @@
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="labelR3">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>保存路径</string>
         </property>
@@ -131,12 +101,6 @@
           <width>483</width>
           <height>27</height>
          </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Microsoft YaHei</family>
-          <pointsize>12</pointsize>
-         </font>
         </property>
         <property name="inputMask">
          <string/>
@@ -151,12 +115,6 @@
           <height>25</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
         <property name="value">
          <number>0</number>
         </property>
@@ -169,12 +127,6 @@
           <width>0</width>
           <height>32</height>
          </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Century Gothic</family>
-          <pointsize>11</pointsize>
-         </font>
         </property>
         <property name="cursor">
          <cursorShape>PointingHandCursor</cursorShape>
@@ -195,11 +147,6 @@
           <height>16777215</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>下载结束后打开</string>
         </property>
@@ -207,12 +154,6 @@
       </item>
       <item row="3" column="5" colspan="2">
        <widget class="QLabel" name="labelRecvTotal">
-        <property name="font">
-         <font>
-          <family>新宋体</family>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>RecvTotal</string>
         </property>
@@ -228,12 +169,6 @@
           <width>0</width>
           <height>32</height>
          </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Century Gothic</family>
-          <pointsize>11</pointsize>
-         </font>
         </property>
         <property name="cursor">
          <cursorShape>PointingHandCursor</cursorShape>
@@ -273,11 +208,6 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
        <widget class="QTabWidget" name="tabWidgetTool">
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
         <property name="currentIndex">
          <number>0</number>
         </property>
@@ -306,11 +236,6 @@
               <height>27</height>
              </size>
             </property>
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
             <property name="placeholderText">
              <string>输入扩展的版本号</string>
             </property>
@@ -323,11 +248,6 @@
               <width>0</width>
               <height>30</height>
              </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
             </property>
             <property name="cursor">
              <cursorShape>PointingHandCursor</cursorShape>
@@ -352,11 +272,6 @@
           </item>
           <item row="0" column="0" colspan="3">
            <widget class="QTextEdit" name="textEditWebUrl">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
             <property name="placeholderText">
              <string>输入扩展主页的网址</string>
             </property>
@@ -376,11 +291,6 @@
               <width>0</width>
               <height>30</height>
              </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
             </property>
             <property name="cursor">
              <cursorShape>PointingHandCursor</cursorShape>
@@ -418,11 +328,6 @@
           </item>
           <item row="0" column="0" colspan="3">
            <widget class="QTextEdit" name="textEditVscUrl">
-            <property name="font">
-             <font>
-              <pointsize>14</pointsize>
-             </font>
-            </property>
             <property name="placeholderText">
              <string>输入VsCode源下载地址</string>
             </property>

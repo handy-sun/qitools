@@ -37,11 +37,6 @@
      </property>
      <item row="4" column="0">
       <widget class="QLabel" name="label2">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string>宽</string>
        </property>
@@ -52,11 +47,6 @@
      </item>
      <item row="5" column="1">
       <widget class="QSpinBox" name="spinBoxHeight">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
        <property name="minimum">
         <number>1</number>
        </property>
@@ -73,29 +63,14 @@
          <height>30</height>
         </size>
        </property>
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
       </widget>
      </item>
      <item row="3" column="0" colspan="2">
       <widget class="QComboBox" name="comboBox">
-       <property name="font">
-        <font>
-         <pointsize>13</pointsize>
-        </font>
-       </property>
       </widget>
      </item>
      <item row="4" column="1">
       <widget class="QSpinBox" name="spinBoxWidth">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
        <property name="minimum">
         <number>1</number>
        </property>
@@ -106,11 +81,6 @@
      </item>
      <item row="5" column="0">
       <widget class="QLabel" name="label2_2">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string>高</string>
        </property>
@@ -134,11 +104,6 @@
      </item>
      <item row="5" column="2">
       <widget class="QPushButton" name="pushButtonSaveDestDir">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string>另存为</string>
        </property>
@@ -146,11 +111,6 @@
      </item>
      <item row="0" column="0">
       <widget class="QPushButton" name="pushButtonOpenImg">
-       <property name="font">
-        <font>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string>打开文件</string>
        </property>

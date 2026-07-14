@@ -1,5 +1,6 @@
 ﻿#include "glslcodeconvert.h"
 #include "ui_glslcodeconvert.h"
+#include <QFontDatabase>
 
 using namespace GlslTool;
 
@@ -8,6 +9,11 @@ GlslCodeConvert::GlslCodeConvert(QWidget *parent)
     , ui(new Ui::GlslCodeConvert)
 {
     ui->setupUi(this);
+
+    const QFont codeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    ui->textEditFile->setFont(codeFont);
+    ui->textEditCode->setFont(codeFont);
+
     ui->textEditCode->setReadOnly(true);
     connect(ui->textEditFile, &QTextEdit::textChanged, this, &GlslCodeConvert::onTextCodeChanged);
 }

@@ -55,10 +55,6 @@ DownloadWidget::DownloadWidget(QWidget *parent)
 
     ui->pushButtonShowTab->setChecked(true);
     ui->pushButtonDownload->setEnabled(false);
-    auto _font = ui->textBrowserMessage->font();
-    _font.setFamily("MS Shell Dlg 2"); // Tahoma
-    _font.setPointSize(13);
-    ui->textBrowserMessage->setFont(_font);
 #ifndef QT_NO_SSL
 //    qInfo() << "isSupportsSSL:" << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString();
     ui->textBrowserMessage->append(QStringLiteral("是否找到支持的SSL库: %1\n支持的SSL版本信息: <%2>")
@@ -266,4 +262,3 @@ void DownloadWidget::on_pushButtonCancel_clicked()
     ui->labelRecvTotal->setText("");
     m_fileSize = 0;
 }
-
