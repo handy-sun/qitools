@@ -10,7 +10,8 @@ GlslCodeConvert::GlslCodeConvert(QWidget *parent)
 {
     ui->setupUi(this);
 
-    const QFont codeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    QFont codeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    codeFont.setPointSizeF(qMax(13.0, codeFont.pointSizeF()));
     ui->textEditFile->setFont(codeFont);
     ui->textEditCode->setFont(codeFont);
 

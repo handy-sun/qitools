@@ -13,7 +13,8 @@ PropertyGenerator::PropertyGenerator(QWidget *parent)
 {
     ui->setupUi(this);
 
-    const QFont codeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    QFont codeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    codeFont.setPointSizeF(qMax(13.0, codeFont.pointSizeF()));
     ui->lineEditType->setFont(codeFont);
     ui->lineEditVariation->setFont(codeFont);
     ui->lineEditPrefix->setFont(codeFont);

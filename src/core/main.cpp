@@ -125,7 +125,9 @@ int main(int argc, char *argv[])
     configureHighDpiScaling();
 
     QApplication a(argc, argv);
-    a.setFont(QFontDatabase::systemFont(QFontDatabase::GeneralFont));
+    QFont appFont = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
+    appFont.setPointSizeF(qMax(13.0, appFont.pointSizeF()));
+    a.setFont(appFont);
     a.setApplicationVersion(VERSION_STRING);
 //    setvbuf(stdout, nullptr, _IONBF, 1024);
 
