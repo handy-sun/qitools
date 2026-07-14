@@ -46,7 +46,7 @@ endif()
 
 option(QITOOLS_MAC_BUNDLE "Auto deploy to qitools.app package dir" ON)
 
-if(QITOOLS_MAC_BUNDLE)
+if(APPLE AND QITOOLS_MAC_BUNDLE)
     set(PLUGIN_PATH "${EXECUTABLE_OUTPUT_PATH}/${app_name}.app/Contents/MacOS/plugins")
 else()
     set(PLUGIN_PATH "${EXECUTABLE_OUTPUT_PATH}/plugins")
