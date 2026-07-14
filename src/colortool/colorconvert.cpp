@@ -113,7 +113,6 @@ ColorConvert::~ColorConvert()
 void ColorConvert::initTableWidget()
 {
     QTableWidgetItem *item;
-    QFont fontCol0("Microsoft Yahei", 14);
     QStringList horizontalLabels, verticalContents;
     horizontalLabels << tr("option") << tr("value");
 
@@ -134,7 +133,6 @@ void ColorConvert::initTableWidget()
     m_table->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     m_table->verticalHeader()->setHidden(true);
     m_table->setAlternatingRowColors(true); // 奇偶行交替颜色
-    m_table->setFont(QFont("Verdana", 14));
 //    m_table->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
     for (int row = 0; row < m_table->rowCount(); ++row)
@@ -146,7 +144,6 @@ void ColorConvert::initTableWidget()
             {
                 item->setFlags(item->flags() & (~Qt::ItemIsEditable) & (~Qt::ItemIsSelectable)); // 第一列不可编辑
                 item->setText(verticalContents.at(row));
-                item->setFont(fontCol0);
             }
             else if (1 == row && 1 == col) // 色块的展示采用 Qt::DecorationRole 设置一张 pixmap
             {

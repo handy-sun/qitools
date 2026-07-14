@@ -37,12 +37,6 @@
           <height>16777215</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>生成 Q_PROPERTY</string>
         </property>
@@ -50,12 +44,6 @@
       </item>
       <item row="0" column="1">
        <widget class="QLabel" name="label_4">
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>变量类型</string>
         </property>
@@ -63,22 +51,10 @@
       </item>
       <item row="0" column="2">
        <widget class="QLineEdit" name="lineEditType">
-        <property name="font">
-         <font>
-          <family>Consolas</family>
-          <pointsize>13</pointsize>
-         </font>
-        </property>
        </widget>
       </item>
       <item row="0" column="3">
        <widget class="QLabel" name="label">
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>变量名</string>
         </property>
@@ -86,22 +62,10 @@
       </item>
       <item row="0" column="4">
        <widget class="QLineEdit" name="lineEditVariation">
-        <property name="font">
-         <font>
-          <family>Consolas</family>
-          <pointsize>13</pointsize>
-         </font>
-        </property>
        </widget>
       </item>
       <item row="0" column="5">
        <widget class="QCheckBox" name="checkBoxNotify">
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>含有 NOTIFY</string>
         </property>
@@ -131,11 +95,6 @@
        <height>100</height>
       </size>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>14</pointsize>
-      </font>
-     </property>
      <property name="placeholderText">
       <string notr="true">Q_PROPERTY(int number READ number WRITE setNumber NOTIFY NumberChanged)</string>
      </property>
@@ -164,12 +123,6 @@
           <height>16777215</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <family>Consolas</family>
-          <pointsize>13</pointsize>
-         </font>
-        </property>
        </widget>
       </item>
       <item row="0" column="6">
@@ -180,12 +133,6 @@
           <height>0</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
        </widget>
       </item>
       <item row="1" column="5" colspan="2">
@@ -195,12 +142,6 @@
           <width>200</width>
           <height>16777215</height>
          </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
         </property>
         <property name="text">
          <string>指针符号 对齐变量</string>
@@ -218,12 +159,6 @@
           <height>16777215</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>指针符号 对齐类型</string>
         </property>
@@ -231,12 +166,6 @@
       </item>
       <item row="0" column="3">
        <widget class="QLabel" name="label_3">
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>变量名前缀</string>
         </property>
@@ -253,12 +182,6 @@
           <height>0</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>形参类型</string>
         </property>
@@ -274,12 +197,6 @@
           <width>200</width>
           <height>16777215</height>
          </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
         </property>
         <property name="text">
          <string>inline 关键字</string>
@@ -300,12 +217,6 @@
           <height>16777215</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>生成 C++ 代码</string>
         </property>
@@ -316,12 +227,6 @@
    </item>
    <item>
     <widget class="QTextEdit" name="textEditGenCode">
-     <property name="font">
-      <font>
-       <family>Consolas</family>
-       <pointsize>14</pointsize>
-      </font>
-     </property>
      <property name="cursor" stdset="0">
       <cursorShape>IBeamCursor</cursorShape>
      </property>

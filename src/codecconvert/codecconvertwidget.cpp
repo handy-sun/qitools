@@ -6,10 +6,12 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QFont>
 #include <QTextStream>
 #include <QDebug>
 #include <QHeaderView>
 #include <QItemSelectionModel>
+#include <QPalette>
 #include <QSignalBlocker>
 #include <QTableWidget>
 #include <QStringConverter>
@@ -36,8 +38,29 @@ CodecConvertWidget::CodecConvertWidget(QWidget *parent)
     ui->lineEditDir->setReadOnly(true);
     ui->checkBoxWithBom->setChecked(true);
     ui->lineEditDir->setText(qApp->applicationDirPath());
-    ui->tableWidgetFiles->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    ui->tableWidgetFiles->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+
+    QFont tableFont = qApp->font();
+    if (tableFont.pointSizeF() > 0)
+        tableFont.setPointSizeF(tableFont.pointSizeF() + 1.0);
+    else if (tableFont.pixelSize() > 0)
+        tableFont.setPixelSize(tableFont.pixelSize() + 1);
+    ui->tableWidgetFiles->setFont(tableFont);
+
+    QPalette tablePalette = ui->tableWidgetFiles->palette();
+    const QColor baseColor = tablePalette.color(QPalette::Base);
+    tablePalette.setColor(QPalette::AlternateBase,
+                          baseColor.lightness() < 128 ? baseColor.lighter(115)
+                                                      : baseColor.darker(106));
+    ui->tableWidgetFiles->setPalette(tablePalette);
+
+    ui->tableWidgetFiles->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    QTimer::singleShot(0, this, [this]() {
+        constexpr int encodingColumnWidth = 120;
+        ui->tableWidgetFiles->setColumnWidth(
+            0, qMax(200, ui->tableWidgetFiles->viewport()->width() - encodingColumnWidth));
+        ui->tableWidgetFiles->setColumnWidth(1, encodingColumnWidth);
+    });
+    ui->tableWidgetFiles->verticalHeader()->setDefaultSectionSize(34);
     ui->tableWidgetFiles->verticalHeader()->setVisible(false);
     ui->checkBoxSelectAll->setTristate(true);
     ui->pushButtonConvert->setEnabled(false);
