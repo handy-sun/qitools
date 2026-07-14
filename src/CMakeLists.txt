@@ -6,7 +6,7 @@ project("qitools" VERSION 0.2.0 LANGUAGES CXX C)
 include(CTest)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../CMake")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../CMake")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../bin)
 
 string(TOLOWER ${CMAKE_CXX_COMPILER_ID} compiler_id)
@@ -24,6 +24,15 @@ endif()
 if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
+
+# Source files are UTF-8 without BOM. Keep MSVC from interpreting them with
+# the active Windows code page, matching the existing qmake configuration.
+if(MSVC)
+    add_compile_options(
+        "$<$<COMPILE_LANGUAGE:C>:/utf-8>"
+        "$<$<COMPILE_LANGUAGE:CXX>:/utf-8>"
+    )
 endif()
 
 # Prefer Qt6, fall back to Qt5

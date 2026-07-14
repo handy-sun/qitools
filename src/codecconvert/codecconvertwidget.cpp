@@ -14,7 +14,11 @@
 #include <QPalette>
 #include <QSignalBlocker>
 #include <QTableWidget>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 #include <QStringConverter>
+#else
+#include <QTextCodec>
+#endif
 #include <QTimer>
 #include <util/encodings/encodings.h>
 #include <compact_enc_det/compact_enc_det.h>
@@ -286,8 +290,16 @@ void CodecConvertWidget::on_pushButtonConvert_clicked()
             continue;
 
         rwStream.setDevice(&file);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         auto enc = QStringConverter::encodingForName(ui->comboBoxCodec->currentText().toUtf8().constData());
         rwStream.setEncoding(enc.value_or(QStringConverter::Utf8));
+#else
+        const QByteArray codecName = ui->comboBoxCodec->currentText().toUtf8();
+        QTextCodec *codec = codecName.compare("System", Qt::CaseInsensitive) == 0
+            ? QTextCodec::codecForLocale()
+            : QTextCodec::codecForName(codecName);
+        rwStream.setCodec(codec ? codec : QTextCodec::codecForName("UTF-8"));
+#endif
         rwStream.setGenerateByteOrderMark(ui->checkBoxWithBom->isChecked());
         rwStream << _content;
         file.close();

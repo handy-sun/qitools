@@ -18,6 +18,9 @@ set(CED_SOURCES
     ${CED_ROOT}/util/encodings/encodings.cc
     ${CED_ROOT}/util/languages/languages.cc
 )
+if(MSVC)
+    set_property(SOURCE ${CED_SOURCES} APPEND_STRING PROPERTY COMPILE_FLAGS " /w")
+endif()
 include_directories(${PROJECT_NAME} PUBLIC ${CED_ROOT})
 ## -------- add ced -------- }}}
 

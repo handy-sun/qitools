@@ -2,7 +2,13 @@
 #include "ui_audiowidget.h"
 #include "audiodataplay.h"
 #include "wavfile.h"
+#ifdef _MSC_VER
+#pragma warning(push, 0)
+#endif
 #include "minimp3/exmp3.h"
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <QAudioFormat>
 #include <QAudioDecoder>
