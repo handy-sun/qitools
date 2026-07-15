@@ -12,6 +12,7 @@
 #include <QHeaderView>
 #include <QItemSelectionModel>
 #include <QPalette>
+#include <QShowEvent>
 #include <QSignalBlocker>
 #include <QTableWidget>
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -58,12 +59,6 @@ CodecConvertWidget::CodecConvertWidget(QWidget *parent)
     ui->tableWidgetFiles->setPalette(tablePalette);
 
     ui->tableWidgetFiles->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-    QTimer::singleShot(0, this, [this]() {
-        constexpr int encodingColumnWidth = 120;
-        ui->tableWidgetFiles->setColumnWidth(
-            0, qMax(200, ui->tableWidgetFiles->viewport()->width() - encodingColumnWidth));
-        ui->tableWidgetFiles->setColumnWidth(1, encodingColumnWidth);
-    });
     ui->tableWidgetFiles->verticalHeader()->setDefaultSectionSize(34);
     ui->tableWidgetFiles->verticalHeader()->setVisible(false);
     ui->checkBoxSelectAll->setTristate(true);
@@ -86,6 +81,31 @@ CodecConvertWidget::CodecConvertWidget(QWidget *parent)
 CodecConvertWidget::~CodecConvertWidget()
 {
     delete ui;
+}
+
+void CodecConvertWidget::showEvent(QShowEvent *event)
+{
+    QWidget::showEvent(event);
+
+    if (m_initialColumnWidthsSet)
+        return;
+
+    QTimer::singleShot(0, this, [this]() {
+        if (isVisible() && !m_initialColumnWidthsSet)
+            setInitialColumnWidths();
+    });
+}
+
+void CodecConvertWidget::setInitialColumnWidths()
+{
+    const int availableWidth = ui->tableWidgetFiles->viewport()->width();
+    if (availableWidth <= 0)
+        return;
+
+    const int encodingColumnWidth = availableWidth / 3;
+    ui->tableWidgetFiles->setColumnWidth(0, availableWidth - encodingColumnWidth);
+    ui->tableWidgetFiles->setColumnWidth(1, encodingColumnWidth);
+    m_initialColumnWidthsSet = true;
 }
 
 QString CodecConvertWidget::getCodeString(const QByteArray &ba)

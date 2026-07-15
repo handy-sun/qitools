@@ -6,6 +6,7 @@
 #include "../core/pluginterface.h"
 
 class QTableWidgetItem;
+class QShowEvent;
 
 namespace Ui {
 class CodecConvertWidget;
@@ -24,14 +25,19 @@ public:
 
     QString pluginName() const override { return tr("CodecConvert"); }
 
+protected:
+    void showEvent(QShowEvent *event) override;
+
 private:
     Ui::CodecConvertWidget *ui;
     QSet<QString>           m_filePaths;
+    bool                    m_initialColumnWidthsSet = false;
 
     QString getCodeString(const QByteArray &ba);
     QStringList sourceFileNameFilters() const;
     QStringList checkedFiles() const;
     void appendFiles(const QStringList &filePaths);
+    void setInitialColumnWidths();
     void updateSelectionState();
 
 private Q_SLOTS:
