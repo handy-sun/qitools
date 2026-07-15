@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(PROJECT_AUTHOR "sooncheer")
-project("qitools" VERSION 0.2.0 LANGUAGES CXX C)
+project("qitools" VERSION 0.2.1 LANGUAGES CXX C)
 
 include(CTest)
 
