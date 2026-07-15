@@ -64,6 +64,11 @@ public:
         stackedWidget->setObjectName("stackedWidget");
         //stackedWidget->setMinimumSize(QSize(633, 506));
 //        horizontalLayout->addWidget(listWidget);
+
+        QFont appFont = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
+        appFont.setPointSizeF(qMax(g_kMinimumApplicationFontPointSize, appFont.pointSizeF()));
+        listWidget->setFont(appFont);
+
         leftVerticalLayout->addWidget(listWidget);
         leftVerticalLayout->addWidget(tbtnSetting);
         horizontalLayout->addLayout(leftVerticalLayout);
@@ -105,7 +110,6 @@ QiToolsWindow::~QiToolsWindow()
 {
     delete ui;
 }
-
 void QiToolsWindow::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key())

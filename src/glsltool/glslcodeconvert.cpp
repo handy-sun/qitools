@@ -1,5 +1,6 @@
 ﻿#include "glslcodeconvert.h"
 #include "ui_glslcodeconvert.h"
+#include <QApplication>
 #include <QFontDatabase>
 
 using namespace GlslTool;
@@ -11,7 +12,7 @@ GlslCodeConvert::GlslCodeConvert(QWidget *parent)
     ui->setupUi(this);
 
     QFont codeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    codeFont.setPointSizeF(qMax(13.0, codeFont.pointSizeF()));
+    codeFont.setPointSizeF(qMax(QApplication::font().pointSizeF(), codeFont.pointSizeF()));
     ui->textEditFile->setFont(codeFont);
     ui->textEditCode->setFont(codeFont);
 

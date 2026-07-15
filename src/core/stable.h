@@ -1,4 +1,4 @@
-﻿#ifndef STABLE_H
+#ifndef STABLE_H
 #define STABLE_H
 
 #include <QtCore>
@@ -12,3 +12,11 @@
 #endif
 
 #endif // STABLE_H
+
+static constexpr qreal g_kMinimumApplicationFontPointSize =
+#ifdef Q_OS_WIN
+13.0
+#else
+12.0
+#endif
+;

@@ -1,6 +1,7 @@
 ﻿#include "propertygenerator.h"
 #include "ui_propertygenerator.h"
 #include "propertymanager.h"
+#include <QApplication>
 #include <QFontDatabase>
 #include <QMessageBox>
 
@@ -14,7 +15,7 @@ PropertyGenerator::PropertyGenerator(QWidget *parent)
     ui->setupUi(this);
 
     QFont codeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    codeFont.setPointSizeF(qMax(13.0, codeFont.pointSizeF()));
+    codeFont.setPointSizeF(qMax(QApplication::font().pointSizeF(), codeFont.pointSizeF()));
     ui->lineEditType->setFont(codeFont);
     ui->lineEditVariation->setFont(codeFont);
     ui->lineEditPrefix->setFont(codeFont);

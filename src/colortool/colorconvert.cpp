@@ -1,13 +1,14 @@
 #include "colorconvert.h"
 #include "ui_colorconvert.h"
 #include "screencolorpicker.h"
+#include "../core/stable.h"
 #include <QLabel>
 #include <QDebug>
 #include <QTimer>
 #include <typeinfo>
 #include <QColorDialog>
 #include <QRandomGenerator>
-
+#include <QFontDatabase>
 
 static bool toColor(const QStringList &strlist, uchar arr[])
 {
@@ -133,6 +134,11 @@ void ColorConvert::initTableWidget()
     m_table->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     m_table->verticalHeader()->setHidden(true);
     m_table->setAlternatingRowColors(true); // 奇偶行交替颜色
+
+    QFont appFont = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
+    appFont.setPointSizeF(qMax(g_kMinimumApplicationFontPointSize, appFont.pointSizeF()));
+    m_table->setFont(appFont);
+
 //    m_table->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
     for (int row = 0; row < m_table->rowCount(); ++row)
@@ -144,6 +150,7 @@ void ColorConvert::initTableWidget()
             {
                 item->setFlags(item->flags() & (~Qt::ItemIsEditable) & (~Qt::ItemIsSelectable)); // 第一列不可编辑
                 item->setText(verticalContents.at(row));
+                // item->setFont(appFont);
             }
             else if (1 == row && 1 == col) // 色块的展示采用 Qt::DecorationRole 设置一张 pixmap
             {
