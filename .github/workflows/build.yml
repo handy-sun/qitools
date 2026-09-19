@@ -237,6 +237,10 @@ jobs:
           cp bin/qitools-gnu AppDir/usr/bin/qitools
           cp -a bin/plugins AppDir/usr/bin/plugins
           cp -a bin/translations AppDir/usr/bin/translations
+          # 插件在 usr/bin/plugins 下，未经 linuxdeploy 部署，需显式指向打包库目录 usr/lib
+          for plugin in AppDir/usr/bin/plugins/*.so; do
+            patchelf --set-rpath '$ORIGIN/../../lib' "$plugin"
+          done
           cp resource/toolsimage.svg AppDir/usr/share/icons/hicolor/scalable/apps/qitools.svg
 
           cat > AppDir/usr/share/applications/qitools.desktop <<'EOF'
@@ -332,6 +336,8 @@ jobs:
           test -f squashfs-root/usr/bin/plugins/libaudio.so
           test -f squashfs-root/usr/bin/plugins/libsimpledownload.so
           test -f squashfs-root/usr/bin/translations/glsltool-zh_CN.qm
+          readelf -d squashfs-root/usr/bin/plugins/libaudio.so | grep -q '../../lib'
+          readelf -d squashfs-root/usr/bin/plugins/libsimpledownload.so | grep -q '../../lib'
           find squashfs-root -path '*/platforms/libqxcb.so' -print -quit | grep -q .
           find squashfs-root -path '*/platforms/libqwayland-*.so' -print -quit | grep -q .
           find squashfs-root -path '*/wayland-shell-integration/libxdg-shell.so' -print -quit | grep -q .
