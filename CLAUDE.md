@@ -32,6 +32,21 @@ qmake qitools.pro
 make -j$(nproc)
 ```
 
+### Nix flake 构建
+
+```bash
+nix build .#qitools
+nix run .#qitools
+nix develop
+```
+
+- `packages.qitools` 用 Qt6 构建，`packages.qitools-qt5` 用 Qt5.15 构建
+- `overlays.default` 提供 `pkgs.qitools`（Qt6）
+- derivation 在 `nix/package.nix`
+- `ced` 子模块由 `fetchFromGitHub` 单独抓取（flake 源不含子模块内容），改子模块版本后需同步更新其中的 `rev` / `hash`
+- 版本号 `version` 在 `nix/package.nix` 中硬编码，需与 `src/CMakeLists.txt` 的 `project()` 保持一致
+- 安装布局：真实二进制与 `plugins/`、`translations/` 同放 `$out/share/qitools/`（插件与翻译按 `applicationDirPath()` 定位），`$out/bin/qitools` 是 Qt 包装脚本
+
 ## 依赖
 
 - **Qt6 或 Qt5.15**: Core, Gui, Widgets, LinguistTools
