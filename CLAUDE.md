@@ -95,6 +95,7 @@ src/
 - `master` 分支使用 Qt5 构建发布矩阵：Windows x64/x86、Linux x64/ARM64、macOS x86_64
 - `qt6` 分支使用 Qt6 构建发布矩阵：Windows x64、Linux x64/ARM64、macOS x86_64
 - 打 tag `v*` 时，工作流会汇总平台产物并创建 draft release
+- Windows 产物为 zip 便携包 + Inno Setup 安装器（`scripts/qitools.iss`，输出 `qitools-win-x64-setup.exe`；版本号取自 `src/CMakeLists.txt` 的 `project()`）
 
 ## 注意事项
 

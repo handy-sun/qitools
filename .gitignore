@@ -29,6 +29,7 @@ ui_*.h
 *.jsc
 Makefile*
 bin
+dist
 build
 *build-*
 install

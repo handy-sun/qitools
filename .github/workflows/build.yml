@@ -315,6 +315,30 @@ jobs:
             throw "Missing archive: dist/${{ matrix.artifact }}.zip"
           }
 
+      - name: Build installer (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $m = Select-String -Path src/CMakeLists.txt -Pattern 'project\("qitools" VERSION ([0-9][0-9.]*)'
+          if (-not $m) {
+            throw "Failed to parse project version from src/CMakeLists.txt"
+          }
+          $version = $m.Matches[0].Groups[1].Value
+
+          choco install innosetup --no-progress -y
+          $iscc = (Get-Command iscc.exe -ErrorAction SilentlyContinue).Source
+          if (-not $iscc) {
+            $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          }
+          if (-not (Test-Path $iscc)) {
+            throw "ISCC.exe not found after installing Inno Setup"
+          }
+          & $iscc "/DMyAppVersion=$version" "/DMyArtifact=${{ matrix.artifact }}" scripts/qitools.iss
+          $setup = "dist/${{ matrix.artifact }}-setup.exe"
+          if (-not (Test-Path $setup)) {
+            throw "Missing installer: $setup"
+          }
+
       - name: Verify package (Linux)
         if: ${{ runner.os == 'Linux' && !matrix.appimage }}
         run: |
@@ -355,7 +379,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: dist/${{ matrix.artifact }}.zip
+          path: |
+            dist/${{ matrix.artifact }}.zip
+            dist/${{ matrix.artifact }}-setup.exe
 
       - name: Upload artifact (Linux)
         if: ${{ runner.os == 'Linux' && !matrix.appimage && success() }}
@@ -391,6 +417,7 @@ jobs:
           draft: true
           files: |
             qitools-win-x64/qitools-win-x64.zip
+            qitools-win-x64/qitools-win-x64-setup.exe
             qitools-linux/qitools-linux.tar.gz
             qitools-linux-appimage/qitools-linux-x86_64.AppImage
             qitools-linux-arm64/qitools-linux-arm64.tar.gz
